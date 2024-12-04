@@ -1,0 +1,1648 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "base model for any failed / error API response",
+        "title": "ATEC API Docs",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/v1/atec/packages": {
+            "put": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Update existing ATEC questionnarie package",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Update existing ATEC questionnarie package",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ATEC questionnarie package details",
+                        "name": "update_package_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.UpdatePackageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.UpdatePackageOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Create new ATEC questionaire package",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Create new ATEC questionaire package",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ATEC questionnarie package details",
+                        "name": "create_package_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.CreatePackageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.CreatePackageOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/packages/active": {
+            "get": {
+                "description": "Get all active packages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Get all active packages",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SearchActivePackageOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/packages/{package_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Delete ATEC questionnaire package",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Delete ATEC questionnaire package",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "package ID to be deleted (UUID v4)",
+                        "name": "package_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Update existing ATEC questionnarie package activation status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Update package activation status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "package ID to be activated/deactivated (UUID v4)",
+                        "name": "package_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "activation status",
+                        "name": "activation_package_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.ActivationPackageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.ActivationPackageOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/questionnaires": {
+            "post": {
+                "description": "When submiting questionnaire for a child, ensure using the parent's account or Admin level account. otherwise will be blocked.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Submit questionnaire result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Optional jwt auth token to be used if want to fill questionnaire based on a registered child",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "full questionnaire answer",
+                        "name": "submit_questionnaire_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.SubmitQuestionnaireInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SubmitQuestionnaireOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/questionnaires/": {
+            "get": {
+                "description": "Used when a user wants to get an active ATEC questionnaire to be filled later",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Initialize ATEC questionnaire or get one",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "packageID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.GetATECQuestionnaireOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/questionnaires/results": {
+            "get": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Search through all the submitted ATEC questionnaires to the systems",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Search questionnaire result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token to prove that you're admin",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "childID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "resultID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "userID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SearchQUestionnaireResultsOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/questionnaires/results/my": {
+            "get": {
+                "security": [
+                    {
+                        "UserLevelAuth": []
+                    }
+                ],
+                "description": "Get all questionnaires result submitted by the requester account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Get my quesionnaires results",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token from auth process",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SearchQUestionnaireResultsOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/atec/questionnaires/results/{result_id}": {
+            "get": {
+                "description": "Download quesionnaire result as image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "image/jpeg"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Download quesionnaire result as image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Optional jwt auth token to be used if want to download result owned by a specific owner",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the submitted questionnaire (UUID v4)",
+                        "name": "result_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "description": "Use this endpoint to login with your username and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Gain access to the system by authenticating using a registered account",
+                "parameters": [
+                    {
+                        "description": "account detail such as email and password to log in",
+                        "name": "login_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.LoginInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.LoginOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication Failed",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/password": {
+            "post": {
+                "description": "After using init reset password method, the resulting JWT token can be used here\nto authorize the password changes.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Change user's account password",
+                "parameters": [
+                    {
+                        "description": "the email of the account which password will be reset",
+                        "name": "change_password_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.ResetPasswordInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.ResetPasswordOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request\"\t\"validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "If the user wants to change their password, use this API.\nwhen the request succeed, an email containing confirmation link will\nbe sent to the account email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Initiate change password process for an active account",
+                "parameters": [
+                    {
+                        "description": "the email of the account which password will be reset",
+                        "name": "init_change_password_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.InitResetPasswordInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.InitResetPasswordOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request\"\t\"validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/signup": {
+            "post": {
+                "description": "Use this API endpoint to create a new account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Create a new account to access user only resources within this system",
+                "parameters": [
+                    {
+                        "description": "Login Credentials",
+                        "name": "signup_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.SignupInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SignupOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request / validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/verify": {
+            "get": {
+                "description": "Confirmation method to ensure the email used when signup is active and owned by requester.\nIf the confirmation token is valid, the account will be activated\nand will be able to be used on login. Otherwise, the opposite will happen.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Validate account after signup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "validation token received from email after signup in form of a jwt token",
+                        "name": "validation_token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.VerifyAccountOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request / validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "invalid or expired verification token",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/childern": {
+            "get": {
+                "security": [
+                    {
+                        "UserLevelAuth": []
+                    }
+                ],
+                "description": "Get all childern registered under this account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Childern"
+                ],
+                "summary": "Get all childern registered under this account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.GetMyChildernOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "UserLevelAuth": []
+                    }
+                ],
+                "description": "Register a new child",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Childern"
+                ],
+                "summary": "Register a new child",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "child details",
+                        "name": "register_child_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.RegisterChildInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.RegisterChildOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/childern/search": {
+            "get": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Search childern data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Childern"
+                ],
+                "summary": "Search childern data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "search by child name using ILIKE query",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search childern registered by this account (user_id is UUID v4)",
+                        "name": "user_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.SearchChildernOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/childern/{child_id}": {
+            "put": {
+                "security": [
+                    {
+                        "UserLevelAuth": []
+                    }
+                ],
+                "description": "Update child data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Childern"
+                ],
+                "summary": "Update child data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Child ID to be updated (UUID v4)",
+                        "name": "child_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "new child details",
+                        "name": "update_child_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.UpdateChildernInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.UpdateChildernOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/childern/{child_id}/stats": {
+            "get": {
+                "security": [
+                    {
+                        "UserLevelAuth": []
+                    }
+                ],
+                "description": "The returned data will be JSON but contains sufficient data to be drawn as graph on frontend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Childern"
+                ],
+                "summary": "Get child ATEC score history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Child ID (UUID v4)",
+                        "name": "child_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.GetChildStatOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "rest.ActivationPackageInput": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "rest.ActivationPackageOutput": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "rest.AnswerAndValue": {
+            "type": "object",
+            "required": [
+                "text",
+                "value"
+            ],
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "rest.CreatePackageInput": {
+            "type": "object",
+            "required": [
+                "package_name",
+                "sub_group_details"
+            ],
+            "properties": {
+                "package_name": {
+                    "type": "string"
+                },
+                "sub_group_details": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "#/definitions/rest.SubGroupDetail"
+                    }
+                }
+            }
+        },
+        "rest.CreatePackageOutput": {
+            "type": "object"
+        },
+        "rest.GetATECQuestionnaireOutput": {
+            "type": "object"
+        },
+        "rest.GetChildStatOutput": {
+            "type": "object",
+            "properties": {
+                "todo": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "rest.GetMyChildernOutput": {
+            "type": "object",
+            "properties": {
+                "childern_data": {}
+            }
+        },
+        "rest.InitResetPasswordInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.InitResetPasswordOutput": {
+            "type": "object"
+        },
+        "rest.LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "rest.LoginOutput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.QuestionAndAnswers": {
+            "type": "object",
+            "required": [
+                "answer_and_value",
+                "question"
+            ],
+            "properties": {
+                "answer_and_value": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "#/definitions/rest.AnswerAndValue"
+                    }
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.RegisterChildInput": {
+            "type": "object",
+            "required": [
+                "date_of_birth",
+                "name"
+            ],
+            "properties": {
+                "date_of_birth": {
+                    "type": "string",
+                    "example": "2001-11-29 (YYYY-MM-DD)"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.RegisterChildOutput": {
+            "type": "object"
+        },
+        "rest.ResetPasswordInput": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.ResetPasswordOutput": {
+            "type": "object"
+        },
+        "rest.SearchActivePackageOutput": {
+            "type": "object",
+            "properties": {
+                "packages": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "rest.SearchChildernOutput": {
+            "type": "object",
+            "properties": {
+                "childern": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "rest.SearchQUestionnaireResultsOutput": {
+            "type": "object",
+            "properties": {
+                "todo": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "rest.SignupInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.SignupOutput": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "confirmation link sent to your email"
+                }
+            }
+        },
+        "rest.StandardErrorResponse": {
+            "description": "base model for any failed / error API response",
+            "type": "object",
+            "properties": {
+                "error_code": {
+                    "type": "string"
+                },
+                "error_message": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
+        "rest.StandardSuccessResponse": {
+            "description": "base model for any successful API response",
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "status_code": {
+                    "type": "integer",
+                    "example": 200
+                }
+            }
+        },
+        "rest.SubGroupDetail": {
+            "type": "object",
+            "required": [
+                "name",
+                "question_and_answer_lists"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "question_and_answer_lists": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/rest.QuestionAndAnswers"
+                    }
+                }
+            }
+        },
+        "rest.SubmitQuestionnaireInput": {
+            "type": "object",
+            "properties": {
+                "child_id": {
+                    "type": "string"
+                },
+                "package_id": {
+                    "type": "string"
+                },
+                "todo": {
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "rest.SubmitQuestionnaireOutput": {
+            "type": "object",
+            "properties": {
+                "any": {
+                    "type": "array",
+                    "items": {}
+                },
+                "result_id": {
+                    "type": "string"
+                },
+                "score": {}
+            }
+        },
+        "rest.UpdateChildernInput": {
+            "type": "object",
+            "required": [
+                "date_of_birth",
+                "name"
+            ],
+            "properties": {
+                "date_of_birth": {
+                    "type": "string",
+                    "example": "2001-11-29 (YYYY-MM-DD)"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.UpdateChildernOutput": {
+            "type": "object"
+        },
+        "rest.UpdatePackageInput": {
+            "type": "object",
+            "required": [
+                "package_name",
+                "sub_group_details"
+            ],
+            "properties": {
+                "package_name": {
+                    "type": "string"
+                },
+                "sub_group_details": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "#/definitions/rest.SubGroupDetail"
+                    }
+                }
+            }
+        },
+        "rest.UpdatePackageOutput": {
+            "type": "object"
+        },
+        "rest.VerifyAccountOutput": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "your account is now activated and can be used"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "AdminLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by Admin level user",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "UserLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by registered user with auth token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

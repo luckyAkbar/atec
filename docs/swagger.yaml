@@ -1,0 +1,1043 @@
+definitions:
+  rest.ActivationPackageInput:
+    properties:
+      status:
+        type: boolean
+    type: object
+  rest.ActivationPackageOutput:
+    properties:
+      status:
+        type: boolean
+    type: object
+  rest.AnswerAndValue:
+    properties:
+      text:
+        type: string
+      value:
+        minimum: 1
+        type: integer
+    required:
+    - text
+    - value
+    type: object
+  rest.CreatePackageInput:
+    properties:
+      package_name:
+        type: string
+      sub_group_details:
+        items:
+          $ref: '#/definitions/rest.SubGroupDetail'
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - package_name
+    - sub_group_details
+    type: object
+  rest.CreatePackageOutput:
+    type: object
+  rest.GetATECQuestionnaireOutput:
+    type: object
+  rest.GetChildStatOutput:
+    properties:
+      todo:
+        items: {}
+        type: array
+    type: object
+  rest.GetMyChildernOutput:
+    properties:
+      childern_data: {}
+    type: object
+  rest.InitResetPasswordInput:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  rest.InitResetPasswordOutput:
+    type: object
+  rest.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  rest.LoginOutput:
+    properties:
+      token:
+        type: string
+    type: object
+  rest.QuestionAndAnswers:
+    properties:
+      answer_and_value:
+        items:
+          $ref: '#/definitions/rest.AnswerAndValue'
+        minItems: 1
+        type: array
+        uniqueItems: true
+      question:
+        type: string
+    required:
+    - answer_and_value
+    - question
+    type: object
+  rest.RegisterChildInput:
+    properties:
+      date_of_birth:
+        example: 2001-11-29 (YYYY-MM-DD)
+        type: string
+      name:
+        type: string
+    required:
+    - date_of_birth
+    - name
+    type: object
+  rest.RegisterChildOutput:
+    type: object
+  rest.ResetPasswordInput:
+    properties:
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  rest.ResetPasswordOutput:
+    type: object
+  rest.SearchActivePackageOutput:
+    properties:
+      packages:
+        items: {}
+        type: array
+    type: object
+  rest.SearchChildernOutput:
+    properties:
+      childern:
+        items: {}
+        type: array
+    type: object
+  rest.SearchQUestionnaireResultsOutput:
+    properties:
+      todo:
+        items: {}
+        type: array
+    type: object
+  rest.SignupInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  rest.SignupOutput:
+    properties:
+      message:
+        example: confirmation link sent to your email
+        type: string
+    type: object
+  rest.StandardErrorResponse:
+    description: base model for any failed / error API response
+    properties:
+      error_code:
+        type: string
+      error_message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  rest.StandardSuccessResponse:
+    description: base model for any successful API response
+    properties:
+      data: {}
+      message:
+        example: success
+        type: string
+      status_code:
+        example: 200
+        type: integer
+    type: object
+  rest.SubGroupDetail:
+    properties:
+      name:
+        type: string
+      question_and_answer_lists:
+        items:
+          $ref: '#/definitions/rest.QuestionAndAnswers'
+        minItems: 1
+        type: array
+    required:
+    - name
+    - question_and_answer_lists
+    type: object
+  rest.SubmitQuestionnaireInput:
+    properties:
+      child_id:
+        type: string
+      package_id:
+        type: string
+      todo:
+        items: {}
+        type: array
+    type: object
+  rest.SubmitQuestionnaireOutput:
+    properties:
+      any:
+        items: {}
+        type: array
+      result_id:
+        type: string
+      score: {}
+    type: object
+  rest.UpdateChildernInput:
+    properties:
+      date_of_birth:
+        example: 2001-11-29 (YYYY-MM-DD)
+        type: string
+      name:
+        type: string
+    required:
+    - date_of_birth
+    - name
+    type: object
+  rest.UpdateChildernOutput:
+    type: object
+  rest.UpdatePackageInput:
+    properties:
+      package_name:
+        type: string
+      sub_group_details:
+        items:
+          $ref: '#/definitions/rest.SubGroupDetail'
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - package_name
+    - sub_group_details
+    type: object
+  rest.UpdatePackageOutput:
+    type: object
+  rest.VerifyAccountOutput:
+    properties:
+      message:
+        example: your account is now activated and can be used
+        type: string
+    type: object
+info:
+  contact: {}
+  description: base model for any failed / error API response
+  title: ATEC API Docs
+  version: "1.0"
+paths:
+  /v1/atec/packages:
+    post:
+      consumes:
+      - application/json
+      description: Create new ATEC questionaire package
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ATEC questionnarie package details
+        in: body
+        name: create_package_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.CreatePackageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.CreatePackageOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Create new ATEC questionaire package
+      tags:
+      - ATEC Package
+    put:
+      consumes:
+      - application/json
+      description: Update existing ATEC questionnarie package
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ATEC questionnarie package details
+        in: body
+        name: update_package_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.UpdatePackageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.UpdatePackageOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Update existing ATEC questionnarie package
+      tags:
+      - ATEC Package
+  /v1/atec/packages/{package_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete ATEC questionnaire package
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: package ID to be deleted (UUID v4)
+        in: path
+        name: package_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: '#/definitions/rest.StandardSuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Delete ATEC questionnaire package
+      tags:
+      - ATEC Package
+    patch:
+      consumes:
+      - application/json
+      description: Update existing ATEC questionnarie package activation status
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: package ID to be activated/deactivated (UUID v4)
+        in: path
+        name: package_id
+        required: true
+        type: string
+      - description: activation status
+        in: body
+        name: activation_package_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.ActivationPackageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.ActivationPackageOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Update package activation status
+      tags:
+      - ATEC Package
+  /v1/atec/packages/active:
+    get:
+      consumes:
+      - application/json
+      description: Get all active packages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SearchActivePackageOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Get all active packages
+      tags:
+      - ATEC Package
+  /v1/atec/questionnaires:
+    post:
+      consumes:
+      - application/json
+      description: When submiting questionnaire for a child, ensure using the parent's
+        account or Admin level account. otherwise will be blocked.
+      parameters:
+      - description: Optional jwt auth token to be used if want to fill questionnaire
+          based on a registered child
+        in: header
+        name: Authorization
+        type: string
+      - description: full questionnaire answer
+        in: body
+        name: submit_questionnaire_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.SubmitQuestionnaireInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SubmitQuestionnaireOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Submit questionnaire result
+      tags:
+      - Questionnaire
+  /v1/atec/questionnaires/:
+    get:
+      consumes:
+      - application/json
+      description: Used when a user wants to get an active ATEC questionnaire to be
+        filled later
+      parameters:
+      - in: query
+        name: packageID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.GetATECQuestionnaireOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Initialize ATEC questionnaire or get one
+      tags:
+      - Questionnaire
+  /v1/atec/questionnaires/results:
+    get:
+      consumes:
+      - application/json
+      description: Search through all the submitted ATEC questionnaires to the systems
+      parameters:
+      - description: JWT token to prove that you're admin
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: childID
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - in: query
+        name: resultID
+        type: string
+      - in: query
+        name: userID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SearchQUestionnaireResultsOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Search questionnaire result
+      tags:
+      - Questionnaire
+  /v1/atec/questionnaires/results/{result_id}:
+    get:
+      consumes:
+      - application/json
+      description: Download quesionnaire result as image
+      parameters:
+      - description: Optional jwt auth token to be used if want to download result
+          owned by a specific owner
+        in: header
+        name: Authorization
+        type: string
+      - description: ID of the submitted questionnaire (UUID v4)
+        in: path
+        name: result_id
+        required: true
+        type: string
+      produces:
+      - image/jpeg
+      responses:
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Download quesionnaire result as image
+      tags:
+      - Questionnaire
+  /v1/atec/questionnaires/results/my:
+    get:
+      consumes:
+      - application/json
+      description: Get all questionnaires result submitted by the requester account
+      parameters:
+      - description: JWT token from auth process
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SearchQUestionnaireResultsOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - UserLevelAuth: []
+      summary: Get my quesionnaires results
+      tags:
+      - Questionnaire
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Use this endpoint to login with your username and password
+      parameters:
+      - description: account detail such as email and password to log in
+        in: body
+        name: login_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.LoginOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "401":
+          description: Authentication Failed
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Gain access to the system by authenticating using a registered account
+      tags:
+      - Authentication
+  /v1/auth/password:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        If the user wants to change their password, use this API.
+        when the request succeed, an email containing confirmation link will
+        be sent to the account email.
+      parameters:
+      - description: the email of the account which password will be reset
+        in: body
+        name: init_change_password_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.InitResetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.InitResetPasswordOutput'
+              type: object
+        "400":
+          description: "Bad request\"\t\"validation error"
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Initiate change password process for an active account
+      tags:
+      - Authentication
+    post:
+      consumes:
+      - application/json
+      description: |-
+        After using init reset password method, the resulting JWT token can be used here
+        to authorize the password changes.
+      parameters:
+      - description: the email of the account which password will be reset
+        in: body
+        name: change_password_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.ResetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.ResetPasswordOutput'
+              type: object
+        "400":
+          description: "Bad request\"\t\"validation error"
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Change user's account password
+      tags:
+      - Authentication
+  /v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Use this API endpoint to create a new account
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: signup_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.SignupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SignupOutput'
+              type: object
+        "400":
+          description: Bad request / validation error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Create a new account to access user only resources within this system
+      tags:
+      - Authentication
+  /v1/auth/verify:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Confirmation method to ensure the email used when signup is active and owned by requester.
+        If the confirmation token is valid, the account will be activated
+        and will be able to be used on login. Otherwise, the opposite will happen.
+      parameters:
+      - description: validation token received from email after signup in form of
+          a jwt token
+        in: query
+        name: validation_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.VerifyAccountOutput'
+              type: object
+        "400":
+          description: Bad request / validation error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "401":
+          description: invalid or expired verification token
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Validate account after signup
+      tags:
+      - Authentication
+  /v1/childern:
+    get:
+      consumes:
+      - application/json
+      description: Get all childern registered under this account
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.GetMyChildernOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - UserLevelAuth: []
+      summary: Get all childern registered under this account
+      tags:
+      - Childern
+    post:
+      consumes:
+      - application/json
+      description: Register a new child
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: child details
+        in: body
+        name: register_child_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.RegisterChildInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.RegisterChildOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - UserLevelAuth: []
+      summary: Register a new child
+      tags:
+      - Childern
+  /v1/childern/{child_id}:
+    put:
+      consumes:
+      - application/json
+      description: Update child data
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Child ID to be updated (UUID v4)
+        in: path
+        name: child_id
+        required: true
+        type: string
+      - description: new child details
+        in: body
+        name: update_child_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.UpdateChildernInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.UpdateChildernOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - UserLevelAuth: []
+      summary: Update child data
+      tags:
+      - Childern
+  /v1/childern/{child_id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: The returned data will be JSON but contains sufficient data to
+        be drawn as graph on frontend
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Child ID (UUID v4)
+        in: path
+        name: child_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.GetChildStatOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - UserLevelAuth: []
+      summary: Get child ATEC score history
+      tags:
+      - Childern
+  /v1/childern/search:
+    get:
+      consumes:
+      - application/json
+      description: Search childern data
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: search by child name using ILIKE query
+        in: query
+        name: name
+        type: string
+      - description: search childern registered by this account (user_id is UUID v4)
+        in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.SearchChildernOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Search childern data
+      tags:
+      - Childern
+securityDefinitions:
+  AdminLevelAuth:
+    description: Bearer Token authentication for secure endpoints accessible only
+      by Admin level user
+    in: header
+    name: Authorization
+    type: apiKey
+  UserLevelAuth:
+    description: Bearer Token authentication for secure endpoints accessible only
+      by registered user with auth token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
