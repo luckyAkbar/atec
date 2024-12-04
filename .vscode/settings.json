@@ -1,0 +1,9 @@
+{
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "go.formatTool": "gofmt",
+    "window.autoDetectColorScheme": true,
+    "workbench.colorTheme": "Night Owl (No Italics)",
+    "workbench.preferredLightColorTheme": "Night Owl Light (No Italics)"
+}
