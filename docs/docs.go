@@ -1490,14 +1490,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "string@string.com"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "password123"
                 },
                 "username": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "username"
                 }
             }
         },

@@ -134,11 +134,14 @@ definitions:
   rest.SignupInput:
     properties:
       email:
+        example: string@string.com
         type: string
       password:
+        example: password123
         minLength: 8
         type: string
       username:
+        example: username
         type: string
     required:
     - email
