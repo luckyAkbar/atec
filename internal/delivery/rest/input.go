@@ -30,9 +30,9 @@ type GetMyQUestionnaireResultsInput struct {
 }
 
 type SignupInput struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
-	Username string `json:"username" validate:"required"`
+	Email    string `json:"email" validate:"required,email" example:"string@string.com"`
+	Password string `json:"password" validate:"required,min=8" example:"password123"`
+	Username string `json:"username" validate:"required" example:"username"`
 }
 
 type VerifyAccountInput struct {
