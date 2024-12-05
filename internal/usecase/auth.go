@@ -155,11 +155,13 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	_, err = u.mailer.SendEmail(ctx, common.SendEmailInput{
 		ReceiverName:  user.Username,
 		ReceiverEmail: input.Email,
-		Subject:       "Validasi Akun",
+		Subject:       "Verifikasi Akun",
 		HtmlContent: fmt.Sprintf(`
-			<h1>TOKEN TEST</h1>
-			<p>token: <strong>%s</strong></p>	
-		`, token),
+			<h2>Halo %s!</h2>
+			<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC)</p>
+			</p> Untuk mengaktifkan akun Anda, silakan klik link berikut: </p> <br>
+			<a href="%s">validasi akun</a>	
+		`, user.Username, token), // TODO replace the confirmation link once the feature has been developed
 	})
 
 	if err != nil {
