@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/config"
 	"github.com/luckyAkbar/atec/internal/db"
@@ -23,6 +24,7 @@ type AuthUsecase struct {
 
 type AuthUsecaseIface interface {
 	HandleSignup(ctx context.Context, input SignupInput) (*SignupOutput, error)
+	HandleAccountVerification(ctx context.Context, input AccountVerificationInput) (*AccountVerificationOutput, error)
 }
 
 func NewAuthUsecase(
@@ -68,6 +70,12 @@ type JWTTokenType string
 
 var (
 	SignupVerificationToken JWTTokenType = "signup-verification-token"
+)
+
+type JWTTokenIssuer string
+
+var (
+	TokenIssuerSystem JWTTokenIssuer = "system"
 )
 
 func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*SignupOutput, error) {
@@ -137,7 +145,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	}
 
 	token, err := u.sharedCryptor.CreateJWT(jwt.RegisteredClaims{
-		Issuer:    "system",
+		Issuer:    string(TokenIssuerSystem),
 		Subject:   string(SignupVerificationToken),
 		Audience:  []string{user.ID.String()},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.SignupTokenExpiry())),
@@ -157,11 +165,82 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		ReceiverEmail: input.Email,
 		Subject:       "Verifikasi Akun",
 		HtmlContent: fmt.Sprintf(`
-			<h2>Halo %s!</h2>
-			<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC)</p>
-			</p> Untuk mengaktifkan akun Anda, silakan klik link berikut: </p> <br>
-			<a href="%s">validasi akun</a>	
-		`, user.Username, token), // TODO replace the confirmation link once the feature has been developed
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<style>
+					/* General styles */
+					body {
+						font-family: Arial, sans-serif;
+						margin: 0;
+						padding: 0;
+						background-color: #f6f6f6;
+						color: #333;
+					}
+					.email-container {
+						max-width: 600px;
+						margin: 20px auto;
+						background-color: #ffffff;
+						border: 1px solid #ddd;
+						border-radius: 8px;
+						overflow: hidden;
+					}
+					.header {
+						background-color: #4CAF50;
+						color: white;
+						padding: 20px;
+						text-align: center;
+					}
+					.content {
+						padding: 20px;
+					}
+					.content p {
+						margin: 0 0 15px;
+						line-height: 1.6;
+					}
+					.btn-container {
+						text-align: center;
+						margin: 20px 0;
+					}
+					.btn {
+						display: inline-block;
+						background-color: #4CAF50;
+						color: white;
+						text-decoration: none;
+						padding: 10px 20px;
+						font-size: 16px;
+						border-radius: 5px;
+					}
+					.btn:hover {
+						background-color: #45a049;
+					}
+					.footer {
+						background-color: #f1f1f1;
+						text-align: center;
+						padding: 10px;
+						font-size: 12px;
+						color: #666;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="email-container">
+					<div class="header">
+						<h1>Konfirmasi Akun</h1>
+					</div>
+					<div class="content">
+						<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC). Untuk mengaktifkan akun Anda, silakan klik tombol berikut:</p>
+						<div class="btn-container">
+							<a href="%s?verification_token=%s" class="btn">Aktifkan Akun</a>
+						</div>
+					</div>
+					<div class="footer">
+						<p>Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+					</div>
+				</div>
+			</body>
+			</html>
+			`, config.ServerAccountVerificationBaseURL(), token), // TODO replace the confirmation link once the feature has been developed
 	})
 
 	if err != nil {
@@ -177,5 +256,130 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 
 	return &SignupOutput{
 		Message: "email confirmation sent",
+	}, nil
+}
+
+type AccountVerificationInput struct {
+	VerificationToken string `validate:"required"`
+}
+
+func (avi AccountVerificationInput) Validate() error {
+	return validator.Struct(avi)
+}
+
+type AccountVerificationOutput struct {
+	Message string
+}
+
+func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input AccountVerificationInput) (*AccountVerificationOutput, error) {
+	logger := logrus.WithContext(ctx)
+
+	if err := input.Validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	token, err := u.sharedCryptor.ValidateJWT(input.VerificationToken, common.ValidateJWTOpts{
+		Issuer:  string(TokenIssuerSystem),
+		Subject: string(SignupVerificationToken),
+	})
+
+	switch err {
+	default:
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid token for account verification",
+		}
+	case jwt.ErrTokenExpired:
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "account validation token has expired",
+		}
+	case nil:
+		break
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !(ok && token.Valid) {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid token claims",
+		}
+	}
+
+	issuer, err := claims.GetIssuer()
+	if err != nil || issuer != string(TokenIssuerSystem) {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "incorrect token issuer used",
+		}
+	}
+
+	subject, err := claims.GetSubject()
+	if err != nil || subject != string(SignupVerificationToken) {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "incorrect token subject used",
+		}
+	}
+
+	audiences, err := claims.GetAudience()
+	if err != nil || len(audiences) != 1 {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid audience on token used",
+		}
+	}
+
+	targetUserID := audiences[0]
+	userID, err := uuid.Parse(targetUserID)
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid user id received from account validation token",
+		}
+	}
+
+	user, err := u.userRepo.FindByID(ctx, userID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find user data from db")
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	// early return if already activated
+	if user.IsActive {
+		return &AccountVerificationOutput{
+			Message: "your account has been activated",
+		}, nil
+	}
+
+	activeTrue := true
+	_, err = u.userRepo.Update(ctx, user.ID, repository.UpdateUserInput{
+		IsActive: &activeTrue,
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to activate user account to database")
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &AccountVerificationOutput{
+		Message: "your account has been activated",
 	}, nil
 }

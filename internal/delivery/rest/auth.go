@@ -57,11 +57,34 @@ func (s *service) HandleSignUp() echo.HandlerFunc {
 // @Produce		json
 // @Success		200	{object}	StandardSuccessResponse{data=VerifyAccountOutput}	"Successful response"
 // @Failure		400	{object}	StandardErrorResponse								"Bad request / validation error"
-// @Failure		401	{object}	StandardErrorResponse								"invalid or expired verification token"
+// @Failure		401	{object}	StandardErrorResponse								"invalid or expired verification token. details will be given in the error message"
 // @Router			/v1/auth/verify [get]
 func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &VerifyAccountInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input zzz",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.authUsecase.HandleAccountVerification(c.Request().Context(), usecase.AccountVerificationInput{
+			VerificationToken: input.ValidationToken,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: SignupOutput{
+				Message: output.Message,
+			},
+		})
 	}
 }
 

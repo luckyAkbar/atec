@@ -26,6 +26,10 @@ func PostgresDSN() string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, user, pw, db, port, sslMode)
 }
 
+func ServerAccountVerificationBaseURL() string {
+	return viper.GetString("server.account_verification_base_url")
+}
+
 // ServerPort returns application server port
 func ServerPort() string {
 	return fmt.Sprintf(":%s", viper.GetString("server.port"))
