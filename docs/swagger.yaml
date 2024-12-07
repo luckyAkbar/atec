@@ -158,10 +158,13 @@ definitions:
     description: base model for any failed / error API response
     properties:
       error_code:
+        example: missing required fields on input
         type: string
       error_message:
+        example: Bad Request
         type: string
       status_code:
+        example: 400
         type: integer
     type: object
   rest.StandardSuccessResponse:
@@ -814,7 +817,8 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
         "401":
-          description: invalid or expired verification token
+          description: invalid or expired verification token. details will be given
+            in the error message
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       summary: Validate account after signup

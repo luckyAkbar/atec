@@ -928,7 +928,7 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "invalid or expired verification token",
+                        "description": "invalid or expired verification token. details will be given in the error message",
                         "schema": {
                             "$ref": "#/definitions/rest.StandardErrorResponse"
                         }
@@ -1518,13 +1518,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error_code": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "missing required fields on input"
                 },
                 "error_message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Bad Request"
                 },
                 "status_code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 400
                 }
             }
         },
