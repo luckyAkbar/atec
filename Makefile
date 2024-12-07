@@ -25,7 +25,7 @@ install-linter:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.2
 
 lint:
-	golangci-lint run --print-issued-lines=false --exclude-use-default=false --enable=goimports  --enable=unconvert --enable=unparam --concurrency=2
+	golangci-lint run --print-issued-lines=false --exclude-use-default=false --enable=goimports  --enable=unconvert --enable=unparam --concurrency=4
 
 # installing modd. ensure you have Go 1.17+ installed
 # original docs: https://github.com/cortesi/modd
