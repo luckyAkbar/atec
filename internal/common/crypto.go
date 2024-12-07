@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -28,6 +29,7 @@ type SharedCryptorIface interface {
 	Encrypt(plainText string) (string, error)
 	Hash(data []byte) (string, error)
 	CreateJWT(claims jwt.Claims) (string, error)
+	ValidateJWT(token string, opts ValidateJWTOpts) (*jwt.Token, error)
 }
 
 // CreateCryptorOpts is the options used to create a new cryptor instance.
@@ -110,6 +112,41 @@ func (s *SharedCryptor) CreateJWT(claims jwt.Claims) (string, error) {
 	}
 
 	return signed, nil
+}
+
+type ValidateJWTOpts struct {
+	Issuer  string
+	Subject string
+}
+
+func (s *SharedCryptor) ValidateJWT(token string, opts ValidateJWTOpts) (*jwt.Token, error) {
+	parsedToken, err := jwt.Parse(token,
+		func(t *jwt.Token) (interface{}, error) {
+			if t.Method.Alg() != jwt.SigningMethodHS256.Name {
+				return nil, errors.New("invalid token alg")
+			}
+
+			return s.encryptionKey, nil
+		},
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(opts.Issuer),
+		jwt.WithSubject(opts.Subject),
+		jwt.WithIssuedAt(),
+		jwt.WithValidMethods([]string{
+			jwt.SigningMethodHS256.Name,
+		}),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// safety check
+	if !parsedToken.Valid {
+		return nil, errors.New("jwt token is not a valid token")
+	}
+
+	return parsedToken, nil
 }
 
 func (s *SharedCryptor) pkcs5Unpadding(src []byte) []byte {
