@@ -27,8 +27,9 @@ var serverCMD = &cobra.Command{
 	Run:  serverFn,
 }
 
+//nolint:gochecknoinits
 func init() {
-	RootCMD.AddCommand(serverCMD)
+	rootCMD.AddCommand(serverCMD)
 }
 
 func serverFn(_ *cobra.Command, _ []string) {
@@ -97,7 +98,7 @@ func serverFn(_ *cobra.Command, _ []string) {
 }
 
 func gracefulShutdown(srv *echo.Echo) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {

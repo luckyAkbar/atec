@@ -1,3 +1,4 @@
+// Package usecase contains all the business logic for each app's features
 package usecase
 
 import (
@@ -16,17 +17,20 @@ import (
 	"github.com/sweet-go/stdlib/helper"
 )
 
+// AuthUsecase object containing all usecase level logic related to auth process
 type AuthUsecase struct {
 	sharedCryptor common.SharedCryptorIface
 	userRepo      repository.UserRepositoryIface
 	mailer        *common.Mailer
 }
 
+// AuthUsecaseIface interface exported by AuthUsecase to help ease mocking
 type AuthUsecaseIface interface {
 	HandleSignup(ctx context.Context, input SignupInput) (*SignupOutput, error)
 	HandleAccountVerification(ctx context.Context, input AccountVerificationInput) (*AccountVerificationOutput, error)
 }
 
+// NewAuthUsecase create new instance for AuthUsecase
 func NewAuthUsecase(
 	sharedCryptor common.SharedCryptorIface,
 	userRepo repository.UserRepositoryIface,
@@ -39,45 +43,58 @@ func NewAuthUsecase(
 	}
 }
 
+// LoginInput input
 type LoginInput struct {
 	Email    string
 	Password string
 }
 
+// LoginOutput output
 type LoginOutput struct {
 	Token string
 }
 
-func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*LoginOutput, error) {
-	return nil, nil
+// HandleLogin contains logic to handle login request
+func (u *AuthUsecase) HandleLogin(_ context.Context, _ LoginInput) (*LoginOutput, error) {
+	panic("implement me")
 }
 
+// SignupInput input
 type SignupInput struct {
 	Email    string `validate:"required,email"`
 	Password string `validate:"required,min=8"`
 	Username string `validate:"required"`
 }
 
+// Validate validate SignupInput's fields
 func (si SignupInput) Validate() error {
 	return validator.Struct(si)
 }
 
+// SignupOutput output
 type SignupOutput struct {
 	Message string
 }
 
+// JWTTokenType known jwt token type for field sub
 type JWTTokenType string
 
+// known JWTTokenType
+//
+//nolint:gosec
 var (
 	SignupVerificationToken JWTTokenType = "signup-verification-token"
 )
 
+// JWTTokenIssuer known jwt token issuer for field iss
 type JWTTokenIssuer string
 
+// known JWTToken issuer
 var (
 	TokenIssuerSystem JWTTokenIssuer = "system"
 )
 
+// HandleSignup contains logic to handle signup request
 func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*SignupOutput, error) {
 	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
 		"email": helper.Dump(input.Email),
@@ -102,6 +119,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	switch err {
 	default:
 		logger.WithError(err).Error("failed to perform query to find user by id")
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -118,6 +136,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	hashedPassword, err := u.sharedCryptor.Hash([]byte(input.Password))
 	if err != nil {
 		logger.WithError(err).Error("failed to perform hasing password")
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -138,6 +157,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	if err != nil {
 		logger.WithError(err).Error("failed to create user to database")
 		tx.Rollback()
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -154,6 +174,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	if err != nil {
 		logger.WithError(err).Error("failed to create JWT token for signup verification")
 		tx.Rollback()
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -164,7 +185,8 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		ReceiverName:  user.Username,
 		ReceiverEmail: input.Email,
 		Subject:       "Verifikasi Akun",
-		HtmlContent: fmt.Sprintf(`
+		//nolint:lll
+		HTMLContent: fmt.Sprintf(`
 			<!DOCTYPE html>
 			<html>
 			<head>
@@ -240,12 +262,13 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 				</div>
 			</body>
 			</html>
-			`, config.ServerAccountVerificationBaseURL(), token), // TODO replace the confirmation link once the feature has been developed
+			`, config.ServerAccountVerificationBaseURL(), token),
 	})
 
 	if err != nil {
 		logger.WithError(err).Error("failed to send verification email to user's mail")
 		tx.Rollback()
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -259,18 +282,23 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	}, nil
 }
 
+// AccountVerificationInput input
 type AccountVerificationInput struct {
 	VerificationToken string `validate:"required"`
 }
 
+// Validate validate AccountVerificationInput's fields
 func (avi AccountVerificationInput) Validate() error {
 	return validator.Struct(avi)
 }
 
+// AccountVerificationOutput output
 type AccountVerificationOutput struct {
 	Message string
 }
 
+// HandleAccountVerification after receiving the email from signup process, if the user receive the email, the token
+// inside the email can be used to activate user's account. Then the user can do the login
 func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input AccountVerificationInput) (*AccountVerificationOutput, error) {
 	logger := logrus.WithContext(ctx)
 
@@ -334,6 +362,7 @@ func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input Accou
 	}
 
 	targetUserID := audiences[0]
+
 	userID, err := uuid.Parse(targetUserID)
 	if err != nil {
 		return nil, UsecaseError{
@@ -346,6 +375,7 @@ func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input Accou
 	switch err {
 	default:
 		logger.WithError(err).Error("failed to find user data from db")
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
@@ -373,6 +403,7 @@ func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input Accou
 
 	if err != nil {
 		logger.WithError(err).Error("failed to activate user account to database")
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),

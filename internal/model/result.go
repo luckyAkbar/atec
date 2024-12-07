@@ -25,4 +25,5 @@ type Result struct {
 // represent each question (key) and checklisted option (value)
 type AnswerDetail map[int]map[int]int
 
+// ResultDetail will contain each result from the questionnaire's group
 type ResultDetail map[int]int

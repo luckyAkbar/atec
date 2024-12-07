@@ -1,3 +1,4 @@
+// Package console contains all functionality accessible by cmd / terminal
 package console
 
 import (
@@ -8,11 +9,11 @@ import (
 )
 
 // RootCMD is the root command of the application
-var RootCMD = cmd.CobraInitializer()
+var rootCMD = cmd.CobraInitializer()
 
 // Execute will be the entry point of all the registered command
 func Execute() {
-	if err := RootCMD.Execute(); err != nil {
+	if err := rootCMD.Execute(); err != nil {
 		logrus.Error(err)
 		os.Exit(1)
 	}
