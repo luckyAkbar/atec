@@ -75,7 +75,7 @@ type StandardSuccessResponse struct {
 //
 //	@Description	base model for any failed / error API response
 type StandardErrorResponse struct {
-	StatusCode   int    `json:"status_code"`
-	ErrorMessage string `json:"error_message"`
-	ErrorCode    string `json:"error_code"`
+	StatusCode   int    `json:"status_code" example:"400"`
+	ErrorMessage string `json:"error_message" example:"Bad Request"`
+	ErrorCode    string `json:"error_code" example:"missing required fields on input"`
 }
