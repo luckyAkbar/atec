@@ -1,3 +1,4 @@
+// Package db contains the function to initialize and utilize connection to databases
 package db
 
 import (
@@ -39,6 +40,7 @@ func InitializePostgresConn() {
 	logrus.Info("Connected to Postgres Database")
 }
 
+// TxController create a transaction controller
 func TxController() *gorm.DB {
 	return PostgresDB.Begin()
 }

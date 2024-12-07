@@ -1,3 +1,4 @@
+// Package rest contain all functionality needed to use REST as interface to this API
 package rest
 
 import (
@@ -25,6 +26,7 @@ type service struct {
 	authUsecase usecase.AuthUsecaseIface
 }
 
+// NewService init rest service
 func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface) {
 	s := &service{
 		v1:          v1,

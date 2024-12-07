@@ -1,3 +1,4 @@
+// Package repository contains all the functions necessary to interact with databases
 package repository
 
 import (
@@ -9,10 +10,12 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// UserRepository is an instance containing functions to interact specifically to users database
 type UserRepository struct {
 	db *gorm.DB
 }
 
+// UserRepositoryIface interface exported by UserRepository to help ease mocking
 type UserRepositoryIface interface {
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error)
@@ -20,12 +23,14 @@ type UserRepositoryIface interface {
 	Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error)
 }
 
+// NewUserRepository create a new instance of UserRepository
 func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{
 		db: db,
 	}
 }
 
+// FindByEmail find exactly one record from users table with matching email
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	user := &model.User{}
 
@@ -40,6 +45,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.
 	}
 }
 
+// CreateUserInput input to create a new user data
 type CreateUserInput struct {
 	Email    string
 	Password string
@@ -48,6 +54,7 @@ type CreateUserInput struct {
 	Roles    model.Roles
 }
 
+// Create insert a new records to users table
 func (r *UserRepository) Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error) {
 	tx := r.db.WithContext(ctx)
 	if len(txController) > 0 {
@@ -70,6 +77,7 @@ func (r *UserRepository) Create(ctx context.Context, input CreateUserInput, txCo
 	return user, nil
 }
 
+// FindByID find exacly one record from users table with matching id
 func (r *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	user := &model.User{}
 
@@ -84,6 +92,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Use
 	}
 }
 
+// UpdateUserInput options to update user record
 type UpdateUserInput struct {
 	Email    string
 	Password string `json:"-"`
@@ -91,6 +100,7 @@ type UpdateUserInput struct {
 	IsActive *bool
 }
 
+// ToUpdatedFields helper function to translate update options to gorm dynamic fields update
 func (uui UpdateUserInput) ToUpdatedFields() map[string]interface{} {
 	fields := map[string]interface{}{}
 
@@ -109,8 +119,10 @@ func (uui UpdateUserInput) ToUpdatedFields() map[string]interface{} {
 	return fields
 }
 
+// Update update a users record by its id
 func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error) {
 	user := &model.User{}
+
 	err := r.db.WithContext(ctx).Model(user).
 		Clauses(clause.Returning{}).Where("id = ?", userID).
 		Updates(input.ToUpdatedFields()).Error

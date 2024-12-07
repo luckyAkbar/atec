@@ -9,10 +9,8 @@ import (
 
 // Package represent packages table on database
 type Package struct {
-	ID        uuid.UUID
-	CreatedBy uuid.UUID
-
-	// TODO will be defined later
+	ID            uuid.UUID
+	CreatedBy     uuid.UUID
 	Questionnaire Questionnaire
 	Name          string
 	IsActive      bool
@@ -22,25 +20,28 @@ type Package struct {
 	DeletedAt     sql.NullTime
 }
 
-// TODO use this
+// AnswerOption each singular answer option for a given question along with its detail
 type AnswerOption struct {
 	ID          int
 	Description string
 	Score       int
 }
 
-// TODO use this
+// QuestionAndOptions structure for a question and each answer options
 type QuestionAndOptions struct {
 	QUestion string
 	Options  []AnswerOption
 }
 
+// Questionnaire represent all the ATEC questionnaire structure
 type Questionnaire struct {
 	ChecklistGroups []ChecklistGroup
 }
 
+// Checklists is representing a group of questions and answers for a given sub test / group
 type Checklists map[int]QuestionAndOptions
 
+// ChecklistGroup is each individual question and answer in a given group
 type ChecklistGroup struct {
 	SubtestID int
 

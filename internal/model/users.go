@@ -7,8 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
+// Roles represent database's enum for roles
 type Roles string
 
+// known roles
 const (
 	RolesAdmin Roles = "admin"
 	RoleUser   Roles = "user"

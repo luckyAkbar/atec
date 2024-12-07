@@ -2,6 +2,7 @@ package repository
 
 import "errors"
 
+// known errors that might be returned by this repository's functions
 var (
-	ErrNotFound error = errors.New("data not found")
+	ErrNotFound = errors.New("data not found")
 )

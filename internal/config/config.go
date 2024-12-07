@@ -1,3 +1,4 @@
+// Package config contains all function to access system's configuration
 package config
 
 import (
@@ -11,10 +12,12 @@ import (
 	_ "github.com/sweet-go/stdlib/config"
 )
 
+// LogLevel log level
 func LogLevel() string {
 	return viper.GetString("log_level")
 }
 
+// PostgresDSN postgres dsn
 func PostgresDSN() string {
 	host := viper.GetString("postgres.host")
 	db := viper.GetString("postgres.db")
@@ -26,23 +29,29 @@ func PostgresDSN() string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, user, pw, db, port, sslMode)
 }
 
+// ServerAccountVerificationBaseURL contains the url for user when clicking the
+// validate account button on account verification email after signing up. Could
+// be used to point to the front end page along with the required validation token
 func ServerAccountVerificationBaseURL() string {
 	return viper.GetString("server.account_verification_base_url")
 }
 
 // ServerPort returns application server port
 func ServerPort() string {
-	return fmt.Sprintf(":%s", viper.GetString("server.port"))
+	return ":" + viper.GetString("server.port")
 }
 
+// PrivateKeyFilePath private key path
 func PrivateKeyFilePath() string {
 	return viper.GetString("private_key_path")
 }
 
+// IVKey iv key
 func IVKey() string {
 	return viper.GetString("iv_key")
 }
 
+// SignupTokenExpiry expiry time in time.Duration
 func SignupTokenExpiry() time.Duration {
 	return viper.GetDuration("signup_token_expiry")
 }
