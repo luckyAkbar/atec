@@ -36,7 +36,7 @@ type SignupInput struct {
 }
 
 type VerifyAccountInput struct {
-	ValidationToken string
+	ValidationToken string `query:"validation_token" validate:"required"`
 }
 
 type InitResetPasswordInput struct {

@@ -15,4 +15,8 @@ var (
 	ErrBadRequest error = errors.New("bad request")
 
 	ErrInternal = errors.New("internal server error")
+
+	ErrUnauthorized = errors.New("unauthorized")
+
+	ErrNotFound = errors.New("not found")
 )

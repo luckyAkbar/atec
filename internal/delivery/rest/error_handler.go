@@ -21,13 +21,31 @@ func usecaseErrorToRESTResponse(c echo.Context, err error) error {
 			return c.JSON(http.StatusInternalServerError, StandardErrorResponse{
 				StatusCode:   http.StatusInternalServerError,
 				ErrorCode:    http.StatusText(http.StatusInternalServerError),
-				ErrorMessage: "internal server error",
+				ErrorMessage: "server unable to produce appropriate response",
+			})
+		case usecase.ErrInternal:
+			return c.JSON(http.StatusInternalServerError, StandardErrorResponse{
+				StatusCode:   http.StatusInternalServerError,
+				ErrorCode:    http.StatusText(http.StatusInternalServerError),
+				ErrorMessage: e.Message,
 			})
 		case usecase.ErrBadRequest:
 			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
 				StatusCode:   http.StatusBadRequest,
-				ErrorMessage: err.Error(),
+				ErrorMessage: e.Message,
 				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		case usecase.ErrNotFound:
+			return c.JSON(http.StatusNotFound, StandardErrorResponse{
+				StatusCode:   http.StatusNotFound,
+				ErrorMessage: e.Message,
+				ErrorCode:    http.StatusText(http.StatusNotFound),
+			})
+		case usecase.ErrUnauthorized:
+			return c.JSON(http.StatusUnauthorized, StandardErrorResponse{
+				StatusCode:   http.StatusUnauthorized,
+				ErrorCode:    http.StatusText(http.StatusUnauthorized),
+				ErrorMessage: e.Message,
 			})
 		}
 	}
