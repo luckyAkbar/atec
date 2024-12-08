@@ -84,7 +84,6 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 	switch err {
 	default:
 		logger.WithError(err).Error("failed to find user by email")
-
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
