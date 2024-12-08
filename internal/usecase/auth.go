@@ -51,7 +51,7 @@ type LoginInput struct {
 	Password string `validate:"required,min=8"`
 }
 
-// Validate validate LoginInput's fields
+// Validate validate LoginInput's
 func (li LoginInput) Validate() error {
 	return validator.Struct(li)
 }
@@ -84,6 +84,7 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 	switch err {
 	default:
 		logger.WithError(err).Error("failed to find user by email")
+
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
