@@ -34,6 +34,7 @@ type SharedCryptorIface interface {
 	Hash(data []byte) (string, error)
 	CreateJWT(claims jwt.Claims) (string, error)
 	ValidateJWT(token string, opts ValidateJWTOpts) (*jwt.Token, error)
+	CompareHash(hashed []byte, plain []byte) error
 }
 
 // CreateCryptorOpts is the options used to create a new cryptor instance.

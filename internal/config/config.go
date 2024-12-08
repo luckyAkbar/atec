@@ -73,3 +73,8 @@ func SendInBlueSender() *lib.SendSmtpEmailSender {
 func SendInBlueIsActivated() bool {
 	return viper.GetBool("sendinblue.is_activated")
 }
+
+// LoginTokenExpiry expiry time for login token in time.Duration
+func LoginTokenExpiry() time.Duration {
+	return viper.GetDuration("login_token_expiry")
+}

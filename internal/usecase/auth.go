@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -28,6 +29,7 @@ type AuthUsecase struct {
 type AuthUsecaseIface interface {
 	HandleSignup(ctx context.Context, input SignupInput) (*SignupOutput, error)
 	HandleAccountVerification(ctx context.Context, input AccountVerificationInput) (*AccountVerificationOutput, error)
+	HandleLogin(ctx context.Context, input LoginInput) (*LoginOutput, error)
 }
 
 // NewAuthUsecase create new instance for AuthUsecase
@@ -45,8 +47,13 @@ func NewAuthUsecase(
 
 // LoginInput input
 type LoginInput struct {
-	Email    string
-	Password string
+	Email    string `vallidate:"required,email"`
+	Password string `validate:"required,min=8"`
+}
+
+// Validate validate LoginInput's fields
+func (li LoginInput) Validate() error {
+	return validator.Struct(li)
 }
 
 // LoginOutput output
@@ -55,8 +62,87 @@ type LoginOutput struct {
 }
 
 // HandleLogin contains logic to handle login request
-func (u *AuthUsecase) HandleLogin(_ context.Context, _ LoginInput) (*LoginOutput, error) {
-	panic("implement me")
+func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*LoginOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("email", input.Email)
+
+	if err := input.Validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	emailEnc, err := u.sharedCryptor.Encrypt(input.Email)
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: "encryption process failed",
+		}
+	}
+
+	user, err := u.userRepo.FindByEmail(ctx, emailEnc)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find user by email")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if !user.IsActive {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "this account still not activated",
+		}
+	}
+
+	pwDecoded, err := base64.StdEncoding.DecodeString(user.Password)
+	if err != nil {
+		logger.WithError(err).Error("failed to decode base 64 string")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	err = u.sharedCryptor.CompareHash(pwDecoded, []byte(input.Password))
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid password",
+		}
+	}
+
+	loginToken, err := u.sharedCryptor.CreateJWT(jwt.RegisteredClaims{
+		Issuer:    string(TokenIssuerSystem),
+		Subject:   string(LoginToken),
+		Audience:  []string{user.ID.String()},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.LoginTokenExpiry())),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to generate jwt token after login")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &LoginOutput{
+		Token: loginToken,
+	}, nil
 }
 
 // SignupInput input
@@ -84,6 +170,7 @@ type JWTTokenType string
 //nolint:gosec
 var (
 	SignupVerificationToken JWTTokenType = "signup-verification-token"
+	LoginToken              JWTTokenType = "login-token"
 )
 
 // JWTTokenIssuer known jwt token issuer for field iss

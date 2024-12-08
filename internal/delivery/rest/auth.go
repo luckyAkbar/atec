@@ -65,7 +65,7 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 		if err := c.Bind(input); err != nil {
 			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
 				StatusCode:   http.StatusBadRequest,
-				ErrorMessage: "failed to parse input zzz",
+				ErrorMessage: "failed to parse input",
 				ErrorCode:    http.StatusText(http.StatusBadRequest),
 			})
 		}
@@ -101,7 +101,31 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 // @Router			/v1/auth/login [post]
 func (s *service) HandleLogin() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &LoginInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.authUsecase.HandleLogin(c.Request().Context(), usecase.LoginInput{
+			Email:    input.Email,
+			Password: input.Password,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: LoginOutput{
+				Token: output.Token,
+			},
+		})
 	}
 }
 
