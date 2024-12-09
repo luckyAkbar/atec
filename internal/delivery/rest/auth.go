@@ -143,7 +143,30 @@ func (s *service) HandleLogin() echo.HandlerFunc {
 // @Router			/v1/auth/password [patch]
 func (s *service) HandleInitResetPassword() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &InitResetPasswordInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.authUsecase.HandleInitesetPassword(c.Request().Context(), usecase.InitResetPasswordInput{
+			Email: input.Email,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: InitResetPasswordOutput{
+				Message: output.Message,
+			},
+		})
 	}
 }
 
@@ -160,6 +183,30 @@ func (s *service) HandleInitResetPassword() echo.HandlerFunc {
 // @Router			/v1/auth/password [post]
 func (s *service) HandleResetPassword() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &ResetPasswordInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.authUsecase.HandleResetPassword(c.Request().Context(), usecase.ResetPasswordInput{
+			ResetPasswordToken: input.Token,
+			NewPassword:        input.NewPassword,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: ResetPasswordOutput{
+				Message: output.Message,
+			},
+		})
 	}
 }

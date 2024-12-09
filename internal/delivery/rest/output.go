@@ -41,10 +41,12 @@ type VerifyAccountOutput struct {
 
 // InitResetPasswordOutput output
 type InitResetPasswordOutput struct {
+	Message string `json:"message"`
 }
 
 // ResetPasswordOutput output
 type ResetPasswordOutput struct {
+	Message string `json:"message"`
 }
 
 // LoginOutput output

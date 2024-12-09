@@ -11,7 +11,6 @@ import (
 // @title						ATEC API Docs
 // @version					1.0
 // @description				this is the ATEC method implemented using API
-//
 // @securityDefinitions.apikey	AdminLevelAuth
 // @description				Bearer Token authentication for secure endpoints accessible only by Admin level user
 // @in							header

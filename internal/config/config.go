@@ -78,3 +78,13 @@ func SendInBlueIsActivated() bool {
 func LoginTokenExpiry() time.Duration {
 	return viper.GetDuration("login_token_expiry")
 }
+
+// ChangePasswordTokenExpiry change password token expiry in time.Duration
+func ChangePasswordTokenExpiry() time.Duration {
+	return viper.GetDuration("change_password_token_expiry")
+}
+
+// ServerResetPasswordBaseURL reset password base URL
+func ServerResetPasswordBaseURL() string {
+	return viper.GetString("server.reset_password_base_url")
+}
