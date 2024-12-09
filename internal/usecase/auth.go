@@ -33,6 +33,7 @@ type AuthUsecaseIface interface {
 	HandleLogin(ctx context.Context, input LoginInput) (*LoginOutput, error)
 	HandleInitesetPassword(ctx context.Context, input InitResetPasswordInput) (*InitResetPasswordOutput, error)
 	HandleResetPassword(ctx context.Context, input ResetPasswordInput) (*ResetPasswordOutput, error)
+	AllowAccess(ctx context.Context, input AllowAccessInput) (*AllowAccessOutput, error)
 }
 
 // NewAuthUsecase create new instance for AuthUsecase
@@ -129,11 +130,11 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 	loginToken, err := u.sharedCryptor.CreateJWT(model.LoginTokenClaims{
 		Role: user.Roles,
 		RegisteredClaims: jwt.RegisteredClaims{
-		Issuer:    string(TokenIssuerSystem),
-		Subject:   string(LoginToken),
-		Audience:  []string{user.ID.String()},
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.LoginTokenExpiry())),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    string(TokenIssuerSystem),
+			Subject:   string(LoginToken),
+			Audience:  []string{user.ID.String()},
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.LoginTokenExpiry())),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	})
 
@@ -704,7 +705,7 @@ func (u *AuthUsecase) HandleResetPassword(ctx context.Context, input ResetPasswo
 		}
 	}
 
-	claims, err := u.parseJWTToken(input.ResetPasswordToken, parseJWTTokenInput{
+	_, claims, err := u.parseJWTToken(input.ResetPasswordToken, parseJWTTokenInput{
 		expectedIssuer:      TokenIssuerSystem,
 		expectedSubject:     ChangePasswordToken,
 		expectedAudiences:   nil,
@@ -771,6 +772,98 @@ func (u *AuthUsecase) HandleResetPassword(ctx context.Context, input ResetPasswo
 
 	return &ResetPasswordOutput{
 		Message: "ok",
+	}, nil
+}
+
+// AllowAccessInput input
+type AllowAccessInput struct {
+	Token              string
+	AllowAllAuthorized bool
+	AllowAdminOnly     bool
+}
+
+// AllowAccessOutput output
+type AllowAccessOutput struct {
+	UserID   uuid.UUID
+	UserRole model.Roles
+}
+
+// AllowAccess will perform validation and checking for supplied jwt token.
+// Based on the supplied params, you can determine whether to allow the request or not based on the
+// returned value. If the error is not nil, safe to assume that you should not let the request pass.
+func (u *AuthUsecase) AllowAccess(_ context.Context, input AllowAccessInput) (*AllowAccessOutput, error) {
+	jwtToken, _, err := u.parseJWTToken(input.Token, parseJWTTokenInput{
+		expectedIssuer:      TokenIssuerSystem,
+		expectedSubject:     LoginToken,
+		expectedAudiences:   nil,
+		expectedAudienceLen: 1,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := jwtToken.Claims.(jwt.MapClaims)
+	if !(ok && jwtToken.Valid) {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid jwt payload or the token is invalid",
+		}
+	}
+
+	// no need to check the err here, because it's already checked
+	// when calling the parseJWTToken
+	audiences, _ := claims.GetAudience()
+	targetUserID := audiences[0]
+
+	userID, err := uuid.Parse(targetUserID)
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid value of user id",
+		}
+	}
+
+	role, ok := claims["role"].(string)
+	if !ok {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "undefined role on auth token",
+		}
+	}
+
+	var userRole model.Roles
+
+	switch role {
+	default:
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid role on auth token",
+		}
+	case string(model.RoleUser):
+		userRole = model.RoleUser
+	case string(model.RolesAdmin):
+		userRole = model.RolesAdmin
+	}
+
+	// early return if not specified for admin only
+	if input.AllowAllAuthorized {
+		return &AllowAccessOutput{
+			UserID:   userID,
+			UserRole: userRole,
+		}, nil
+	}
+
+	if input.AllowAdminOnly && userRole != model.RolesAdmin {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "access denied due to invalid required access role",
+		}
+	}
+
+	return &AllowAccessOutput{
+		UserID:   userID,
+		UserRole: userRole,
 	}, nil
 }
 
