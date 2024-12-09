@@ -47,6 +47,12 @@ func usecaseErrorToRESTResponse(c echo.Context, err error) error {
 				ErrorCode:    http.StatusText(http.StatusUnauthorized),
 				ErrorMessage: e.Message,
 			})
+		case usecase.ErrForbidden:
+			return c.JSON(http.StatusForbidden, StandardErrorResponse{
+				StatusCode:   http.StatusForbidden,
+				ErrorCode:    http.StatusText(http.StatusForbidden),
+				ErrorMessage: e.Message,
+			})
 		}
 	}
 }
