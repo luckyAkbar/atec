@@ -781,7 +781,7 @@ type parseJWTTokenInput struct {
 	expectedAudienceLen int
 }
 
-func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt.MapClaims, error) {
+func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (*jwt.Token, jwt.MapClaims, error) {
 	jwtToken, err := u.sharedCryptor.ValidateJWT(token, common.ValidateJWTOpts{
 		Issuer:  string(input.expectedIssuer),
 		Subject: string(input.expectedSubject),
@@ -789,12 +789,12 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 
 	switch err {
 	default:
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
-			Message: "invalid token for change password",
+			Message: err.Error(),
 		}
 	case jwt.ErrTokenExpired:
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "change password token has expired",
 		}
@@ -804,7 +804,7 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !(ok && jwtToken.Valid) {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "invalid token claims",
 		}
@@ -812,7 +812,7 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 
 	issuer, err := claims.GetIssuer()
 	if err != nil || issuer != string(input.expectedIssuer) {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "incorrect token issuer used",
 		}
@@ -820,7 +820,7 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 
 	subject, err := claims.GetSubject()
 	if err != nil || subject != string(input.expectedSubject) {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "incorrect token subject used",
 		}
@@ -828,14 +828,14 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 
 	audiences, err := claims.GetAudience()
 	if err != nil {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "invalid audience on token used",
 		}
 	}
 
 	if len(audiences) != input.expectedAudienceLen {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "invalid number of audience",
 		}
@@ -845,17 +845,17 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (jwt
 	// some times, this checking is not required to performed here
 	// but may still be checked by the caller
 	if input.expectedAudiences == nil {
-		return claims, nil
+		return jwtToken, claims, nil
 	}
 
 	expectedAudiences := *input.expectedAudiences
 
 	if !reflect.DeepEqual(audiences, expectedAudiences) {
-		return nil, UsecaseError{
+		return nil, nil, UsecaseError{
 			ErrType: ErrUnauthorized,
 			Message: "unexpected audiences value",
 		}
 	}
 
-	return claims, nil
+	return jwtToken, claims, nil
 }
