@@ -56,6 +56,9 @@ definitions:
     - email
     type: object
   rest.InitResetPasswordOutput:
+    properties:
+      message:
+        type: string
     type: object
   rest.LoginInput:
     properties:
@@ -112,6 +115,9 @@ definitions:
     - token
     type: object
   rest.ResetPasswordOutput:
+    properties:
+      message:
+        type: string
     type: object
   rest.SearchActivePackageOutput:
     properties:

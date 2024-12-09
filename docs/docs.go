@@ -1370,7 +1370,12 @@ const docTemplate = `{
             }
         },
         "rest.InitResetPasswordOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "rest.LoginInput": {
             "type": "object",
@@ -1452,7 +1457,12 @@ const docTemplate = `{
             }
         },
         "rest.ResetPasswordOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "rest.SearchActivePackageOutput": {
             "type": "object",
