@@ -126,12 +126,15 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 		}
 	}
 
-	loginToken, err := u.sharedCryptor.CreateJWT(jwt.RegisteredClaims{
+	loginToken, err := u.sharedCryptor.CreateJWT(model.LoginTokenClaims{
+		Role: user.Roles,
+		RegisteredClaims: jwt.RegisteredClaims{
 		Issuer:    string(TokenIssuerSystem),
 		Subject:   string(LoginToken),
 		Audience:  []string{user.ID.String()},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.LoginTokenExpiry())),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	})
 
 	if err != nil {
