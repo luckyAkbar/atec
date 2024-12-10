@@ -25,22 +25,22 @@ type SubTest map[int]SubtestDetail
 //nolint:mnd
 var DefaultATECTemplate = Template{
 	SubTest: SubTest{
-		1: {
+		0: {
 			Name:          "Speech/Language/Communication",
 			OptionCount:   3,
 			QuestionCount: 14,
 		},
-		2: {
+		1: {
 			Name:          "Sociability",
 			OptionCount:   3,
 			QuestionCount: 20,
 		},
-		3: {
+		2: {
 			Name:          "Sensory/Cognitive Awareness",
 			OptionCount:   3,
 			QuestionCount: 18,
 		},
-		4: {
+		3: {
 			Name:          "Health/Physical/Behavior",
 			OptionCount:   4,
 			QuestionCount: 25,
