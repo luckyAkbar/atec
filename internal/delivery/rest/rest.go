@@ -21,15 +21,17 @@ import (
 // @in							header
 // @name						Authorization
 type service struct {
-	v1          *echo.Group
-	authUsecase usecase.AuthUsecaseIface
+	v1             *echo.Group
+	authUsecase    usecase.AuthUsecaseIface
+	packageUsecase usecase.PackageUsecaseIface
 }
 
 // NewService init rest service
-func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface) {
+func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface, packageUsecase *usecase.PackageUsecase) {
 	s := &service{
-		v1:          v1,
-		authUsecase: authUsecase,
+		v1:             v1,
+		authUsecase:    authUsecase,
+		packageUsecase: packageUsecase,
 	}
 
 	s.initV1Routes()
@@ -42,7 +44,7 @@ func (s *service) initV1Routes() {
 	s.v1.PATCH("/auth/password", s.HandleInitResetPassword())
 	s.v1.POST("/auth/password", s.HandleResetPassword())
 
-	s.v1.POST("/atec/packages", s.HandleCreatePackage())
+	s.v1.POST("/atec/packages", s.HandleCreatePackage(), s.AuthMiddleware(false, true))
 	s.v1.PUT("/atec/packages/:package_id", s.HandleUpdatePackage())
 	s.v1.PATCH("/atec/packages/:package_id", s.HandleActivationPackage())
 	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage())

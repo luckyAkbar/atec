@@ -1,4 +1,44 @@
 definitions:
+  model.AnswerOption:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      score:
+        minimum: 0
+        type: integer
+    required:
+    - description
+    - id
+    type: object
+  model.ChecklistGroup:
+    properties:
+      custom_name:
+        description: |-
+          CustomName can be used to be displayed to user. if empty, the one from
+          the template will be used
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/model.AnswerOption'
+        minItems: 1
+        type: array
+        uniqueItems: true
+      questions:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - custom_name
+    - options
+    - questions
+    type: object
+  model.Questionnaire:
+    additionalProperties:
+      $ref: '#/definitions/model.ChecklistGroup'
+    type: object
   rest.ActivationPackageInput:
     properties:
       status:
@@ -9,32 +49,20 @@ definitions:
       status:
         type: boolean
     type: object
-  rest.AnswerAndValue:
-    properties:
-      text:
-        type: string
-      value:
-        minimum: 1
-        type: integer
-    required:
-    - text
-    - value
-    type: object
   rest.CreatePackageInput:
     properties:
       package_name:
         type: string
-      sub_group_details:
-        items:
-          $ref: '#/definitions/rest.SubGroupDetail'
-        minItems: 1
-        type: array
-        uniqueItems: true
+      questionnaire:
+        $ref: '#/definitions/model.Questionnaire'
     required:
     - package_name
-    - sub_group_details
+    - questionnaire
     type: object
   rest.CreatePackageOutput:
+    properties:
+      id:
+        type: string
     type: object
   rest.GetATECQuestionnaireOutput:
     type: object
@@ -75,20 +103,6 @@ definitions:
     properties:
       token:
         type: string
-    type: object
-  rest.QuestionAndAnswers:
-    properties:
-      answer_and_value:
-        items:
-          $ref: '#/definitions/rest.AnswerAndValue'
-        minItems: 1
-        type: array
-        uniqueItems: true
-      question:
-        type: string
-    required:
-    - answer_and_value
-    - question
     type: object
   rest.RegisterChildInput:
     properties:
@@ -184,19 +198,6 @@ definitions:
         example: 200
         type: integer
     type: object
-  rest.SubGroupDetail:
-    properties:
-      name:
-        type: string
-      question_and_answer_lists:
-        items:
-          $ref: '#/definitions/rest.QuestionAndAnswers'
-        minItems: 1
-        type: array
-    required:
-    - name
-    - question_and_answer_lists
-    type: object
   rest.SubmitQuestionnaireInput:
     properties:
       child_id:
@@ -233,15 +234,11 @@ definitions:
     properties:
       package_name:
         type: string
-      sub_group_details:
-        items:
-          $ref: '#/definitions/rest.SubGroupDetail'
-        minItems: 1
-        type: array
-        uniqueItems: true
+      questionnaire:
+        $ref: '#/definitions/model.Questionnaire'
     required:
     - package_name
-    - sub_group_details
+    - questionnaire
     type: object
   rest.UpdatePackageOutput:
     type: object

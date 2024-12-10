@@ -19,6 +19,7 @@ linters:
     - gochecknoglobals
     - err113
     - gci
+    - recvcheck
   presets:
     - bugs
     - comment
@@ -66,6 +67,8 @@ linters-settings:
       - c
       - e
       - s
+      - i
+      - j
       - err
 
 issues:

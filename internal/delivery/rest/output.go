@@ -68,6 +68,7 @@ type GetMyChildernOutput struct {
 
 // CreatePackageOutput output
 type CreatePackageOutput struct {
+	ID uuid.UUID `json:"id"`
 }
 
 // UpdatePackageOutput output

@@ -22,7 +22,7 @@ func (s *service) HandleSignUp() echo.HandlerFunc {
 		if err := c.Bind(&input); err != nil {
 			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
 				StatusCode:   http.StatusBadRequest,
-				ErrorMessage: "failed to parse input zzz",
+				ErrorMessage: "failed to parse input",
 				ErrorCode:    http.StatusText(http.StatusBadRequest),
 			})
 		}
