@@ -1285,6 +1285,60 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.AnswerOption": {
+            "type": "object",
+            "required": [
+                "description",
+                "id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "model.ChecklistGroup": {
+            "type": "object",
+            "required": [
+                "custom_name",
+                "options",
+                "questions"
+            ],
+            "properties": {
+                "custom_name": {
+                    "description": "CustomName can be used to be displayed to user. if empty, the one from\nthe template will be used",
+                    "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "#/definitions/model.AnswerOption"
+                    }
+                },
+                "questions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.Questionnaire": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/model.ChecklistGroup"
+            }
+        },
         "rest.ActivationPackageInput": {
             "type": "object",
             "properties": {
@@ -1301,44 +1355,28 @@ const docTemplate = `{
                 }
             }
         },
-        "rest.AnswerAndValue": {
-            "type": "object",
-            "required": [
-                "text",
-                "value"
-            ],
-            "properties": {
-                "text": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "integer",
-                    "minimum": 1
-                }
-            }
-        },
         "rest.CreatePackageInput": {
             "type": "object",
             "required": [
                 "package_name",
-                "sub_group_details"
+                "questionnaire"
             ],
             "properties": {
                 "package_name": {
                     "type": "string"
                 },
-                "sub_group_details": {
-                    "type": "array",
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "items": {
-                        "$ref": "#/definitions/rest.SubGroupDetail"
-                    }
+                "questionnaire": {
+                    "$ref": "#/definitions/model.Questionnaire"
                 }
             }
         },
         "rest.CreatePackageOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
         },
         "rest.GetATECQuestionnaireOutput": {
             "type": "object"
@@ -1397,26 +1435,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "rest.QuestionAndAnswers": {
-            "type": "object",
-            "required": [
-                "answer_and_value",
-                "question"
-            ],
-            "properties": {
-                "answer_and_value": {
-                    "type": "array",
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "items": {
-                        "$ref": "#/definitions/rest.AnswerAndValue"
-                    }
-                },
-                "question": {
                     "type": "string"
                 }
             }
@@ -1556,25 +1574,6 @@ const docTemplate = `{
                 }
             }
         },
-        "rest.SubGroupDetail": {
-            "type": "object",
-            "required": [
-                "name",
-                "question_and_answer_lists"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "question_and_answer_lists": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "$ref": "#/definitions/rest.QuestionAndAnswers"
-                    }
-                }
-            }
-        },
         "rest.SubmitQuestionnaireInput": {
             "type": "object",
             "properties": {
@@ -1626,19 +1625,14 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "package_name",
-                "sub_group_details"
+                "questionnaire"
             ],
             "properties": {
                 "package_name": {
                     "type": "string"
                 },
-                "sub_group_details": {
-                    "type": "array",
-                    "minItems": 1,
-                    "uniqueItems": true,
-                    "items": {
-                        "$ref": "#/definitions/rest.SubGroupDetail"
-                    }
+                "questionnaire": {
+                    "$ref": "#/definitions/model.Questionnaire"
                 }
             }
         },

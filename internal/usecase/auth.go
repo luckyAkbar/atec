@@ -57,7 +57,7 @@ type LoginInput struct {
 
 // Validate validate LoginInput's
 func (li LoginInput) Validate() error {
-	return validator.Struct(li)
+	return common.Validator.Struct(li)
 }
 
 // LoginOutput output
@@ -161,7 +161,7 @@ type SignupInput struct {
 
 // Validate validate SignupInput's fields
 func (si SignupInput) Validate() error {
-	return validator.Struct(si)
+	return common.Validator.Struct(si)
 }
 
 // SignupOutput output
@@ -384,7 +384,7 @@ type AccountVerificationInput struct {
 
 // Validate validate AccountVerificationInput's fields
 func (avi AccountVerificationInput) Validate() error {
-	return validator.Struct(avi)
+	return common.Validator.Struct(avi)
 }
 
 // AccountVerificationOutput output
@@ -517,7 +517,7 @@ type InitResetPasswordInput struct {
 
 // Validate validate InitResetPasswordInput
 func (irpi InitResetPasswordInput) Validate() error {
-	return validator.Struct(irpi)
+	return common.Validator.Struct(irpi)
 }
 
 // InitResetPasswordOutput output
@@ -686,7 +686,7 @@ type ResetPasswordInput struct {
 
 // Validate validate ResetPasswordInput
 func (rpi ResetPasswordInput) Validate() error {
-	return validator.Struct(rpi)
+	return common.Validator.Struct(rpi)
 }
 
 // ResetPasswordOutput output

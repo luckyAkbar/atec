@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/luckyAkbar/atec/internal/model"
 )
 
 // SubmitQuestionnaireInput input
@@ -68,28 +69,10 @@ type UpdateChildernInput struct {
 	RegisterChildInput
 }
 
-// AnswerAndValue input
-type AnswerAndValue struct {
-	Text  string `json:"text" validate:"required"`
-	Value int    `json:"value" validate:"required,min=1"`
-}
-
-// QuestionAndAnswers input
-type QuestionAndAnswers struct {
-	Question        string           `json:"question" validate:"required"`
-	AnswersAndValue []AnswerAndValue `json:"answer_and_value" validate:"required,min=1,unique=Value,dive"`
-}
-
-// SubGroupDetail input
-type SubGroupDetail struct {
-	Name                   string               `json:"name" validate:"required"`
-	QuestionAndAnswerLists []QuestionAndAnswers `json:"question_and_answer_lists" validate:"required,min=1,dive"`
-}
-
 // CreatePackageInput input
 type CreatePackageInput struct {
-	PackageName     string           `json:"package_name" validate:"required"`
-	SubGroupDetails []SubGroupDetail `json:"sub_group_details" validate:"required,min=1,unique=Name,dive"`
+	PackageName  string              `json:"package_name" validate:"required"`
+	Quesionnaire model.Questionnaire `json:"questionnaire" validate:"required"`
 }
 
 // UpdatePackageInput input
