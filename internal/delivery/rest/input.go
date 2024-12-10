@@ -106,3 +106,8 @@ type CreateATECTemplateInput struct {
 type GetATECQuestionnaireInput struct {
 	PackageID uuid.UUID `query:"package_id,omitempty"`
 }
+
+// DeletePackageInput input
+type DeletePackageInput struct {
+	PackageID uuid.UUID `param:"package_id"`
+}

@@ -47,7 +47,7 @@ func (s *service) initV1Routes() {
 	s.v1.POST("/atec/packages", s.HandleCreatePackage(), s.AuthMiddleware(false, true))
 	s.v1.PUT("/atec/packages/:package_id", s.HandleUpdatePackage())
 	s.v1.PATCH("/atec/packages/:package_id", s.HandleActivationPackage(), s.AuthMiddleware(false, true))
-	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage())
+	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage(), s.AuthMiddleware(false, true))
 	s.v1.GET("/atec/packages/active", s.HandleSearchActivePackage())
 
 	s.v1.POST("/childern", s.HandleRegisterChildern())
