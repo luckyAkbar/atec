@@ -77,7 +77,7 @@ type UpdatePackageOutput struct {
 
 // ActivationPackageOutput output
 type ActivationPackageOutput struct {
-	Status bool `json:"status"`
+	Message string
 }
 
 // CreateATECTemplateOutput output
@@ -88,11 +88,6 @@ type CreateATECTemplateOutput struct {
 // UpdateATECTemplateOutput output
 type UpdateATECTemplateOutput struct {
 	ID uuid.UUID `json:"id"`
-}
-
-// ActivateTemplateOutput output
-type ActivateTemplateOutput struct {
-	Status bool `json:"status"`
 }
 
 // GetATECQuestionnaireOutput output

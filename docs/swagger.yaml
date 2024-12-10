@@ -46,8 +46,8 @@ definitions:
     type: object
   rest.ActivationPackageOutput:
     properties:
-      status:
-        type: boolean
+      message:
+        type: string
     type: object
   rest.CreatePackageInput:
     properties:
