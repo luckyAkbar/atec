@@ -236,10 +236,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response",
-                        "schema": {
-                            "$ref": "#/definitions/rest.StandardSuccessResponse"
-                        }
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad request",

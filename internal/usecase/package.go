@@ -20,6 +20,7 @@ type PackageUsecase struct {
 type PackageUsecaseIface interface {
 	Create(ctx context.Context, input CreatePackageInput) (*CreatePackageOutput, error)
 	ChangeActiveStatus(ctx context.Context, input ChangeActiveStatusInput) (*ChangeActiveStatusOutput, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 // NewPackageUsecase create new PackageUsecase instance
@@ -163,4 +164,20 @@ func (u *PackageUsecase) ChangeActiveStatus(ctx context.Context, input ChangeAct
 	return &ChangeActiveStatusOutput{
 		Message: "ok",
 	}, nil
+}
+
+// Delete delete a package with its id by using soft delete technique
+func (u *PackageUsecase) Delete(ctx context.Context, id uuid.UUID) error {
+	logger := logrus.WithContext(ctx).WithField("id", id.String())
+
+	if err := u.packageRepo.Delete(ctx, id); err != nil {
+		logger.WithError(err).Error("failed to delete package to database")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return nil
 }

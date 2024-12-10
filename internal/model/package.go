@@ -21,7 +21,7 @@ type Package struct {
 	Name          string
 	IsActive      bool
 	IsLocked      bool
-	CreatedAt     time.Time
+	CreatedAt     time.Time `gorm:"default:now()"`
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt
 }

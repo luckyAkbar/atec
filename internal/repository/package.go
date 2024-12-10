@@ -19,6 +19,7 @@ type PackageRepoIface interface {
 	Create(ctx context.Context, input CreatePackageInput) (*model.Package, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Package, error)
 	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput) (*model.Package, error)
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 // NewPackageRepo create new package repo instance
@@ -94,4 +95,9 @@ func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePack
 	}
 
 	return pack, nil
+}
+
+// Delete use soft delete to delett a package record by its id
+func (r *PackageRepo) Delete(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&model.Package{ID: id}).Error
 }

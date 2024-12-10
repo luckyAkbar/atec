@@ -295,16 +295,30 @@ func (s *service) HandleActivationPackage() echo.HandlerFunc {
 // @Accept			json
 // @Produce		json
 // @Security		AdminLevelAuth
-// @Param			Authorization	header		string						true	"JWT Token"
+// @Param			Authorization	header	string	true	"JWT Token"
 //
-// @Param			package_id		path		string						true	"package ID to be deleted (UUID v4)"
-// @Success		200				{object}	StandardSuccessResponse{}	"Successful response"
-// @Failure		400				{object}	StandardErrorResponse		"Bad request"
-// @Failure		500				{object}	StandardErrorResponse		"Internal Error"
+// @Param			package_id		path	string	true	"package ID to be deleted (UUID v4)"
+// @Success		200				"No Content"
+// @Failure		400				{object}	StandardErrorResponse	"Bad request"
+// @Failure		500				{object}	StandardErrorResponse	"Internal Error"
 // @Router			/v1/atec/packages/{package_id} [delete]
 func (s *service) HandleDeletePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &DeletePackageInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		err := s.packageUsecase.Delete(c.Request().Context(), input.PackageID)
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }
 
