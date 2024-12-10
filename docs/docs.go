@@ -1350,8 +1350,8 @@ const docTemplate = `{
         "rest.ActivationPackageOutput": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "boolean"
+                "message": {
+                    "type": "string"
                 }
             }
         },

@@ -82,7 +82,8 @@ type UpdatePackageInput struct {
 
 // ActivationPackageInput input
 type ActivationPackageInput struct {
-	Status bool `json:"status"`
+	Status    bool      `json:"status"`
+	PackageID uuid.UUID `json:"-" param:"package_id"`
 }
 
 // SDTemplateSubGroupDetail input
@@ -99,16 +100,6 @@ type CreateATECTemplateInput struct {
 	PositiveIndiationText  string                     `json:"positive_indication_text" validate:"required"`
 	NegativeIndicationText string                     `json:"negative_indication_text" validate:"required"`
 	SubGroupDetails        []SDTemplateSubGroupDetail `json:"sub_group_details" validate:"min=1,dive"`
-}
-
-// UpdateATECTemplateInput input
-type UpdateATECTemplateInput struct {
-	CreateATECTemplateInput
-}
-
-// ActivateTemplateInput input
-type ActivateTemplateInput struct {
-	Status bool `json:"status"`
 }
 
 // GetATECQuestionnaireInput input
