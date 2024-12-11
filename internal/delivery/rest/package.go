@@ -353,12 +353,30 @@ func (s *service) HandleDeletePackage() echo.HandlerFunc {
 // @Tags			ATEC Package
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	StandardSuccessResponse{data=SearchActivePackageOutput}	"Successful response"
-// @Failure		400	{object}	StandardErrorResponse									"Bad request"
-// @Failure		500	{object}	StandardErrorResponse									"Internal Error"
+// @Success		200	{object}	StandardSuccessResponse{data=[]SearchActivePackageOutput}	"Successful response"
+// @Failure		400	{object}	StandardErrorResponse										"Bad request"
+// @Failure		500	{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/atec/packages/active [get]
 func (s *service) HandleSearchActivePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		packages, err := s.packageUsecase.FindActiveQuestionnaires(c.Request().Context())
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		output := []SearchActivePackageOutput{}
+		for _, pack := range packages {
+			output = append(output, SearchActivePackageOutput{
+				ID:            pack.ID,
+				Questionnaire: pack.Questionnaire,
+				Name:          pack.Name,
+			})
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       output,
+		})
 	}
 }

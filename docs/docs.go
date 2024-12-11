@@ -110,7 +110,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rest.SearchActivePackageOutput"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rest.SearchActivePackageOutput"
+                                            }
                                         }
                                     }
                                 }
@@ -1551,9 +1554,14 @@ const docTemplate = `{
         "rest.SearchActivePackageOutput": {
             "type": "object",
             "properties": {
-                "packages": {
-                    "type": "array",
-                    "items": {}
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "questionnaire": {
+                    "$ref": "#/definitions/model.Questionnaire"
                 }
             }
         },

@@ -154,9 +154,12 @@ definitions:
     type: object
   rest.SearchActivePackageOutput:
     properties:
-      packages:
-        items: {}
-        type: array
+      id:
+        type: string
+      name:
+        type: string
+      questionnaire:
+        $ref: '#/definitions/model.Questionnaire'
     type: object
   rest.SearchChildernOutput:
     properties:
@@ -476,7 +479,9 @@ paths:
             - $ref: '#/definitions/rest.StandardSuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/rest.SearchActivePackageOutput'
+                  items:
+                    $ref: '#/definitions/rest.SearchActivePackageOutput'
+                  type: array
               type: object
         "400":
           description: Bad request

@@ -20,6 +20,7 @@ type PackageRepoIface interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Package, error)
 	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput) (*model.Package, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error)
 }
 
 // NewPackageRepo create new package repo instance
@@ -111,4 +112,35 @@ func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePack
 // Delete use soft delete to delett a package record by its id
 func (r *PackageRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&model.Package{ID: id}).Error
+}
+
+// SearchPackageInput input to search package. any fields typed with a pointer means it is optional
+type SearchPackageInput struct {
+	IsActive *bool
+}
+
+func (spi SearchPackageInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+	if spi.IsActive != nil {
+		cursor = cursor.Where("is_active = ?", *spi.IsActive)
+	}
+
+	return cursor
+}
+
+// Search search package based on provided parameters
+func (r *PackageRepo) Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error) {
+	packages := []model.Package{}
+
+	conn := r.db.WithContext(ctx)
+	cursor := input.toSearchFields(conn)
+
+	if err := cursor.Find(&packages).Error; err != nil {
+		return nil, err
+	}
+
+	if len(packages) == 0 {
+		return nil, ErrNotFound
+	}
+
+	return packages, nil
 }
