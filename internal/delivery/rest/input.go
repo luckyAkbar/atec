@@ -117,3 +117,9 @@ type GetATECQuestionnaireInput struct {
 type DeletePackageInput struct {
 	PackageID uuid.UUID `param:"package_id"`
 }
+
+// GetMyChildrenInput input
+type GetMyChildrenInput struct {
+	Limit  int `query:"limit" validate:"min=1"`
+	Offset int `query:"offset" validate:"min=0"`
+}

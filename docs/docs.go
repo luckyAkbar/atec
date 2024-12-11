@@ -965,6 +965,20 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit searching param",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset searching param",
+                        "name": "offset",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -979,7 +993,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rest.GetMyChildernOutput"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rest.GetMyChildernOutput"
+                                            }
                                         }
                                     }
                                 }
@@ -1397,7 +1414,27 @@ const docTemplate = `{
         "rest.GetMyChildernOutput": {
             "type": "object",
             "properties": {
-                "childern_data": {}
+                "created_at": {
+                    "type": "string"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_user_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
             }
         },
         "rest.InitResetPasswordInput": {
