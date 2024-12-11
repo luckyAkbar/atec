@@ -56,6 +56,7 @@ type LoginOutput struct {
 
 // RegisterChildOutput output
 type RegisterChildOutput struct {
+	ID uuid.UUID `json:"id"`
 }
 
 // UpdateChildernOutput output

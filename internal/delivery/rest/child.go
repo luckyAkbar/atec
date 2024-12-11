@@ -2,8 +2,10 @@ package rest
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/luckyAkbar/atec/internal/usecase"
 )
 
 // @Summary		Register a new child
@@ -20,7 +22,41 @@ import (
 // @Router			/v1/childern [post]
 func (s *service) HandleRegisterChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &RegisterChildInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		dateOfBirth, err := time.Parse("2006-01-02", input.DateOfBirth)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "invalid time format. should be: 2001-11-29 (YYYY-MM-DD)",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.childUsecase.Register(c.Request().Context(), usecase.RegisterChildInput{
+			DateOfBirth: dateOfBirth,
+			Gender:      input.Gender,
+			Name:        input.Name,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: RegisterChildOutput{
+				ID: output.ID,
+			},
+		})
 	}
 }
 
