@@ -1,6 +1,10 @@
 package rest
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // SearchActivePackageOutput output
 type SearchActivePackageOutput struct {
@@ -66,7 +70,13 @@ type UpdateChildernOutput struct {
 
 // GetMyChildernOutput output
 type GetMyChildernOutput struct {
-	ChildernData any `json:"childern_data"`
+	ID           uuid.UUID `json:"id"`
+	ParentUserID uuid.UUID `json:"parent_user_id"`
+	DateOfBirth  time.Time `json:"date_of_birth"`
+	Gender       bool      `json:"gender"`
+	Name         string    `json:"name"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // CreatePackageOutput output

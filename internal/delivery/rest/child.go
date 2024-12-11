@@ -114,13 +114,51 @@ func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 // @Produce		json
 // @Security		UserLevelAuth
 // @Param			Authorization	header		string												true	"JWT Token"
-// @Success		200				{object}	StandardSuccessResponse{data=GetMyChildernOutput}	"Successful response"
+// @Param			limit			query		int													true	"limit searching param"
+// @Param			offset			query		int													true	"offset searching param"
+// @Success		200				{object}	StandardSuccessResponse{data=[]GetMyChildernOutput}	"Successful response"
 // @Failure		400				{object}	StandardErrorResponse								"Bad request"
 // @Failure		500				{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern [get]
 func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &GetMyChildrenInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		children, err := s.childUsecase.GetRegisteredChildren(c.Request().Context(), usecase.GetRegisteredChildrenInput{
+			Limit:  input.Limit,
+			Offset: input.Offset,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		output := []GetMyChildernOutput{}
+
+		for _, child := range children {
+			output = append(output, GetMyChildernOutput{
+				ID:           child.ID,
+				ParentUserID: child.ParentUserID,
+				DateOfBirth:  child.DateOfBirth,
+				Gender:       child.Gender,
+				Name:         child.Name,
+				CreatedAt:    child.CreatedAt,
+				UpdatedAt:    child.UpdatedAt,
+			})
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       output,
+		})
 	}
 }
 

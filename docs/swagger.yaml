@@ -74,7 +74,20 @@ definitions:
     type: object
   rest.GetMyChildernOutput:
     properties:
-      childern_data: {}
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      parent_user_id:
+        type: string
+      updated_at:
+        type: string
     type: object
   rest.InitResetPasswordInput:
     properties:
@@ -856,6 +869,16 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: limit searching param
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: offset searching param
+        in: query
+        name: offset
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -866,7 +889,9 @@ paths:
             - $ref: '#/definitions/rest.StandardSuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/rest.GetMyChildernOutput'
+                  items:
+                    $ref: '#/definitions/rest.GetMyChildernOutput'
+                  type: array
               type: object
         "400":
           description: Bad request
