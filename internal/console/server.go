@@ -53,9 +53,11 @@ func serverFn(_ *cobra.Command, _ []string) {
 
 	userRepo := repository.NewUserRepository(db.PostgresDB)
 	packageRepo := repository.NewPackageRepo(db.PostgresDB)
+	childRepo := repository.NewChildRepository(db.PostgresDB)
 
 	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer)
 	packageUsecase := usecase.NewPackageUsecase(packageRepo)
+	childUsecase := usecase.NewChildUsecase(childRepo)
 
 	httpServer := echo.New()
 
@@ -65,7 +67,7 @@ func serverFn(_ *cobra.Command, _ []string) {
 
 	v1Group := httpServer.Group("v1")
 
-	rest.NewService(v1Group, authUsecase, packageUsecase)
+	rest.NewService(v1Group, authUsecase, packageUsecase, childUsecase)
 
 	sigCh := make(chan os.Signal, 1)
 	errCh := make(chan error, 1)

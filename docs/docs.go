@@ -1454,13 +1454,22 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2001-11-29 (YYYY-MM-DD)"
                 },
+                "gender": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string"
                 }
             }
         },
         "rest.RegisterChildOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
         },
         "rest.ResetPasswordInput": {
             "type": "object",
@@ -1616,6 +1625,10 @@ const docTemplate = `{
                 "date_of_birth": {
                     "type": "string",
                     "example": "2001-11-29 (YYYY-MM-DD)"
+                },
+                "gender": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string"

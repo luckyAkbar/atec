@@ -109,6 +109,9 @@ definitions:
       date_of_birth:
         example: 2001-11-29 (YYYY-MM-DD)
         type: string
+      gender:
+        example: true
+        type: boolean
       name:
         type: string
     required:
@@ -116,6 +119,9 @@ definitions:
     - name
     type: object
   rest.RegisterChildOutput:
+    properties:
+      id:
+        type: string
     type: object
   rest.ResetPasswordInput:
     properties:
@@ -222,6 +228,9 @@ definitions:
       date_of_birth:
         example: 2001-11-29 (YYYY-MM-DD)
         type: string
+      gender:
+        example: true
+        type: boolean
       name:
         type: string
     required:

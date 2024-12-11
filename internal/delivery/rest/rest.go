@@ -24,14 +24,16 @@ type service struct {
 	v1             *echo.Group
 	authUsecase    usecase.AuthUsecaseIface
 	packageUsecase usecase.PackageUsecaseIface
+	childUsecase   usecase.ChildUsecaseIface
 }
 
 // NewService init rest service
-func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface, packageUsecase *usecase.PackageUsecase) {
+func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface, packageUsecase *usecase.PackageUsecase, childUsecase *usecase.ChildUsecase) {
 	s := &service{
 		v1:             v1,
 		authUsecase:    authUsecase,
 		packageUsecase: packageUsecase,
+		childUsecase:   childUsecase,
 	}
 
 	s.initV1Routes()
@@ -50,7 +52,7 @@ func (s *service) initV1Routes() {
 	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage(), s.AuthMiddleware(false, true))
 	s.v1.GET("/atec/packages/active", s.HandleSearchActivePackage())
 
-	s.v1.POST("/childern", s.HandleRegisterChildern())
+	s.v1.POST("/childern", s.HandleRegisterChildern(), s.AuthMiddleware(true, false))
 	s.v1.PUT("/childern/:child_id", s.HandleUpdateChildern())
 	s.v1.GET("/childern", s.HandleGetMyChildern())
 	s.v1.GET("/childern/search", s.HandleSearchChildern())

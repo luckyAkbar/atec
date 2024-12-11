@@ -1,8 +1,6 @@
 package rest
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
 )
@@ -60,8 +58,9 @@ type LoginInput struct {
 
 // RegisterChildInput input
 type RegisterChildInput struct {
-	Name        string    `json:"name" validate:"required"`
-	DateOfBirth time.Time `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
+	Name        string `json:"name" validate:"required"`
+	DateOfBirth string `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
+	Gender      bool   `json:"gender" example:"true"`
 }
 
 // UpdateChildernInput input
