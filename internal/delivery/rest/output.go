@@ -73,6 +73,7 @@ type CreatePackageOutput struct {
 
 // UpdatePackageOutput output
 type UpdatePackageOutput struct {
+	Message string
 }
 
 // ActivationPackageOutput output

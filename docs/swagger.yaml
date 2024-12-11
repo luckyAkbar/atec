@@ -241,6 +241,9 @@ definitions:
     - questionnaire
     type: object
   rest.UpdatePackageOutput:
+    properties:
+      message:
+        type: string
     type: object
   rest.VerifyAccountOutput:
     properties:
@@ -294,47 +297,6 @@ paths:
       security:
       - AdminLevelAuth: []
       summary: Create new ATEC questionaire package
-      tags:
-      - ATEC Package
-    put:
-      consumes:
-      - application/json
-      description: Update existing ATEC questionnarie package
-      parameters:
-      - description: JWT Token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: ATEC questionnarie package details
-        in: body
-        name: update_package_input
-        required: true
-        schema:
-          $ref: '#/definitions/rest.UpdatePackageInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successful response
-          schema:
-            allOf:
-            - $ref: '#/definitions/rest.StandardSuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/rest.UpdatePackageOutput'
-              type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/rest.StandardErrorResponse'
-        "500":
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/rest.StandardErrorResponse'
-      security:
-      - AdminLevelAuth: []
-      summary: Update existing ATEC questionnarie package
       tags:
       - ATEC Package
   /v1/atec/packages/{package_id}:
@@ -415,6 +377,52 @@ paths:
       security:
       - AdminLevelAuth: []
       summary: Update package activation status
+      tags:
+      - ATEC Package
+    put:
+      consumes:
+      - application/json
+      description: Update existing ATEC questionnarie package
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: package id (UUID v4)
+        in: path
+        name: package_id
+        required: true
+        type: string
+      - description: ATEC questionnarie package details
+        in: body
+        name: update_package_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.UpdatePackageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.UpdatePackageOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - AdminLevelAuth: []
+      summary: Update existing ATEC questionnarie package
       tags:
       - ATEC Package
   /v1/atec/packages/active:

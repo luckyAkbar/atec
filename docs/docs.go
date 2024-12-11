@@ -16,74 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/v1/atec/packages": {
-            "put": {
-                "security": [
-                    {
-                        "AdminLevelAuth": []
-                    }
-                ],
-                "description": "Update existing ATEC questionnarie package",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ATEC Package"
-                ],
-                "summary": "Update existing ATEC questionnarie package",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "JWT Token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "ATEC questionnarie package details",
-                        "name": "update_package_input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/rest.UpdatePackageInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rest.UpdatePackageOutput"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/rest.StandardErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Error",
-                        "schema": {
-                            "$ref": "#/definitions/rest.StandardErrorResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -201,6 +133,81 @@ const docTemplate = `{
             }
         },
         "/v1/atec/packages/{package_id}": {
+            "put": {
+                "security": [
+                    {
+                        "AdminLevelAuth": []
+                    }
+                ],
+                "description": "Update existing ATEC questionnarie package",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ATEC Package"
+                ],
+                "summary": "Update existing ATEC questionnarie package",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "package id (UUID v4)",
+                        "name": "package_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ATEC questionnarie package details",
+                        "name": "update_package_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.UpdatePackageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.UpdatePackageOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1634,7 +1641,12 @@ const docTemplate = `{
             }
         },
         "rest.UpdatePackageOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "rest.VerifyAccountOutput": {
             "type": "object",

@@ -234,14 +234,40 @@ func (s *service) HandleCreatePackage() echo.HandlerFunc {
 // @Produce		json
 // @Security		AdminLevelAuth
 // @Param			Authorization			header		string												true	"JWT Token"
+// @Param			package_id				path		string												true	"package id (UUID v4)"
 // @Param			update_package_input	body		UpdatePackageInput									true	"ATEC questionnarie package details"
 // @Success		200						{object}	StandardSuccessResponse{data=UpdatePackageOutput}	"Successful response"
 // @Failure		400						{object}	StandardErrorResponse								"Bad request"
 // @Failure		500						{object}	StandardErrorResponse								"Internal Error"
-// @Router			/v1/atec/packages [put]
+// @Router			/v1/atec/packages/{package_id} [put]
 func (s *service) HandleUpdatePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &UpdatePackageInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.packageUsecase.Update(c.Request().Context(), usecase.UpdatePackageInput{
+			PackageID:     input.PackageID,
+			PackageName:   input.PackageName,
+			Questionnaire: input.Quesionnaire,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: UpdatePackageOutput{
+				Message: output.Message,
+			},
+		})
 	}
 }
 
