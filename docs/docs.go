@@ -1113,15 +1113,31 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "search by child name using ILIKE query",
-                        "name": "name",
+                        "type": "boolean",
+                        "name": "gender",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "example": 1,
+                        "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "search childern registered by this account (user_id is UUID v4)",
-                        "name": "user_id",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "parent_user_id",
                         "in": "query"
                     }
                 ],
@@ -1544,9 +1560,26 @@ const docTemplate = `{
         "rest.SearchChildernOutput": {
             "type": "object",
             "properties": {
-                "childern": {
-                    "type": "array",
-                    "items": {}
+                "created_at": {
+                    "type": "string"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_user_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

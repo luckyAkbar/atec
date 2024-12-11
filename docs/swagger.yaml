@@ -160,9 +160,20 @@ definitions:
     type: object
   rest.SearchChildernOutput:
     properties:
-      childern:
-        items: {}
-        type: array
+      created_at:
+        type: string
+      date_of_birth:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      parent_user_id:
+        type: string
+      updated_at:
+        type: string
     type: object
   rest.SearchQUestionnaireResultsOutput:
     properties:
@@ -1047,13 +1058,23 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: search by child name using ILIKE query
+      - in: query
+        name: gender
+        type: boolean
+      - example: 1
         in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - in: query
         name: name
         type: string
-      - description: search childern registered by this account (user_id is UUID v4)
-        in: query
-        name: user_id
+      - in: query
+        minimum: 0
+        name: offset
+        type: integer
+      - in: query
+        name: parent_user_id
         type: string
       produces:
       - application/json

@@ -168,16 +168,54 @@ func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 // @Accept			json
 // @Produce		json
 // @Security		AdminLevelAuth
-// @Param			Authorization	header		string												true	"JWT Token"
-// @Param			name			query		string												false	"search by child name using ILIKE query"
-// @Param			user_id			query		string												false	"search childern registered by this account (user_id is UUID v4)"
-// @Success		200				{object}	StandardSuccessResponse{data=SearchChildernOutput}	"Successful response"
-// @Failure		400				{object}	StandardErrorResponse								"Bad request"
-// @Failure		500				{object}	StandardErrorResponse								"Internal Error"
+// @Param			Authorization		header		string												true	"JWT Token"
+// @Param			search_child_input	query		SearchChildrenInput									true	"search parameters"
+// @Success		200					{object}	StandardSuccessResponse{data=SearchChildernOutput}	"Successful response"
+// @Failure		400					{object}	StandardErrorResponse								"Bad request"
+// @Failure		500					{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern/search [get]
 func (s *service) HandleSearchChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &SearchChildrenInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		children, err := s.childUsecase.Search(c.Request().Context(), usecase.SearchChildInput{
+			ParentUserID: input.ParentUserID,
+			Name:         input.Name,
+			Gender:       input.Gender,
+			Limit:        input.Limit,
+			Offset:       input.Offset,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		output := []SearchChildernOutput{}
+
+		for _, child := range children {
+			output = append(output, SearchChildernOutput{
+				ID:           child.ID,
+				ParentUserID: child.ParentUserID,
+				DateOfBirth:  child.DateOfBirth,
+				Gender:       child.Gender,
+				Name:         child.Name,
+				CreatedAt:    child.CreatedAt,
+				UpdatedAt:    child.UpdatedAt,
+			})
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       output,
+		})
 	}
 }
 

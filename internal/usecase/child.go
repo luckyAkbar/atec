@@ -23,6 +23,7 @@ type ChildUsecaseIface interface {
 	Register(ctx context.Context, input RegisterChildInput) (*RegisterChildOutput, error)
 	Update(ctx context.Context, input UpdateChildInput) (*UpdateChildOutput, error)
 	GetRegisteredChildren(ctx context.Context, input GetRegisteredChildrenInput) ([]GetRegisteredChildrenOutput, error)
+	Search(ctx context.Context, input SearchChildInput) ([]SearchChildOutput, error)
 }
 
 // NewChildUsecase create new ChildUsecase instance
@@ -235,6 +236,83 @@ func (u *ChildUsecase) GetRegisteredChildren(ctx context.Context, input GetRegis
 
 	for _, child := range children {
 		output = append(output, GetRegisteredChildrenOutput{
+			ID:           child.ID,
+			ParentUserID: child.ParentUserID,
+			DateOfBirth:  child.DateOfBirth,
+			Gender:       child.Gender,
+			Name:         child.Name,
+			CreatedAt:    child.CreatedAt,
+			UpdatedAt:    child.UpdatedAt,
+			DeletedAt:    sql.NullTime(child.DeletedAt),
+		})
+	}
+
+	return output, nil
+}
+
+// SearchChildInput input
+type SearchChildInput struct {
+	ParentUserID *uuid.UUID
+	Name         *string
+	Gender       *bool
+	Limit        int `validate:"required,min=1,max=100"`
+	Offset       int `validate:"min=0"`
+}
+
+func (sci SearchChildInput) validate() error {
+	return common.Validator.Struct(sci)
+}
+
+// SearchChildOutput output
+type SearchChildOutput struct {
+	ID           uuid.UUID
+	ParentUserID uuid.UUID
+	DateOfBirth  time.Time
+	Gender       bool
+	Name         string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    sql.NullTime
+}
+
+// Search allow requester to full search registered child data based on multiple search params
+func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]SearchChildOutput, error) {
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	children, err := u.childRepo.Search(ctx, repository.SearchChildInput{
+		ParentUserID: input.ParentUserID,
+		Name:         input.Name,
+		Gender:       input.Gender,
+		Limit:        input.Limit,
+		Offset:       input.Offset,
+	})
+
+	switch err {
+	default:
+		logrus.WithContext(ctx).WithField("input", helper.Dump(input)).Error("failed to search children data")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	output := []SearchChildOutput{}
+
+	for _, child := range children {
+		output = append(output, SearchChildOutput{
 			ID:           child.ID,
 			ParentUserID: child.ParentUserID,
 			DateOfBirth:  child.DateOfBirth,
