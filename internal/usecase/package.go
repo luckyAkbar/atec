@@ -22,6 +22,7 @@ type PackageUsecaseIface interface {
 	ChangeActiveStatus(ctx context.Context, input ChangeActiveStatusInput) (*ChangeActiveStatusOutput, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	Update(ctx context.Context, input UpdatePackageInput) (*UpdatePackageOutput, error)
+	FindActiveQuestionnaires(ctx context.Context) ([]FindActiveQuestionnaireOutput, error)
 }
 
 // NewPackageUsecase create new PackageUsecase instance
@@ -257,4 +258,47 @@ func (u *PackageUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+// FindActiveQuestionnaireOutput output
+type FindActiveQuestionnaireOutput struct {
+	ID            uuid.UUID
+	Questionnaire model.Questionnaire
+	Name          string
+}
+
+// FindActiveQuestionnaires will find any packages on database that have is_active set to true
+func (u *PackageUsecase) FindActiveQuestionnaires(ctx context.Context) ([]FindActiveQuestionnaireOutput, error) {
+	truth := true
+	packages, err := u.packageRepo.Search(ctx, repository.SearchPackageInput{
+		IsActive: &truth,
+	})
+
+	switch err {
+	default:
+		logrus.WithContext(ctx).Error("failed to search active questionnaire package data")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: "system still doesn't have any questionnaire to be used yet",
+		}
+	case nil:
+		break
+	}
+
+	output := []FindActiveQuestionnaireOutput{}
+	for _, pack := range packages {
+		output = append(output, FindActiveQuestionnaireOutput{
+			ID:            pack.ID,
+			Questionnaire: pack.Questionnaire,
+			Name:          pack.Name,
+		})
+	}
+
+	return output, nil
 }

@@ -4,11 +4,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/luckyAkbar/atec/internal/model"
 )
 
 // SearchActivePackageOutput output
 type SearchActivePackageOutput struct {
-	Packages []any `json:"packages"`
+	ID            uuid.UUID           `json:"id"`
+	Questionnaire model.Questionnaire `json:"questionnaire"`
+	Name          string              `json:"name"`
 }
 
 // SubmitQuestionnaireOutput output
