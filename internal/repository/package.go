@@ -69,6 +69,9 @@ func (r *PackageRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Packag
 // UpdatePackageInput input
 type UpdatePackageInput struct {
 	ActiveStatus *bool
+
+	Questionnaire *model.Questionnaire
+	PackageName   string
 }
 
 // ToUpdateFields convert the update params to gorm dynamic update fields
@@ -77,6 +80,14 @@ func (upi UpdatePackageInput) ToUpdateFields() map[string]interface{} {
 
 	if upi.ActiveStatus != nil {
 		fields["is_active"] = *upi.ActiveStatus
+	}
+
+	if upi.PackageName != "" {
+		fields["name"] = upi.PackageName
+	}
+
+	if upi.Questionnaire != nil {
+		fields["questionnaire"] = upi.Questionnaire
 	}
 
 	return fields

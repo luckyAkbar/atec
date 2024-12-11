@@ -21,6 +21,7 @@ type PackageUsecaseIface interface {
 	Create(ctx context.Context, input CreatePackageInput) (*CreatePackageOutput, error)
 	ChangeActiveStatus(ctx context.Context, input ChangeActiveStatusInput) (*ChangeActiveStatusOutput, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	Update(ctx context.Context, input UpdatePackageInput) (*UpdatePackageOutput, error)
 }
 
 // NewPackageUsecase create new PackageUsecase instance
@@ -162,6 +163,82 @@ func (u *PackageUsecase) ChangeActiveStatus(ctx context.Context, input ChangeAct
 	}
 
 	return &ChangeActiveStatusOutput{
+		Message: "ok",
+	}, nil
+}
+
+// UpdatePackageInput input
+type UpdatePackageInput struct {
+	PackageID     uuid.UUID           `validate:"required"`
+	PackageName   string              `validate:"required"`
+	Questionnaire model.Questionnaire `validate:"required"`
+}
+
+// Validate validate UpdatePackageInput
+func (upi UpdatePackageInput) Validate() error {
+	if err := common.Validator.Struct(upi); err != nil {
+		return err
+	}
+
+	return upi.Questionnaire.Validate()
+}
+
+// UpdatePackageOutput output
+type UpdatePackageOutput struct {
+	Message string
+}
+
+// Update update a package based on its id. Only applicable if the package is not yet locked
+func (u *PackageUsecase) Update(ctx context.Context, input UpdatePackageInput) (*UpdatePackageOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("id", input.PackageID)
+
+	if err := input.Validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	pack, err := u.packageRepo.FindByID(ctx, input.PackageID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find package to be updated")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if pack.IsLocked {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "package is already locked",
+		}
+	}
+
+	_, err = u.packageRepo.Update(ctx, input.PackageID, repository.UpdatePackageInput{
+		PackageName:   input.PackageName,
+		Questionnaire: &input.Questionnaire,
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to update package to database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &UpdatePackageOutput{
 		Message: "ok",
 	}, nil
 }

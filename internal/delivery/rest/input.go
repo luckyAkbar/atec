@@ -77,6 +77,8 @@ type CreatePackageInput struct {
 
 // UpdatePackageInput input
 type UpdatePackageInput struct {
+	PackageID uuid.UUID `json:"-" param:"package_id"`
+
 	CreatePackageInput
 }
 
