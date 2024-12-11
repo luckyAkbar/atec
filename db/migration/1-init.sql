@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS childern (
+CREATE TABLE IF NOT EXISTS children (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_user_id UUID NOT NULL,
     name TEXT NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS results (
     deleted_at TIMESTAMPTZ DEFAULT NULL,
 
     CONSTRAINT fk_package_id FOREIGN KEY (package_id) REFERENCES packages(id),
-    CONSTRAINT fk_child_id FOREIGN KEY (child_id) REFERENCES childern(id)
+    CONSTRAINT fk_child_id FOREIGN KEY (child_id) REFERENCES children(id)
 );
 
 
@@ -62,5 +62,5 @@ CREATE TABLE IF NOT EXISTS results (
 
 DROP TABLE IF EXISTS results;
 DROP TABLE IF EXISTS packages;
-DROP TABLE IF EXISTS childern;
+DROP TABLE IF EXISTS children;
 DROP TABLE IF EXISTS users;
