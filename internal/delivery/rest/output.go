@@ -110,5 +110,11 @@ type GetATECQuestionnaireOutput struct {
 
 // SearchChildernOutput output
 type SearchChildernOutput struct {
-	Childern []any `json:"childern"`
+	ID           uuid.UUID `json:"id"`
+	ParentUserID uuid.UUID `json:"parent_user_id"`
+	DateOfBirth  time.Time `json:"date_of_birth"`
+	Gender       bool      `json:"gender"`
+	Name         string    `json:"name"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

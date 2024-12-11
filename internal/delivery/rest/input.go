@@ -123,3 +123,12 @@ type GetMyChildrenInput struct {
 	Limit  int `query:"limit" validate:"min=1"`
 	Offset int `query:"offset" validate:"min=0"`
 }
+
+// SearchChildrenInput input
+type SearchChildrenInput struct {
+	ParentUserID *uuid.UUID `json:"parent_user_id" query:"parent_user_id"`
+	Name         *string    `query:"name"`
+	Gender       *bool      `query:"gender"`
+	Limit        int        `query:"limit" validate:"min=1" example:"1"`
+	Offset       int        `query:"offset" validate:"min=0"`
+}
