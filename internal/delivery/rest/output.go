@@ -60,7 +60,9 @@ type RegisterChildOutput struct {
 }
 
 // UpdateChildernOutput output
-type UpdateChildernOutput struct{}
+type UpdateChildernOutput struct {
+	Message string `json:"message"`
+}
 
 // GetMyChildernOutput output
 type GetMyChildernOutput struct {

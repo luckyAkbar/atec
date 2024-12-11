@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
 )
@@ -65,7 +67,10 @@ type RegisterChildInput struct {
 
 // UpdateChildernInput input
 type UpdateChildernInput struct {
-	RegisterChildInput
+	ChildID     uuid.UUID  `json:"-" param:"child_id"`
+	Name        *string    `json:"name" validate:"required"`
+	DateOfBirth *time.Time `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
+	Gender      *bool      `json:"gender" example:"true"`
 }
 
 // CreatePackageInput input

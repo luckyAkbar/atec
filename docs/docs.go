@@ -1636,7 +1636,12 @@ const docTemplate = `{
             }
         },
         "rest.UpdateChildernOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "rest.UpdatePackageInput": {
             "type": "object",

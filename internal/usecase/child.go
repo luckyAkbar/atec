@@ -20,6 +20,7 @@ type ChildUsecase struct {
 // ChildUsecaseIface interface
 type ChildUsecaseIface interface {
 	Register(ctx context.Context, input RegisterChildInput) (*RegisterChildOutput, error)
+	Update(ctx context.Context, input UpdateChildInput) (*UpdateChildOutput, error)
 }
 
 // NewChildUsecase create new ChildUsecase instance
@@ -83,5 +84,85 @@ func (u *ChildUsecase) Register(ctx context.Context, input RegisterChildInput) (
 
 	return &RegisterChildOutput{
 		ID: child.ID,
+	}, nil
+}
+
+// UpdateChildInput input
+type UpdateChildInput struct {
+	ChildID     uuid.UUID `validate:"required"`
+	DateOfBirth *time.Time
+	Gender      *bool
+	Name        *string
+}
+
+// Validate validate UpdateChildInput
+func (uci UpdateChildInput) Validate() error {
+	return common.Validator.Struct(uci)
+}
+
+// UpdateChildOutput output
+type UpdateChildOutput struct {
+	Message string
+}
+
+// Update update child data and can only be done by parents aka the child register
+func (u *ChildUsecase) Update(ctx context.Context, input UpdateChildInput) (*UpdateChildOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
+
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if err := input.Validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	child, err := u.childRepo.FindByID(ctx, input.ChildID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find ")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if child.ParentUserID != requester.ID {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "only the child's parent should be able to update child data",
+		}
+	}
+
+	_, err = u.childRepo.Update(ctx, child.ID, repository.UpdateChildInput{
+		DateOfBirth: input.DateOfBirth,
+		Gender:      input.Gender,
+		Name:        input.Name,
+	})
+
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &UpdateChildOutput{
+		Message: "ok",
 	}, nil
 }
