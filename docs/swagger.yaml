@@ -238,6 +238,9 @@ definitions:
     - name
     type: object
   rest.UpdateChildernOutput:
+    properties:
+      message:
+        type: string
     type: object
   rest.UpdatePackageInput:
     properties:

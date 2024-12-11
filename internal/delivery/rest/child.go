@@ -77,7 +77,33 @@ func (s *service) HandleRegisterChildern() echo.HandlerFunc {
 // @Router			/v1/childern/{child_id} [put]
 func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &UpdateChildernInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.childUsecase.Update(c.Request().Context(), usecase.UpdateChildInput{
+			ChildID:     input.ChildID,
+			DateOfBirth: input.DateOfBirth,
+			Gender:      input.Gender,
+			Name:        input.Name,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: UpdateChildernOutput{
+				Message: output.Message,
+			},
+		})
 	}
 }
 
