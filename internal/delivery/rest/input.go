@@ -9,9 +9,9 @@ import (
 
 // SubmitQuestionnaireInput input
 type SubmitQuestionnaireInput struct {
-	PackageID uuid.UUID `json:"package_id"`
-	ChildID   uuid.UUID `json:"child_id"`
-	TODO      []any     `json:"todo"`
+	PackageID uuid.UUID          `json:"package_id"`
+	ChildID   uuid.UUID          `json:"child_id"`
+	Answers   model.AnswerDetail `validate:"required" json:"answers"`
 }
 
 // SearchQUestionnaireResultsInput input

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/luckyAkbar/atec/internal/usecase"
 )
 
 // @Summary		Submit questionnaire result
@@ -21,7 +22,35 @@ import (
 // @Router			/v1/atec/questionnaires [post]
 func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &SubmitQuestionnaireInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.questionnaireUsecase.HandleSubmitQuestionnaire(c.Request().Context(), usecase.SubmitQuestionnaireInput{
+			ChildID:   input.ChildID,
+			Answers:   input.Answers,
+			PackageID: input.PackageID,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: SubmitQuestionnaireOutput{
+				ResultID:  output.ResultID,
+				Grade:     output.Result,
+				ChildID:   output.ChildID,
+				CreatedBy: output.CreatedBy,
+			},
+		})
 	}
 }
 

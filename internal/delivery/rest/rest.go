@@ -21,19 +21,25 @@ import (
 // @in							header
 // @name						Authorization
 type service struct {
-	v1             *echo.Group
-	authUsecase    usecase.AuthUsecaseIface
-	packageUsecase usecase.PackageUsecaseIface
-	childUsecase   usecase.ChildUsecaseIface
+	v1                   *echo.Group
+	authUsecase          usecase.AuthUsecaseIface
+	packageUsecase       usecase.PackageUsecaseIface
+	childUsecase         usecase.ChildUsecaseIface
+	questionnaireUsecase usecase.QuestionnaireUsecaseIface
 }
 
 // NewService init rest service
-func NewService(v1 *echo.Group, authUsecase usecase.AuthUsecaseIface, packageUsecase *usecase.PackageUsecase, childUsecase *usecase.ChildUsecase) {
+func NewService(
+	v1 *echo.Group, authUsecase usecase.AuthUsecaseIface,
+	packageUsecase *usecase.PackageUsecase, childUsecase *usecase.ChildUsecase,
+	questionnaireUsecase *usecase.QuestionnaireUsecase,
+) {
 	s := &service{
-		v1:             v1,
-		authUsecase:    authUsecase,
-		packageUsecase: packageUsecase,
-		childUsecase:   childUsecase,
+		v1:                   v1,
+		authUsecase:          authUsecase,
+		packageUsecase:       packageUsecase,
+		childUsecase:         childUsecase,
+		questionnaireUsecase: questionnaireUsecase,
 	}
 
 	s.initV1Routes()
@@ -59,7 +65,7 @@ func (s *service) initV1Routes() {
 	s.v1.GET("/childern/:child_id/stats", s.HandleGetChildStats())
 
 	s.v1.GET("/atec/questionnaires", s.HandleGetATECQuestionaire())
-	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire())
+	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire(), s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false))
 	s.v1.GET("/atec/questionnaires/results/:id", s.HandleDownloadQuestionnaireResult())
 	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults())
 	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults())

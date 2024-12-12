@@ -1,4 +1,10 @@
 definitions:
+  model.AnswerDetail:
+    additionalProperties:
+      additionalProperties:
+        type: integer
+      type: object
+    type: object
   model.AnswerOption:
     properties:
       description:
@@ -38,6 +44,17 @@ definitions:
   model.Questionnaire:
     additionalProperties:
       $ref: '#/definitions/model.ChecklistGroup'
+    type: object
+  model.ResultDetail:
+    additionalProperties:
+      $ref: '#/definitions/model.SubtestGrade'
+    type: object
+  model.SubtestGrade:
+    properties:
+      grade:
+        type: integer
+      name:
+        type: string
     type: object
   rest.ActivationPackageInput:
     properties:
@@ -233,22 +250,25 @@ definitions:
     type: object
   rest.SubmitQuestionnaireInput:
     properties:
+      answers:
+        $ref: '#/definitions/model.AnswerDetail'
       child_id:
         type: string
       package_id:
         type: string
-      todo:
-        items: {}
-        type: array
+    required:
+    - answers
     type: object
   rest.SubmitQuestionnaireOutput:
     properties:
-      any:
-        items: {}
-        type: array
+      child_id:
+        type: string
+      created_by:
+        type: string
+      grade:
+        $ref: '#/definitions/model.ResultDetail'
       result_id:
         type: string
-      score: {}
     type: object
   rest.UpdateChildernInput:
     properties:

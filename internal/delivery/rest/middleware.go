@@ -18,6 +18,10 @@ func (s *service) AuthMiddleware(allowAllAuthorized, allowAdminOnly bool) echo.M
 		return func(c echo.Context) error {
 			token := getAccessToken(c.Request())
 			if token == "" {
+				if c.Get(allowUnauthorizedKey) != nil {
+					return next(c)
+				}
+
 				return c.JSON(http.StatusUnauthorized, StandardErrorResponse{
 					StatusCode:   http.StatusUnauthorized,
 					ErrorMessage: "missing required auth token",
@@ -58,4 +62,16 @@ func getAccessToken(req *http.Request) string {
 	}
 
 	return strings.TrimSpace(authHeaders[0])
+}
+
+var allowUnauthorizedKey = "allowUnauthorized"
+
+func (s *service) allowUnauthorizedAccess() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set(allowUnauthorizedKey, true)
+
+			return next(c)
+		}
+	}
 }
