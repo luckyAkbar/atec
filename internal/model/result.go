@@ -11,7 +11,7 @@ import (
 type Result struct {
 	ID        uuid.UUID
 	PackageID uuid.UUID
-	ChildID   uuid.UUID // default null on db
+	CreatedBy uuid.UUID `gorm:"default:null"`
 	Answer    AnswerDetail
 	Result    ResultDetail
 	CreatedAt time.Time

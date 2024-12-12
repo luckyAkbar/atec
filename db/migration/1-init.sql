@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS results (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     package_id UUID NOT NULL,
     child_id UUID DEFAULT NULL,
+    created_by UUID DEFAULT NULL,
     answer JSONB NOT NULL,
     result JSONB NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
