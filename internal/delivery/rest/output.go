@@ -16,9 +16,10 @@ type SearchActivePackageOutput struct {
 
 // SubmitQuestionnaireOutput output
 type SubmitQuestionnaireOutput struct {
-	ResultID uuid.UUID `json:"result_id"`
-	Score    any       `json:"score"`
-	TODO     []any     `json:"any"`
+	ResultID  uuid.UUID          `json:"result_id"`
+	Grade     model.ResultDetail `json:"grade"`
+	ChildID   uuid.UUID          `json:"child_id,omitempty"`
+	CreatedBy uuid.UUID          `json:"created_by,omitempty"`
 }
 
 // GetChildStatOutput output

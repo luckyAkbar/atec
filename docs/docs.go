@@ -1325,6 +1325,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.AnswerDetail": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.AnswerOption": {
             "type": "object",
             "required": [
@@ -1377,6 +1386,23 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/model.ChecklistGroup"
+            }
+        },
+        "model.ResultDetail": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/model.SubtestGrade"
+            }
+        },
+        "model.SubtestGrade": {
+            "type": "object",
+            "properties": {
+                "grade": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
             }
         },
         "rest.ActivationPackageInput": {
@@ -1667,30 +1693,36 @@ const docTemplate = `{
         },
         "rest.SubmitQuestionnaireInput": {
             "type": "object",
+            "required": [
+                "answers"
+            ],
             "properties": {
+                "answers": {
+                    "$ref": "#/definitions/model.AnswerDetail"
+                },
                 "child_id": {
                     "type": "string"
                 },
                 "package_id": {
                     "type": "string"
-                },
-                "todo": {
-                    "type": "array",
-                    "items": {}
                 }
             }
         },
         "rest.SubmitQuestionnaireOutput": {
             "type": "object",
             "properties": {
-                "any": {
-                    "type": "array",
-                    "items": {}
+                "child_id": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "grade": {
+                    "$ref": "#/definitions/model.ResultDetail"
                 },
                 "result_id": {
                     "type": "string"
-                },
-                "score": {}
+                }
             }
         },
         "rest.UpdateChildernInput": {
