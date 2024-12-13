@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/luckyAkbar/atec/internal/usecase"
@@ -66,7 +67,27 @@ func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 // @Router			/v1/atec/questionnaires/results/{result_id} [get]
 func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &DownloadQuestionnaireResultInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.questionnaireUsecase.HandleDownloadQuestionnaireResult(c.Request().Context(), usecase.DownloadQuestionnaireResultInput{
+			ResultID: input.ResultID,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		c.Response().Header().Set("Content-Type", output.ContentType)
+		c.Response().Header().Set("Content-Length", strconv.Itoa(output.Buffer.Len()))
+
+		return c.Blob(http.StatusOK, output.ContentType, output.Buffer.Bytes())
 	}
 }
 

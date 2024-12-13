@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/luckyAkbar/atec/internal/common"
@@ -38,6 +39,16 @@ func serverFn(_ *cobra.Command, _ []string) {
 		panic(err)
 	}
 
+	fontBytes, err := os.ReadFile("./assets/font.ttf")
+	if err != nil {
+		panic(err)
+	}
+
+	font, err := truetype.Parse(fontBytes)
+	if err != nil {
+		panic(err)
+	}
+
 	sharedCryptor := common.NewSharedCryptor(&common.CreateCryptorOpts{
 		HashCost:      bcrypt.DefaultCost,
 		EncryptionKey: key.Bytes,
@@ -59,7 +70,7 @@ func serverFn(_ *cobra.Command, _ []string) {
 	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer)
 	packageUsecase := usecase.NewPackageUsecase(packageRepo)
 	childUsecase := usecase.NewChildUsecase(childRepo)
-	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo)
+	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo, font)
 
 	httpServer := echo.New()
 

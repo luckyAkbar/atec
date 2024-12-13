@@ -66,7 +66,11 @@ func (s *service) initV1Routes() {
 
 	s.v1.GET("/atec/questionnaires", s.HandleGetATECQuestionaire())
 	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire(), s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false))
-	s.v1.GET("/atec/questionnaires/results/:id", s.HandleDownloadQuestionnaireResult())
+	s.v1.GET(
+		"/atec/questionnaires/results/:result_id",
+		s.HandleDownloadQuestionnaireResult(),
+		s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false),
+	)
 	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults())
 	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults())
 

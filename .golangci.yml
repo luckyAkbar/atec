@@ -69,6 +69,8 @@ linters-settings:
       - s
       - i
       - j
+      - f
+      - y
       - err
 
 issues:
