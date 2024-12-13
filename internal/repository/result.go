@@ -16,6 +16,7 @@ type ResultRepository struct {
 // ResultRepositoryIface result repository interface
 type ResultRepositoryIface interface {
 	Create(ctx context.Context, input CreateResultInput) (*model.Result, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error)
 }
 
 // NewResultRepository create new instance of ResultRepository
@@ -49,4 +50,19 @@ func (r *ResultRepository) Create(ctx context.Context, input CreateResultInput) 
 	}
 
 	return result, nil
+}
+
+// FindByID find exactly one record from results table with matching id
+func (r *ResultRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error) {
+	result := &model.Result{}
+
+	err := r.db.WithContext(ctx).Take(result, "id = ?", id).Error
+	switch err {
+	default:
+		return nil, err
+	case gorm.ErrRecordNotFound:
+		return nil, ErrNotFound
+	case nil:
+		return result, nil
+	}
 }

@@ -1,15 +1,24 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/jpeg"
+	"math"
+	"strings"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/model"
 	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/sirupsen/logrus"
 	"github.com/sweet-go/stdlib/helper"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 // QuestionnaireUsecase usecase for questionnaire
@@ -17,22 +26,25 @@ type QuestionnaireUsecase struct {
 	packageRepo repository.PackageRepoIface
 	childRepo   repository.ChildRepositoryIface
 	resultRepo  repository.ResultRepositoryIface
+	font        *truetype.Font
 }
 
 // QuestionnaireUsecaseIface interface
 type QuestionnaireUsecaseIface interface {
 	HandleSubmitQuestionnaire(ctx context.Context, input SubmitQuestionnaireInput) (*SubmitQuestionnaireOutput, error)
+	HandleDownloadQuestionnaireResult(ctx context.Context, input DownloadQuestionnaireResultInput) (*DownloadQuestionnaireResultOutput, error)
 }
 
 // NewQuestionnaireUsecase create new QuestionnaireUsecase instance
 func NewQuestionnaireUsecase(
 	packageRepo *repository.PackageRepo, childRepo *repository.ChildRepository,
-	resultRepo *repository.ResultRepository,
+	resultRepo *repository.ResultRepository, font *truetype.Font,
 ) *QuestionnaireUsecase {
 	return &QuestionnaireUsecase{
 		packageRepo: packageRepo,
 		childRepo:   childRepo,
 		resultRepo:  resultRepo,
+		font:        font,
 	}
 }
 
@@ -245,6 +257,86 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 	}, nil
 }
 
+// DownloadQuestionnaireResultInput input
+type DownloadQuestionnaireResultInput struct {
+	ResultID uuid.UUID `validate:"required"`
+}
+
+func (dqri DownloadQuestionnaireResultInput) validate() error {
+	return common.Validator.Struct(dqri)
+}
+
+// DownloadQuestionnaireResultOutput output
+type DownloadQuestionnaireResultOutput struct {
+	ContentType string
+	Buffer      bytes.Buffer
+}
+
+// HandleDownloadQuestionnaireResult handler to handle downloading questionnaire result
+// as an image
+func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
+	ctx context.Context, input DownloadQuestionnaireResultInput,
+) (*DownloadQuestionnaireResultOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	result, err := u.resultRepo.FindByID(ctx, input.ResultID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find result from database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if result.CreatedBy != uuid.Nil {
+		requester := model.GetUserFromCtx(ctx)
+
+		if requester == nil {
+			return nil, UsecaseError{
+				ErrType: ErrUnauthorized,
+				Message: "accessing this result requires authorization",
+			}
+		}
+
+		if requester.Role != model.RolesAdmin && requester.ID != result.CreatedBy {
+			return nil, UsecaseError{
+				ErrType: ErrUnauthorized,
+				Message: "only owner and admin can access this result",
+			}
+		}
+	}
+
+	imgGenerator := newImageGenerator(u.font, imageGenerationOpts{
+		Title:          "ATEC Score",
+		Result:         result.Result,
+		TestID:         result.PackageID,
+		IndicationText: "placeholder for indication text lorem ipsum dolor sit amet.",
+	})
+
+	imageResult := imgGenerator.GenerateJPEG()
+
+	return &DownloadQuestionnaireResultOutput{
+		ContentType: imageResult.ContentType,
+		Buffer:      imageResult.Buffer,
+	}, nil
+}
+
 type imageGenerator struct {
 	Title          string
 	Result         model.ResultDetail
@@ -444,6 +536,7 @@ func wordWrapper(s string) []string {
 
 		if i == len(ss)-1 && !appended {
 			result = append(result, temp)
+
 			break
 		}
 	}

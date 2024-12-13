@@ -132,3 +132,8 @@ type SearchChildrenInput struct {
 	Limit        int        `query:"limit" validate:"min=1" example:"1"`
 	Offset       int        `query:"offset" validate:"min=0"`
 }
+
+// DownloadQuestionnaireResultInput input
+type DownloadQuestionnaireResultInput struct {
+	ResultID uuid.UUID `param:"result_id" validate:"required"`
+}
