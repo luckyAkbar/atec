@@ -165,7 +165,44 @@ func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 // @Router			/v1/atec/questionnaires/results/my [get]
 func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &GetMyQUestionnaireResultsInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.questionnaireUsecase.HandleGetUserHistory(c.Request().Context(), usecase.GetUserHistoryInput{
+			Limit:  input.Limit,
+			Offset: input.Offset,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		result := []SearchQUestionnaireResultsOutput{}
+		for _, val := range output {
+			result = append(result, SearchQUestionnaireResultsOutput{
+				ID:        val.ID,
+				PackageID: val.PackageID,
+				ChildID:   val.ChildID,
+				CreatedBy: val.CreatedBy,
+				Answer:    val.Answer,
+				Result:    val.Result,
+				CreatedAt: val.CreatedAt,
+				UpdatedAt: val.UpdatedAt,
+				DeletedAt: null.NewTime(val.DeletedAt.Time, val.DeletedAt.Valid),
+			})
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       result,
+		})
 	}
 }
 

@@ -26,8 +26,8 @@ type SearchQUestionnaireResultsInput struct {
 
 // GetMyQUestionnaireResultsInput input
 type GetMyQUestionnaireResultsInput struct {
-	Limit  int `query:"limit"`
-	Offset int `query:"offset"`
+	Limit  int `json:"limit" query:"limit" validate:"min=1,max=100"`
+	Offset int `json:"offset" query:"offset" validate:"min=0"`
 }
 
 // SignupInput input
