@@ -16,11 +16,12 @@ type SubmitQuestionnaireInput struct {
 
 // SearchQUestionnaireResultsInput input
 type SearchQUestionnaireResultsInput struct {
-	ResultID uuid.UUID `query:"result_id"`
-	UserID   uuid.UUID `query:"user_id"`
-	ChildID  uuid.UUID `query:"child_id"`
-	Limit    int       `query:"limit"`
-	Offset   int       `query:"offset"`
+	ResultID    uuid.UUID `json:"result_id" query:"result_id"`
+	PackageID   uuid.UUID `json:"package_id" query:"package_id"`
+	ChildID     uuid.UUID `json:"child_id" query:"child_id"`
+	CreatedByID uuid.UUID `json:"created_by_id" query:"created_by_id"`
+	Limit       int       `json:"limit" query:"limit" validate:"min=1,max=100"`
+	Offset      int       `json:"offset" query:"offset" validate:"min=0"`
 }
 
 // GetMyQUestionnaireResultsInput input

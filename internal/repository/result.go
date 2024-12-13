@@ -17,6 +17,7 @@ type ResultRepository struct {
 type ResultRepositoryIface interface {
 	Create(ctx context.Context, input CreateResultInput) (*model.Result, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error)
+	Search(ctx context.Context, input SearchResultInput) ([]model.Result, error)
 }
 
 // NewResultRepository create new instance of ResultRepository
@@ -65,4 +66,60 @@ func (r *ResultRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.R
 	case nil:
 		return result, nil
 	}
+}
+
+// SearchResultInput search result input
+type SearchResultInput struct {
+	ID        uuid.UUID
+	PackageID uuid.UUID
+	ChildID   uuid.UUID
+	CreatedBy uuid.UUID
+	Limit     int
+	Offset    int
+}
+
+func (sri SearchResultInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+	if sri.ID != uuid.Nil {
+		cursor = cursor.Where("id = ?", sri.ID)
+	}
+
+	if sri.PackageID != uuid.Nil {
+		cursor = cursor.Where("package_id = ?", sri.PackageID)
+	}
+
+	if sri.ChildID != uuid.Nil {
+		cursor = cursor.Where("child_id = ?", sri.ChildID)
+	}
+
+	if sri.CreatedBy != uuid.Nil {
+		cursor = cursor.Where("created_by = ?", sri.CreatedBy)
+	}
+
+	if sri.Limit > 0 {
+		cursor = cursor.Limit(sri.Limit)
+	}
+
+	if sri.Offset > 0 {
+		cursor = cursor.Offset(sri.Offset)
+	}
+
+	return cursor
+}
+
+// Search search results based on provided search parameters
+func (r *ResultRepository) Search(ctx context.Context, input SearchResultInput) ([]model.Result, error) {
+	cursor := r.db.WithContext(ctx)
+	cursor = input.toSearchFields(cursor)
+
+	results := []model.Result{}
+
+	if err := cursor.Find(&results).Error; err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, ErrNotFound
+	}
+
+	return results, nil
 }

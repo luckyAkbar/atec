@@ -18,6 +18,7 @@ require (
 	github.com/sweet-go/stdlib v1.2.0
 	golang.org/x/crypto v0.29.0
 	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
+	gopkg.in/guregu/null.v4 v4.0.0
 	gorm.io/gorm v1.25.12
 )
 
