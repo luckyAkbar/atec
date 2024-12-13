@@ -5,6 +5,7 @@ go 1.22.3
 require (
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/sendinblue/APIv3-go-library v2.0.0+incompatible
@@ -16,6 +17,7 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/sweet-go/stdlib v1.2.0
 	golang.org/x/crypto v0.29.0
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
 	gorm.io/gorm v1.25.12
 )
 
