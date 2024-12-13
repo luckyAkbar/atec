@@ -484,27 +484,35 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "childID",
+                        "name": "child_id",
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "created_by_id",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
                     },
                     {
+                        "minimum": 0,
                         "type": "integer",
                         "name": "offset",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "resultID",
+                        "name": "package_id",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "userID",
+                        "name": "result_id",
                         "in": "query"
                     }
                 ],
@@ -1620,9 +1628,32 @@ const docTemplate = `{
         "rest.SearchQUestionnaireResultsOutput": {
             "type": "object",
             "properties": {
-                "todo": {
-                    "type": "array",
-                    "items": {}
+                "answer": {
+                    "$ref": "#/definitions/model.AnswerDetail"
+                },
+                "child_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "package_id": {
+                    "type": "string"
+                },
+                "result": {
+                    "$ref": "#/definitions/model.ResultDetail"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

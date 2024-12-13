@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/luckyAkbar/atec/internal/usecase"
+	"gopkg.in/guregu/null.v4"
 )
 
 // @Summary		Submit questionnaire result
@@ -105,7 +106,48 @@ func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 // @Router			/v1/atec/questionnaires/results [get]
 func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &SearchQUestionnaireResultsInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.questionnaireUsecase.HandleSearchQuestionnaireResult(c.Request().Context(), usecase.SearchQuestionnaireResultInput{
+			ID:        input.ResultID,
+			PackageID: input.PackageID,
+			ChildID:   input.ChildID,
+			CreatedBy: input.CreatedByID,
+			Limit:     input.Limit,
+			Offset:    input.Offset,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		result := []SearchQUestionnaireResultsOutput{}
+		for _, val := range output {
+			result = append(result, SearchQUestionnaireResultsOutput{
+				ID:        val.ID,
+				PackageID: val.PackageID,
+				ChildID:   val.ChildID,
+				CreatedBy: val.CreatedBy,
+				Answer:    val.Answer,
+				Result:    val.Result,
+				CreatedAt: val.CreatedAt,
+				UpdatedAt: val.UpdatedAt,
+				DeletedAt: null.NewTime(val.DeletedAt.Time, val.DeletedAt.Valid),
+			})
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       result,
+		})
 	}
 }
 

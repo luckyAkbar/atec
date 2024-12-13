@@ -197,9 +197,24 @@ definitions:
     type: object
   rest.SearchQUestionnaireResultsOutput:
     properties:
-      todo:
-        items: {}
-        type: array
+      answer:
+        $ref: '#/definitions/model.AnswerDetail'
+      child_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      package_id:
+        type: string
+      result:
+        $ref: '#/definitions/model.ResultDetail'
+      updated_at:
+        type: string
     type: object
   rest.SignupInput:
     properties:
@@ -600,19 +615,25 @@ paths:
         required: true
         type: string
       - in: query
-        name: childID
+        name: child_id
         type: string
       - in: query
+        name: created_by_id
+        type: string
+      - in: query
+        maximum: 100
+        minimum: 1
         name: limit
         type: integer
       - in: query
+        minimum: 0
         name: offset
         type: integer
       - in: query
-        name: resultID
+        name: package_id
         type: string
       - in: query
-        name: userID
+        name: result_id
         type: string
       produces:
       - application/json

@@ -71,7 +71,7 @@ func (s *service) initV1Routes() {
 		s.HandleDownloadQuestionnaireResult(),
 		s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false),
 	)
-	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults())
+	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults(), s.AuthMiddleware(false, true))
 	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults())
 
 	s.v1.GET("/swagger/*", echoSwagger.WrapHandler)

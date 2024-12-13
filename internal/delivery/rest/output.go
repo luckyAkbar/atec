@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
+	"gopkg.in/guregu/null.v4"
 )
 
 // SearchActivePackageOutput output
@@ -29,7 +30,15 @@ type GetChildStatOutput struct {
 
 // SearchQUestionnaireResultsOutput output
 type SearchQUestionnaireResultsOutput struct {
-	TODO []any `json:"todo"`
+	ID        uuid.UUID          `json:"id"`
+	PackageID uuid.UUID          `json:"package_id"`
+	ChildID   uuid.UUID          `json:"child_id"`
+	CreatedBy uuid.UUID          `json:"created_by"`
+	Answer    model.AnswerDetail `json:"answer"`
+	Result    model.ResultDetail `json:"result"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+	DeletedAt null.Time          `json:"deleted_at,omitempty"`
 }
 
 // GetMyQUestionnaireResultsOutput output

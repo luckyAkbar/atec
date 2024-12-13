@@ -3,12 +3,14 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"math"
 	"strings"
+	"time"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/google/uuid"
@@ -33,6 +35,7 @@ type QuestionnaireUsecase struct {
 type QuestionnaireUsecaseIface interface {
 	HandleSubmitQuestionnaire(ctx context.Context, input SubmitQuestionnaireInput) (*SubmitQuestionnaireOutput, error)
 	HandleDownloadQuestionnaireResult(ctx context.Context, input DownloadQuestionnaireResultInput) (*DownloadQuestionnaireResultOutput, error)
+	HandleSearchQuestionnaireResult(ctx context.Context, input SearchQuestionnaireResultInput) ([]SearchQuestionnaireResultOutput, error)
 }
 
 // NewQuestionnaireUsecase create new QuestionnaireUsecase instance
@@ -255,6 +258,92 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		ChildID:   result.ChildID,
 		CreatedBy: result.CreatedBy,
 	}, nil
+}
+
+// SearchQuestionnaireResultInput search questionnaire result
+type SearchQuestionnaireResultInput struct {
+	ID        uuid.UUID
+	PackageID uuid.UUID
+	ChildID   uuid.UUID
+	CreatedBy uuid.UUID
+	Limit     int `validate:"min=1,max=100"`
+	Offset    int `validate:"min=0"`
+}
+
+func (sqi SearchQuestionnaireResultInput) validate() error {
+	return common.Validator.Struct(sqi)
+}
+
+// SearchQuestionnaireResultOutput search questionnaire result
+type SearchQuestionnaireResultOutput struct {
+	ID        uuid.UUID
+	PackageID uuid.UUID
+	ChildID   uuid.UUID
+	CreatedBy uuid.UUID
+	Answer    model.AnswerDetail
+	Result    model.ResultDetail
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+}
+
+// HandleSearchQuestionnaireResult search questionnaire results from database based on given search param
+// this function will return a list of questionnaire result based on the search param
+func (u *QuestionnaireUsecase) HandleSearchQuestionnaireResult(
+	ctx context.Context, input SearchQuestionnaireResultInput,
+) ([]SearchQuestionnaireResultOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	results, err := u.resultRepo.Search(ctx, repository.SearchResultInput{
+		ID:        input.ID,
+		PackageID: input.PackageID,
+		ChildID:   input.ChildID,
+		CreatedBy: input.CreatedBy,
+		Limit:     input.Limit,
+		Offset:    input.Offset,
+	})
+
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to search questionnaire result from database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	output := []SearchQuestionnaireResultOutput{}
+
+	for _, res := range results {
+		output = append(output, SearchQuestionnaireResultOutput{
+			ID:        res.ID,
+			PackageID: res.PackageID,
+			ChildID:   res.ChildID,
+			CreatedBy: res.CreatedBy,
+			Answer:    res.Answer,
+			Result:    res.Result,
+			CreatedAt: res.CreatedAt,
+			UpdatedAt: res.UpdatedAt,
+			DeletedAt: res.DeletedAt,
+		})
+	}
+
+	return output, nil
 }
 
 // DownloadQuestionnaireResultInput input
