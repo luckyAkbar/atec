@@ -577,11 +577,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "maximum": 100,
+                        "minimum": 1,
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
                     },
                     {
+                        "minimum": 0,
                         "type": "integer",
                         "name": "offset",
                         "in": "query"

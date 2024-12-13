@@ -18,6 +18,7 @@ type ResultRepositoryIface interface {
 	Create(ctx context.Context, input CreateResultInput) (*model.Result, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error)
 	Search(ctx context.Context, input SearchResultInput) ([]model.Result, error)
+	FindAllUserHistory(ctx context.Context, input FindAllUserHistoryInput) ([]model.Result, error)
 }
 
 // NewResultRepository create new instance of ResultRepository
@@ -114,6 +115,36 @@ func (r *ResultRepository) Search(ctx context.Context, input SearchResultInput) 
 	results := []model.Result{}
 
 	if err := cursor.Find(&results).Error; err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, ErrNotFound
+	}
+
+	return results, nil
+}
+
+// FindAllUserHistoryInput input
+type FindAllUserHistoryInput struct {
+	UserID uuid.UUID
+	Limit  int
+	Offset int
+}
+
+// FindAllUserHistory find the result made by the userID or the child of the userID
+func (r *ResultRepository) FindAllUserHistory(ctx context.Context, input FindAllUserHistoryInput) ([]model.Result, error) {
+	results := []model.Result{}
+
+	err := r.db.WithContext(ctx).Where("created_by = ?", input.UserID).
+		Or(
+			"child_id IN (?)",
+			r.db.Model(&model.Child{}).
+				Select("id").Where("parent_user_id = ?", input.UserID),
+		).Limit(input.Limit).Offset(input.Offset).
+		Find(&results).Error
+
+	if err != nil {
 		return nil, err
 	}
 

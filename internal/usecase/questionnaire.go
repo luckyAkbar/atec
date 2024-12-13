@@ -36,6 +36,7 @@ type QuestionnaireUsecaseIface interface {
 	HandleSubmitQuestionnaire(ctx context.Context, input SubmitQuestionnaireInput) (*SubmitQuestionnaireOutput, error)
 	HandleDownloadQuestionnaireResult(ctx context.Context, input DownloadQuestionnaireResultInput) (*DownloadQuestionnaireResultOutput, error)
 	HandleSearchQuestionnaireResult(ctx context.Context, input SearchQuestionnaireResultInput) ([]SearchQuestionnaireResultOutput, error)
+	HandleGetUserHistory(ctx context.Context, input GetUserHistoryInput) ([]GetUserHistoryOutput, error)
 }
 
 // NewQuestionnaireUsecase create new QuestionnaireUsecase instance
@@ -331,6 +332,91 @@ func (u *QuestionnaireUsecase) HandleSearchQuestionnaireResult(
 
 	for _, res := range results {
 		output = append(output, SearchQuestionnaireResultOutput{
+			ID:        res.ID,
+			PackageID: res.PackageID,
+			ChildID:   res.ChildID,
+			CreatedBy: res.CreatedBy,
+			Answer:    res.Answer,
+			Result:    res.Result,
+			CreatedAt: res.CreatedAt,
+			UpdatedAt: res.UpdatedAt,
+			DeletedAt: res.DeletedAt,
+		})
+	}
+
+	return output, nil
+}
+
+// GetUserHistoryInput input
+type GetUserHistoryInput struct {
+	Limit  int `validate:"min=1,max=100"`
+	Offset int `validate:"min=0"`
+}
+
+func (guhi GetUserHistoryInput) validate() error {
+	return common.Validator.Struct(guhi)
+}
+
+// GetUserHistoryOutput output
+type GetUserHistoryOutput struct {
+	ID        uuid.UUID
+	PackageID uuid.UUID
+	ChildID   uuid.UUID
+	CreatedBy uuid.UUID
+	Answer    model.AnswerDetail
+	Result    model.ResultDetail
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+}
+
+// HandleGetUserHistory will return a list of questionnaire result made by the requester
+// or questionnaire submitted for the requester's children
+func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input GetUserHistoryInput) ([]GetUserHistoryOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(ctx))
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "getting user history requires valid authorization",
+		}
+	}
+
+	results, err := u.resultRepo.FindAllUserHistory(ctx, repository.FindAllUserHistoryInput{
+		UserID: requester.ID,
+		Limit:  input.Limit,
+		Offset: input.Offset,
+	})
+
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to get user history from database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	output := []GetUserHistoryOutput{}
+
+	for _, res := range results {
+		output = append(output, GetUserHistoryOutput{
 			ID:        res.ID,
 			PackageID: res.PackageID,
 			ChildID:   res.ChildID,
