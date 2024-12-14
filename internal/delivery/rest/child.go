@@ -225,14 +225,35 @@ func (s *service) HandleSearchChildern() echo.HandlerFunc {
 // @Accept			json
 // @Produce		json
 // @Security		UserLevelAuth
-// @Param			Authorization	header		string												true	"JWT Token"
-// @Param			child_id		path		string												true	"Child ID (UUID v4)"
-// @Success		200				{object}	StandardSuccessResponse{data=GetChildStatOutput}	"Successful response"
-// @Failure		400				{object}	StandardErrorResponse								"Bad request"
-// @Failure		500				{object}	StandardErrorResponse								"Internal Error"
+// @Param			Authorization	header		string														true	"JWT Token"
+// @Param			child_id		path		string														true	"Child ID (UUID v4)"
+// @Success		200				{object}	StandardSuccessResponse{data=[]usecase.StatisticComponent}	"Successful response"
+// @Failure		400				{object}	StandardErrorResponse										"Bad request"
+// @Failure		500				{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/childern/{child_id}/stats [get]
 func (s *service) HandleGetChildStats() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &GetChildStatInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		stats, err := s.childUsecase.HandleGetStatistic(c.Request().Context(), usecase.GetStatisticInput{
+			ChildID: input.ChildID,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data:       stats.Statistic, // deliberately return only statistic and avoid any type casting or data conversion
+		})
 	}
 }

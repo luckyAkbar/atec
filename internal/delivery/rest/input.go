@@ -138,3 +138,8 @@ type SearchChildrenInput struct {
 type DownloadQuestionnaireResultInput struct {
 	ResultID uuid.UUID `param:"result_id" validate:"required"`
 }
+
+// GetChildStatInput input
+type GetChildStatInput struct {
+	ChildID uuid.UUID `param:"child_id" validate:"required"`
+}

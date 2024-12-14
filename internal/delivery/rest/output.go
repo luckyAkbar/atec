@@ -25,7 +25,6 @@ type SubmitQuestionnaireOutput struct {
 
 // GetChildStatOutput output
 type GetChildStatOutput struct {
-	TODO []any `json:"todo"`
 }
 
 // SearchQUestionnaireResultsOutput output
