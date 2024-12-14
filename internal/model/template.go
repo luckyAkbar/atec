@@ -2,7 +2,9 @@ package model
 
 // Template is the ATEC template in which contains several known subtest's group
 type Template struct {
-	SubTest SubTest
+	SubTest              SubTest
+	MinimumPossibleScore int
+	MaximumPossibleScore int
 }
 
 // SubtestDetail each questionnaire groups along with its detail
@@ -46,4 +48,9 @@ var DefaultATECTemplate = Template{
 			QuestionCount: 25,
 		},
 	},
+
+	// by design these are the lowest and highest possible score
+	// can be achieved for any given standard atec questionnaire
+	MinimumPossibleScore: 0,
+	MaximumPossibleScore: 179,
 }

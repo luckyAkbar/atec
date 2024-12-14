@@ -41,6 +41,23 @@ definitions:
     - options
     - questions
     type: object
+  model.IndicationCategory:
+    properties:
+      detail:
+        type: string
+      maximum_score:
+        minimum: 1
+        type: integer
+      minimum_score:
+        minimum: 0
+        type: integer
+      name:
+        type: string
+    required:
+    - detail
+    - maximum_score
+    - name
+    type: object
   model.Questionnaire:
     additionalProperties:
       $ref: '#/definitions/model.ChecklistGroup'
@@ -68,11 +85,16 @@ definitions:
     type: object
   rest.CreatePackageInput:
     properties:
+      indication_categories:
+        items:
+          $ref: '#/definitions/model.IndicationCategory'
+        type: array
       package_name:
         type: string
       questionnaire:
         $ref: '#/definitions/model.Questionnaire'
     required:
+    - indication_categories
     - package_name
     - questionnaire
     type: object
@@ -300,11 +322,16 @@ definitions:
     type: object
   rest.UpdatePackageInput:
     properties:
+      indication_categories:
+        items:
+          $ref: '#/definitions/model.IndicationCategory'
+        type: array
       package_name:
         type: string
       questionnaire:
         $ref: '#/definitions/model.Questionnaire'
     required:
+    - indication_categories
     - package_name
     - questionnaire
     type: object

@@ -1396,6 +1396,30 @@ const docTemplate = `{
                 }
             }
         },
+        "model.IndicationCategory": {
+            "type": "object",
+            "required": [
+                "detail",
+                "maximum_score",
+                "name"
+            ],
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "maximum_score": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "minimum_score": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Questionnaire": {
             "type": "object",
             "additionalProperties": {
@@ -1438,10 +1462,17 @@ const docTemplate = `{
         "rest.CreatePackageInput": {
             "type": "object",
             "required": [
+                "indication_categories",
                 "package_name",
                 "questionnaire"
             ],
             "properties": {
+                "indication_categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.IndicationCategory"
+                    }
+                },
                 "package_name": {
                     "type": "string"
                 },
@@ -1784,10 +1815,17 @@ const docTemplate = `{
         "rest.UpdatePackageInput": {
             "type": "object",
             "required": [
+                "indication_categories",
                 "package_name",
                 "questionnaire"
             ],
             "properties": {
+                "indication_categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.IndicationCategory"
+                    }
+                },
                 "package_name": {
                     "type": "string"
                 },
