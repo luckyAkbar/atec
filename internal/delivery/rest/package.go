@@ -209,8 +209,9 @@ func (s *service) HandleCreatePackage() echo.HandlerFunc {
 		}
 
 		output, err := s.packageUsecase.Create(c.Request().Context(), usecase.CreatePackageInput{
-			PackageName:   input.PackageName,
-			Questionnaire: input.Quesionnaire,
+			PackageName:          input.PackageName,
+			Questionnaire:        input.Quesionnaire,
+			IndicationCategories: input.IndicationCategories,
 		})
 
 		if err != nil {

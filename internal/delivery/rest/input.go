@@ -76,8 +76,9 @@ type UpdateChildernInput struct {
 
 // CreatePackageInput input
 type CreatePackageInput struct {
-	PackageName  string              `json:"package_name" validate:"required"`
-	Quesionnaire model.Questionnaire `json:"questionnaire" validate:"required"`
+	PackageName          string                     `json:"package_name" validate:"required"`
+	Quesionnaire         model.Questionnaire        `json:"questionnaire" validate:"required"`
+	IndicationCategories model.IndicationCategories `json:"indication_categories" validate:"required"`
 }
 
 // UpdatePackageInput input

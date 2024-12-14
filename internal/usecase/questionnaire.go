@@ -497,11 +497,29 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 		}
 	}
 
+	pack, err := u.packageRepo.FindByID(ctx, result.PackageID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find package from database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
 	imgGenerator := newImageGenerator(u.font, imageGenerationOpts{
-		Title:          "ATEC Score",
-		Result:         result.Result,
-		TestID:         result.PackageID,
-		IndicationText: "placeholder for indication text lorem ipsum dolor sit amet.",
+		Title:                "ATEC Score",
+		Result:               result.Result,
+		TestID:               result.PackageID,
+		indicationCategories: pack.IndicationCategories,
 	})
 
 	imageResult := imgGenerator.GenerateJPEG()
@@ -513,30 +531,30 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 }
 
 type imageGenerator struct {
-	Title          string
-	Result         model.ResultDetail
-	TestID         uuid.UUID
-	IndicationText string
+	Title  string
+	Result model.ResultDetail
+	TestID uuid.UUID
 
-	rgba         *image.RGBA
-	ttp          []string // ttp stands for text to print
-	width        int
-	height       int
-	titleDrawer  *font.Drawer
-	textDrawer   *font.Drawer
-	sampleDrawer *font.Drawer
-	font         *truetype.Font
-	dpi          float64
-	textSize     float64
-	titleSize    float64
-	spacing      float64
+	indicationCategories model.IndicationCategories
+	rgba                 *image.RGBA
+	ttp                  []string // ttp stands for text to print
+	width                int
+	height               int
+	titleDrawer          *font.Drawer
+	textDrawer           *font.Drawer
+	sampleDrawer         *font.Drawer
+	font                 *truetype.Font
+	dpi                  float64
+	textSize             float64
+	titleSize            float64
+	spacing              float64
 }
 
 type imageGenerationOpts struct {
-	Title          string
-	Result         model.ResultDetail
-	TestID         uuid.UUID
-	IndicationText string
+	Title                string
+	Result               model.ResultDetail
+	TestID               uuid.UUID
+	indicationCategories model.IndicationCategories
 }
 
 type imageResult struct {
@@ -568,16 +586,16 @@ func newImageGenerator(f *truetype.Font, opts imageGenerationOpts) *imageGenerat
 	}
 
 	imgGenerator := &imageGenerator{
-		Title:          opts.Title,
-		Result:         opts.Result,
-		TestID:         opts.TestID,
-		IndicationText: opts.IndicationText,
-		sampleDrawer:   initialTextDrawer,
-		spacing:        spacing,
-		font:           f,
-		textSize:       size,
-		titleSize:      titleSize,
-		dpi:            dpi,
+		Title:                opts.Title,
+		Result:               opts.Result,
+		TestID:               opts.TestID,
+		indicationCategories: opts.indicationCategories,
+		sampleDrawer:         initialTextDrawer,
+		spacing:              spacing,
+		font:                 f,
+		textSize:             size,
+		titleSize:            titleSize,
+		dpi:                  dpi,
 	}
 
 	imgGenerator.generateTTP()
@@ -647,8 +665,10 @@ func (ig *imageGenerator) generateTTP() {
 		total += r.Grade
 	}
 
+	indication := ig.indicationCategories.GetIndicationCategoryByScore(total)
+
 	ig.appendTTP(fmt.Sprintf("Total: %d", total))
-	ig.appendTTP("Indikasi: " + ig.IndicationText)
+	ig.appendTTP("Indikasi: " + indication.Detail)
 	ig.appendTTP(fmt.Sprintf("Test ID: %s", ig.TestID))
 }
 
