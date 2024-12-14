@@ -697,22 +697,24 @@ func wordWrapper(s string) []string {
 
 	result := []string{}
 	ss := strings.Fields(s)
-	appended := false
 
 	var temp string
 
 	for i, word := range ss {
+		appended := false
 		temp += word + " "
+
 		if len(temp) >= optimumTextLength {
 			result = append(result, temp)
 			temp = ""
+
 			appended = true
 		}
 
+		// when it's already the last word and the temp is not empty
+		// just append it to the result
 		if i == len(ss)-1 && !appended {
 			result = append(result, temp)
-
-			break
 		}
 	}
 
