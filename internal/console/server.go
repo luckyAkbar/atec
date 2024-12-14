@@ -69,7 +69,7 @@ func serverFn(_ *cobra.Command, _ []string) {
 
 	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer)
 	packageUsecase := usecase.NewPackageUsecase(packageRepo)
-	childUsecase := usecase.NewChildUsecase(childRepo)
+	childUsecase := usecase.NewChildUsecase(childRepo, resultRepo)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo, font)
 
 	httpServer := echo.New()

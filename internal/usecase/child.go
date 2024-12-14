@@ -15,7 +15,8 @@ import (
 
 // ChildUsecase child usecase
 type ChildUsecase struct {
-	childRepo repository.ChildRepositoryIface
+	childRepo  repository.ChildRepositoryIface
+	resultRepo repository.ResultRepositoryIface
 }
 
 // ChildUsecaseIface interface
@@ -24,12 +25,14 @@ type ChildUsecaseIface interface {
 	Update(ctx context.Context, input UpdateChildInput) (*UpdateChildOutput, error)
 	GetRegisteredChildren(ctx context.Context, input GetRegisteredChildrenInput) ([]GetRegisteredChildrenOutput, error)
 	Search(ctx context.Context, input SearchChildInput) ([]SearchChildOutput, error)
+	HandleGetStatistic(ctx context.Context, input GetStatisticInput) (*GetStatisticOutput, error)
 }
 
 // NewChildUsecase create new ChildUsecase instance
-func NewChildUsecase(childRepo *repository.ChildRepository) *ChildUsecase {
+func NewChildUsecase(childRepo *repository.ChildRepository, resultRepo *repository.ResultRepository) *ChildUsecase {
 	return &ChildUsecase{
-		childRepo: childRepo,
+		childRepo:  childRepo,
+		resultRepo: resultRepo,
 	}
 }
 
@@ -325,4 +328,137 @@ func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]Se
 	}
 
 	return output, nil
+}
+
+// GetStatisticInput input
+type GetStatisticInput struct {
+	ChildID uuid.UUID `validate:"required"`
+}
+
+func (gsi GetStatisticInput) validate() error {
+	return common.Validator.Struct(gsi)
+}
+
+// StatisticComponent is the single component of statistic. composed of at least
+// the total score for a given time of test.
+type StatisticComponent struct {
+	Total     int                `json:"total"`
+	CreatedAt time.Time          `json:"created_at"`
+	Detail    model.ResultDetail `json:"detail"`
+}
+
+// GetStatisticOutput represent the overall data to build the statistic
+type GetStatisticOutput struct {
+	Statistic []StatisticComponent `json:"statistic"`
+}
+
+// HandleGetStatistic get the statistic of a given child id. It requires the valid
+// authorization of the parent or admin role. It will return the overall statistic
+// of the child, which is composed of time of test and the total score of the test.
+func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisticInput) (*GetStatisticOutput, error) {
+	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	child, err := u.childRepo.FindByID(ctx, input.ChildID)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find child data from database")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "getting statistic requires valid authorization",
+		}
+	}
+
+	if child.ParentUserID != requester.ID && requester.Role != model.RolesAdmin {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "getting statistic for this child must be done either by parent or admin",
+		}
+	}
+
+	batchSize := 100
+	offset := 0
+	isFirst := true
+	mustContinue := true
+	statComponents := []StatisticComponent{}
+
+	for {
+		results, err := u.resultRepo.Search(ctx, repository.SearchResultInput{
+			ChildID: input.ChildID,
+			Limit:   batchSize,
+			Offset:  offset,
+		})
+
+		switch err {
+		default:
+			logger.WithError(err).Error("failed to get statistic from database")
+
+			return nil, UsecaseError{
+				ErrType: ErrInternal,
+				Message: ErrInternal.Error(),
+			}
+		case repository.ErrNotFound:
+			if isFirst {
+				return nil, UsecaseError{
+					ErrType: ErrNotFound,
+					Message: ErrNotFound.Error(),
+				}
+			}
+
+			mustContinue = false
+		case nil:
+		}
+
+		for _, res := range results {
+			total := 0
+
+			for _, detail := range res.Result {
+				total += detail.Grade
+			}
+
+			statComponents = append(statComponents, StatisticComponent{
+				Total:     total,
+				CreatedAt: res.CreatedAt,
+				Detail:    res.Result,
+			})
+		}
+
+		offset += batchSize
+		isFirst = false
+
+		// avoid extra one query if the result is less than batch size
+		if len(results) < batchSize {
+			mustContinue = false
+		}
+
+		if !mustContinue {
+			break
+		}
+	}
+
+	return &GetStatisticOutput{
+		Statistic: statComponents,
+	}, nil
 }

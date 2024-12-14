@@ -1312,7 +1312,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rest.GetChildStatOutput"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/usecase.StatisticComponent"
+                                            }
                                         }
                                     }
                                 }
@@ -1457,15 +1460,6 @@ const docTemplate = `{
         },
         "rest.GetATECQuestionnaireOutput": {
             "type": "object"
-        },
-        "rest.GetChildStatOutput": {
-            "type": "object",
-            "properties": {
-                "todo": {
-                    "type": "array",
-                    "items": {}
-                }
-            }
         },
         "rest.GetMyChildernOutput": {
             "type": "object",
@@ -1816,6 +1810,20 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "your account is now activated and can be used"
+                }
+            }
+        },
+        "usecase.StatisticComponent": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "detail": {
+                    "$ref": "#/definitions/model.ResultDetail"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         }

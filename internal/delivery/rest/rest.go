@@ -62,7 +62,7 @@ func (s *service) initV1Routes() {
 	s.v1.PUT("/childern/:child_id", s.HandleUpdateChildern())
 	s.v1.GET("/childern", s.HandleGetMyChildern(), s.AuthMiddleware(true, false))
 	s.v1.GET("/childern/search", s.HandleSearchChildern(), s.AuthMiddleware(false, true))
-	s.v1.GET("/childern/:child_id/stats", s.HandleGetChildStats())
+	s.v1.GET("/childern/:child_id/stats", s.HandleGetChildStats(), s.AuthMiddleware(true, false))
 
 	s.v1.GET("/atec/questionnaires", s.HandleGetATECQuestionaire())
 	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire(), s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false))

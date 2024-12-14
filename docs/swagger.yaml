@@ -83,12 +83,6 @@ definitions:
     type: object
   rest.GetATECQuestionnaireOutput:
     type: object
-  rest.GetChildStatOutput:
-    properties:
-      todo:
-        items: {}
-        type: array
-    type: object
   rest.GetMyChildernOutput:
     properties:
       created_at:
@@ -324,6 +318,15 @@ definitions:
       message:
         example: your account is now activated and can be used
         type: string
+    type: object
+  usecase.StatisticComponent:
+    properties:
+      created_at:
+        type: string
+      detail:
+        $ref: '#/definitions/model.ResultDetail'
+      total:
+        type: integer
     type: object
 info:
   contact: {}
@@ -1081,7 +1084,9 @@ paths:
             - $ref: '#/definitions/rest.StandardSuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/rest.GetChildStatOutput'
+                  items:
+                    $ref: '#/definitions/usecase.StatisticComponent'
+                  type: array
               type: object
         "400":
           description: Bad request
