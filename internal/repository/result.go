@@ -114,7 +114,7 @@ func (r *ResultRepository) Search(ctx context.Context, input SearchResultInput) 
 
 	results := []model.Result{}
 
-	if err := cursor.Find(&results).Error; err != nil {
+	if err := cursor.Order("created_at ASC").Find(&results).Error; err != nil {
 		return nil, err
 	}
 
