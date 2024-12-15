@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS packages (
     created_by UUID NOT NULL,
     questionnaire JSONB NOT NULL,
     indication_categories JSONB NOT NULL,
+    image_result_attribute_key JSONB NOT NULL,
     name TEXT NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
     is_locked BOOLEAN DEFAULT FALSE,
