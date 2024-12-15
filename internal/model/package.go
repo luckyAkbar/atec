@@ -15,16 +15,17 @@ import (
 
 // Package represent packages table on database
 type Package struct {
-	ID                   uuid.UUID `gorm:"default:uuid_generate_v4()"`
-	CreatedBy            uuid.UUID
-	Questionnaire        Questionnaire
-	IndicationCategories IndicationCategories
-	Name                 string
-	IsActive             bool
-	IsLocked             bool
-	CreatedAt            time.Time `gorm:"default:now()"`
-	UpdatedAt            time.Time `gorm:"default:now()"`
-	DeletedAt            gorm.DeletedAt
+	ID                      uuid.UUID `gorm:"default:uuid_generate_v4()"`
+	CreatedBy               uuid.UUID
+	Questionnaire           Questionnaire
+	IndicationCategories    IndicationCategories
+	ImageResultAttributeKey ImageResultAttributeKey
+	Name                    string
+	IsActive                bool
+	IsLocked                bool
+	CreatedAt               time.Time `gorm:"default:now()"`
+	UpdatedAt               time.Time `gorm:"default:now()"`
+	DeletedAt               gorm.DeletedAt
 }
 
 // AnswerOption each singular answer option for a given question along with its detail
@@ -243,6 +244,51 @@ func (ic IndicationCategory) Validate() error {
 
 	if ic.MaximumScore > DefaultATECTemplate.MaximumPossibleScore {
 		return fmt.Errorf("maximum score %d is greater than maximum possible score %d", ic.MaximumScore, DefaultATECTemplate.MaximumPossibleScore)
+	}
+
+	return nil
+}
+
+// ImageResultAttributeKey is the list of available keys when building questionnaire result image.
+// These fields are required in each image and will be written in this format
+// "key" + " : " + "value", where key is the field itself, and the value are
+// the actual questionnaire result
+type ImageResultAttributeKey struct {
+	Title       string `json:"title" validate:"required"`
+	Total       string `json:"total" validate:"required"`
+	Indication  string `json:"indication" validate:"required"`
+	ResultID    string `json:"result_id" validate:"required"`
+	SubmittedAt string `json:"submitted_at" validate:"required"`
+}
+
+// Validate validate ImageResultAttributeKey
+func (iray ImageResultAttributeKey) Validate() error {
+	return common.Validator.Struct(iray)
+}
+
+// Value implements Valuer/Scanner interface
+func (iray ImageResultAttributeKey) Value(_ context.Context, _ *schema.Field, _ reflect.Value, fieldValue interface{}) (interface{}, error) {
+	return json.Marshal(fieldValue)
+}
+
+// Scan implements Valuer/Scanner interface
+func (iray *ImageResultAttributeKey) Scan(_ context.Context, _ *schema.Field, _ reflect.Value, dbValue interface{}) error {
+	if dbValue == nil {
+		return nil
+	}
+
+	var bytes []byte
+	switch v := dbValue.(type) {
+	case []byte:
+		bytes = v
+	case string:
+		bytes = []byte(v)
+	default:
+		return fmt.Errorf("failed to unmarshal JSONB value: %#v", dbValue)
+	}
+
+	if err := json.Unmarshal(bytes, iray); err != nil {
+		return err
 	}
 
 	return nil

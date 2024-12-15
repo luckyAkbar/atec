@@ -9,6 +9,7 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -516,10 +517,10 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 	}
 
 	imgGenerator := newImageGenerator(u.font, imageGenerationOpts{
-		Title:                "ATEC Score",
-		Result:               result.Result,
-		TestID:               result.PackageID,
-		indicationCategories: pack.IndicationCategories,
+		Result:                  result.Result,
+		TestID:                  result.PackageID,
+		indicationCategories:    pack.IndicationCategories,
+		imageResultAttributeKey: pack.ImageResultAttributeKey,
 	})
 
 	imageResult := imgGenerator.GenerateJPEG()
@@ -531,30 +532,31 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 }
 
 type imageGenerator struct {
-	Title  string
 	Result model.ResultDetail
 	TestID uuid.UUID
 
-	indicationCategories model.IndicationCategories
-	rgba                 *image.RGBA
-	ttp                  []string // ttp stands for text to print
-	width                int
-	height               int
-	titleDrawer          *font.Drawer
-	textDrawer           *font.Drawer
-	sampleDrawer         *font.Drawer
-	font                 *truetype.Font
-	dpi                  float64
-	textSize             float64
-	titleSize            float64
-	spacing              float64
+	indicationCategories    model.IndicationCategories
+	imageResultAttributeKey model.ImageResultAttributeKey
+	rgba                    *image.RGBA
+	ttp                     []string // ttp stands for text to print
+	width                   int
+	height                  int
+	titleDrawer             *font.Drawer
+	textDrawer              *font.Drawer
+	sampleDrawer            *font.Drawer
+	font                    *truetype.Font
+	dpi                     float64
+	textSize                float64
+	titleSize               float64
+	spacing                 float64
 }
 
 type imageGenerationOpts struct {
-	Title                string
-	Result               model.ResultDetail
-	TestID               uuid.UUID
-	indicationCategories model.IndicationCategories
+	Title                   string
+	Result                  model.ResultDetail
+	TestID                  uuid.UUID
+	indicationCategories    model.IndicationCategories
+	imageResultAttributeKey model.ImageResultAttributeKey
 }
 
 type imageResult struct {
@@ -586,16 +588,16 @@ func newImageGenerator(f *truetype.Font, opts imageGenerationOpts) *imageGenerat
 	}
 
 	imgGenerator := &imageGenerator{
-		Title:                opts.Title,
-		Result:               opts.Result,
-		TestID:               opts.TestID,
-		indicationCategories: opts.indicationCategories,
-		sampleDrawer:         initialTextDrawer,
-		spacing:              spacing,
-		font:                 f,
-		textSize:             size,
-		titleSize:            titleSize,
-		dpi:                  dpi,
+		Result:                  opts.Result,
+		TestID:                  opts.TestID,
+		indicationCategories:    opts.indicationCategories,
+		imageResultAttributeKey: opts.imageResultAttributeKey,
+		sampleDrawer:            initialTextDrawer,
+		spacing:                 spacing,
+		font:                    f,
+		textSize:                size,
+		titleSize:               titleSize,
+		dpi:                     dpi,
 	}
 
 	imgGenerator.generateTTP()
@@ -618,21 +620,21 @@ func (ig *imageGenerator) GenerateJPEG() *imageResult {
 	y := 10 + int(math.Ceil(ig.textSize*ig.dpi/72))
 	dy := int(math.Ceil(ig.textSize * ig.spacing * ig.dpi / 72))
 	ig.textDrawer.Dot = fixed.Point26_6{
-		X: (fixed.I(ig.width) - ig.textDrawer.MeasureString(ig.Title)) / 2,
+		X: (fixed.I(ig.width) - ig.textDrawer.MeasureString(ig.imageResultAttributeKey.Title)) / 2,
 		Y: fixed.I(y),
 	}
 
 	ty := 10 + int(math.Ceil(ig.titleSize*ig.dpi/72))
 	tdy := int(math.Ceil(ig.titleSize * ig.spacing * ig.dpi / 72))
 
-	tx := (fixed.I(ig.width) - ig.titleDrawer.MeasureString(ig.Title)) / 2
+	tx := (fixed.I(ig.width) - ig.titleDrawer.MeasureString(ig.imageResultAttributeKey.Title)) / 2
 
 	ig.titleDrawer.Dot = fixed.Point26_6{
 		X: tx,
 		Y: fixed.I(ty),
 	}
 
-	ig.titleDrawer.DrawString(ig.Title)
+	ig.titleDrawer.DrawString(ig.imageResultAttributeKey.Title)
 
 	y += tdy
 
@@ -667,9 +669,10 @@ func (ig *imageGenerator) generateTTP() {
 
 	indication := ig.indicationCategories.GetIndicationCategoryByScore(total)
 
-	ig.appendTTP(fmt.Sprintf("Total: %d", total))
-	ig.appendTTP("Indikasi: " + indication.Detail)
-	ig.appendTTP(fmt.Sprintf("Test ID: %s", ig.TestID))
+	ig.appendTTP(ig.imageResultAttributeKey.Total + " : " + strconv.Itoa(total))
+	ig.appendTTP(ig.imageResultAttributeKey.Indication + " : " + indication.Detail)
+	ig.appendTTP(ig.imageResultAttributeKey.ResultID + " : " + ig.TestID.String())
+	ig.appendTTP(ig.imageResultAttributeKey.SubmittedAt + " : " + time.Now().Format(time.DateTime))
 }
 
 func (ig *imageGenerator) appendTTP(s string) {
@@ -682,7 +685,7 @@ const maxImageWitdh = 1080
 
 //nolint:mnd
 func (ig *imageGenerator) countOptimumImageWidth(initialTextDrawer, initialTitleDrawer *font.Drawer) {
-	maxWidth := initialTitleDrawer.MeasureString(ig.Title)
+	maxWidth := initialTitleDrawer.MeasureString(ig.imageResultAttributeKey.Title)
 
 	for _, t := range ig.ttp {
 		ms := initialTextDrawer.MeasureString(t)

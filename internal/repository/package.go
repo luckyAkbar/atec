@@ -32,19 +32,21 @@ func NewPackageRepo(db *gorm.DB) *PackageRepo {
 
 // CreatePackageInput input
 type CreatePackageInput struct {
-	UserID               uuid.UUID
-	PackageName          string
-	Questionnaire        model.Questionnaire
-	IndicationCategories model.IndicationCategories
+	UserID                  uuid.UUID
+	PackageName             string
+	Questionnaire           model.Questionnaire
+	IndicationCategories    model.IndicationCategories
+	ImageResultAttributeKey model.ImageResultAttributeKey
 }
 
 // Create insert new record of packages to the database
 func (r *PackageRepo) Create(ctx context.Context, input CreatePackageInput) (*model.Package, error) {
 	pack := &model.Package{
-		CreatedBy:            input.UserID,
-		Questionnaire:        input.Questionnaire,
-		Name:                 input.PackageName,
-		IndicationCategories: input.IndicationCategories,
+		CreatedBy:               input.UserID,
+		Questionnaire:           input.Questionnaire,
+		Name:                    input.PackageName,
+		IndicationCategories:    input.IndicationCategories,
+		ImageResultAttributeKey: input.ImageResultAttributeKey,
 	}
 
 	if err := r.db.WithContext(ctx).Create(pack).Error; err != nil {

@@ -41,6 +41,25 @@ definitions:
     - options
     - questions
     type: object
+  model.ImageResultAttributeKey:
+    properties:
+      indication:
+        type: string
+      result_id:
+        type: string
+      submitted_at:
+        type: string
+      title:
+        type: string
+      total:
+        type: string
+    required:
+    - indication
+    - result_id
+    - submitted_at
+    - title
+    - total
+    type: object
   model.IndicationCategory:
     properties:
       detail:
@@ -85,6 +104,8 @@ definitions:
     type: object
   rest.CreatePackageInput:
     properties:
+      image_result_attribute_key:
+        $ref: '#/definitions/model.ImageResultAttributeKey'
       indication_categories:
         items:
           $ref: '#/definitions/model.IndicationCategory'
@@ -94,6 +115,7 @@ definitions:
       questionnaire:
         $ref: '#/definitions/model.Questionnaire'
     required:
+    - image_result_attribute_key
     - indication_categories
     - package_name
     - questionnaire
@@ -322,6 +344,8 @@ definitions:
     type: object
   rest.UpdatePackageInput:
     properties:
+      image_result_attribute_key:
+        $ref: '#/definitions/model.ImageResultAttributeKey'
       indication_categories:
         items:
           $ref: '#/definitions/model.IndicationCategory'
@@ -331,6 +355,7 @@ definitions:
       questionnaire:
         $ref: '#/definitions/model.Questionnaire'
     required:
+    - image_result_attribute_key
     - indication_categories
     - package_name
     - questionnaire

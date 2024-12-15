@@ -1396,6 +1396,33 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ImageResultAttributeKey": {
+            "type": "object",
+            "required": [
+                "indication",
+                "result_id",
+                "submitted_at",
+                "title",
+                "total"
+            ],
+            "properties": {
+                "indication": {
+                    "type": "string"
+                },
+                "result_id": {
+                    "type": "string"
+                },
+                "submitted_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "string"
+                }
+            }
+        },
         "model.IndicationCategory": {
             "type": "object",
             "required": [
@@ -1462,11 +1489,15 @@ const docTemplate = `{
         "rest.CreatePackageInput": {
             "type": "object",
             "required": [
+                "image_result_attribute_key",
                 "indication_categories",
                 "package_name",
                 "questionnaire"
             ],
             "properties": {
+                "image_result_attribute_key": {
+                    "$ref": "#/definitions/model.ImageResultAttributeKey"
+                },
                 "indication_categories": {
                     "type": "array",
                     "items": {
@@ -1815,11 +1846,15 @@ const docTemplate = `{
         "rest.UpdatePackageInput": {
             "type": "object",
             "required": [
+                "image_result_attribute_key",
                 "indication_categories",
                 "package_name",
                 "questionnaire"
             ],
             "properties": {
+                "image_result_attribute_key": {
+                    "$ref": "#/definitions/model.ImageResultAttributeKey"
+                },
                 "indication_categories": {
                     "type": "array",
                     "items": {
