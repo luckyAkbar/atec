@@ -34,9 +34,10 @@ func NewPackageUsecase(packageRepo *repository.PackageRepo) *PackageUsecase {
 
 // CreatePackageInput input by embedding direcly model.Questionnaire to simplify the input anotation
 type CreatePackageInput struct {
-	PackageName          string                     `validate:"required"`
-	Questionnaire        model.Questionnaire        `validate:"required"`
-	IndicationCategories model.IndicationCategories `validate:"required,min=3"`
+	PackageName             string                        `validate:"required"`
+	Questionnaire           model.Questionnaire           `validate:"required"`
+	IndicationCategories    model.IndicationCategories    `validate:"required,min=3"`
+	ImageResultAttributeKey model.ImageResultAttributeKey `validate:"required"`
 }
 
 // Validate validate CreatePackageInput
@@ -49,7 +50,11 @@ func (cpi CreatePackageInput) Validate() error {
 		return err
 	}
 
-	return cpi.IndicationCategories.Validate()
+	if err := cpi.IndicationCategories.Validate(); err != nil {
+		return err
+	}
+
+	return cpi.ImageResultAttributeKey.Validate()
 }
 
 // CreatePackageOutput output
@@ -77,10 +82,11 @@ func (u *PackageUsecase) Create(ctx context.Context, input CreatePackageInput) (
 	}
 
 	pack, err := u.packageRepo.Create(ctx, repository.CreatePackageInput{
-		UserID:               user.ID,
-		PackageName:          input.PackageName,
-		Questionnaire:        input.Questionnaire,
-		IndicationCategories: input.IndicationCategories,
+		UserID:                  user.ID,
+		PackageName:             input.PackageName,
+		Questionnaire:           input.Questionnaire,
+		IndicationCategories:    input.IndicationCategories,
+		ImageResultAttributeKey: input.ImageResultAttributeKey,
 	})
 
 	if err != nil {
