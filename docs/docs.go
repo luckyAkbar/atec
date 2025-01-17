@@ -339,6 +339,58 @@ const docTemplate = `{
             }
         },
         "/v1/atec/questionnaires": {
+            "get": {
+                "description": "Used when a user wants to get an active ATEC questionnaire to be filled later",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Questionnaire"
+                ],
+                "summary": "Initialize ATEC questionnaire or get one",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "packageID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.GetATECQuestionnaireOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "When submiting questionnaire for a child, ensure using the parent's account or Admin level account. otherwise will be blocked.",
                 "consumes": [
@@ -381,60 +433,6 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/rest.SubmitQuestionnaireOutput"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/rest.StandardErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Error",
-                        "schema": {
-                            "$ref": "#/definitions/rest.StandardErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/atec/questionnaires/": {
-            "get": {
-                "description": "Used when a user wants to get an active ATEC questionnaire to be filled later",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Questionnaire"
-                ],
-                "summary": "Initialize ATEC questionnaire or get one",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "packageID",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "success response",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rest.GetATECQuestionnaireOutput"
                                         }
                                     }
                                 }
@@ -1521,7 +1519,18 @@ const docTemplate = `{
             }
         },
         "rest.GetATECQuestionnaireOutput": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "questionnaire": {
+                    "$ref": "#/definitions/model.Questionnaire"
+                }
+            }
         },
         "rest.GetMyChildernOutput": {
             "type": "object",

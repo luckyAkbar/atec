@@ -215,9 +215,34 @@ func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 // @Success		200						{object}	StandardSuccessResponse{data=GetATECQuestionnaireOutput}	"success response"
 // @Failure		400						{object}	StandardErrorResponse										"Bad request"
 // @Failure		500						{object}	StandardErrorResponse										"Internal Error"
-// @Router			/v1/atec/questionnaires/ [get]
+// @Router			/v1/atec/questionnaires [get]
 func (s *service) HandleGetATECQuestionaire() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.NoContent(http.StatusNotImplemented)
+		input := &GetATECQuestionnaireInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.questionnaireUsecase.HandleInitializeATECQuestionnaire(c.Request().Context(), usecase.InitializeATECQuestionnaireInput{
+			PackageID: input.PackageID,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: GetATECQuestionnaireOutput{
+				ID:            output.ID,
+				Questionnaire: output.Questionnaire,
+				Name:          output.Name,
+			},
+		})
 	}
 }
