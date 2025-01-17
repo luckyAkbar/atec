@@ -348,7 +348,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 					<div class="content">
 						<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC). Untuk mengaktifkan akun Anda, silakan klik tombol berikut:</p>
 						<div class="btn-container">
-							<a href="%s?verification_token=%s" class="btn">Aktifkan Akun</a>
+							<a href="%s?validation_token=%s" class="btn">Aktifkan Akun</a>
 						</div>
 					</div>
 					<div class="footer">
