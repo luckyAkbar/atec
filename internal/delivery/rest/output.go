@@ -118,6 +118,9 @@ type UpdateATECTemplateOutput struct {
 
 // GetATECQuestionnaireOutput output
 type GetATECQuestionnaireOutput struct {
+	ID            uuid.UUID           `json:"id"`
+	Questionnaire model.Questionnaire `json:"questionnaire"`
+	Name          string              `json:"name"`
 }
 
 // SearchChildernOutput output

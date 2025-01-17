@@ -224,6 +224,8 @@ import (
 //	    }
 //	  }
 //	}
+//
+//nolint:lll
 func (s *service) HandleCreatePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &CreatePackageInput{}

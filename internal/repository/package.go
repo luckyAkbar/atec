@@ -21,6 +21,7 @@ type PackageRepoIface interface {
 	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput) (*model.Package, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error)
+	FindOldestActiveAndLockedPackage(ctx context.Context) (*model.Package, error)
 }
 
 // NewPackageRepo create new package repo instance
@@ -147,4 +148,19 @@ func (r *PackageRepo) Search(ctx context.Context, input SearchPackageInput) ([]m
 	}
 
 	return packages, nil
+}
+
+// FindOldestActiveAndLockedPackage get the oldest active and locked package
+func (r *PackageRepo) FindOldestActiveAndLockedPackage(ctx context.Context) (*model.Package, error) {
+	pack := &model.Package{}
+
+	err := r.db.WithContext(ctx).Where("is_active = ? AND is_locked = ?", true, true).Order("created_at ASC").Take(pack).Error
+	switch err {
+	default:
+		return nil, err
+	case gorm.ErrRecordNotFound:
+		return nil, ErrNotFound
+	case nil:
+		return pack, nil
+	}
 }

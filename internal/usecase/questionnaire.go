@@ -38,6 +38,7 @@ type QuestionnaireUsecaseIface interface {
 	HandleDownloadQuestionnaireResult(ctx context.Context, input DownloadQuestionnaireResultInput) (*DownloadQuestionnaireResultOutput, error)
 	HandleSearchQuestionnaireResult(ctx context.Context, input SearchQuestionnaireResultInput) ([]SearchQuestionnaireResultOutput, error)
 	HandleGetUserHistory(ctx context.Context, input GetUserHistoryInput) ([]GetUserHistoryOutput, error)
+	HandleInitializeATECQuestionnaire(ctx context.Context, input InitializeATECQuestionnaireInput) (*InitializeATECQuestionnaireOutput, error)
 }
 
 // NewQuestionnaireUsecase create new QuestionnaireUsecase instance
@@ -777,5 +778,79 @@ func (ig *imageGenerator) generateTitleDrawer() {
 			DPI:     ig.dpi,
 			Hinting: font.HintingFull,
 		}),
+	}
+}
+
+// InitializeATECQuestionnaireInput input
+type InitializeATECQuestionnaireInput struct {
+	PackageID uuid.UUID
+}
+
+func (iaqi InitializeATECQuestionnaireInput) useDefaultQuestionnaire() bool {
+	return iaqi.PackageID == uuid.Nil
+}
+
+// InitializeATECQuestionnaireOutput output
+type InitializeATECQuestionnaireOutput struct {
+	ID            uuid.UUID
+	Questionnaire model.Questionnaire
+	Name          string
+}
+
+// HandleInitializeATECQuestionnaire get an atec questionaire based on provided input.PackageID
+// if not, default to the oldest active and locked package
+func (u *QuestionnaireUsecase) HandleInitializeATECQuestionnaire(ctx context.Context, input InitializeATECQuestionnaireInput) (
+	*InitializeATECQuestionnaireOutput, error,
+) {
+	if input.useDefaultQuestionnaire() {
+		return u.getDefaultATECQuestionnaire(ctx)
+	}
+
+	pack, err := u.packageRepo.FindByID(ctx, input.PackageID)
+
+	switch err {
+	default:
+		logrus.WithField("input", helper.Dump(input)).WithError(err).Error("failed to find package by id")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		return &InitializeATECQuestionnaireOutput{
+			ID:            pack.ID,
+			Questionnaire: pack.Questionnaire,
+			Name:          pack.Name,
+		}, nil
+	}
+}
+
+func (u *QuestionnaireUsecase) getDefaultATECQuestionnaire(ctx context.Context) (*InitializeATECQuestionnaireOutput, error) {
+	pack, err := u.packageRepo.FindOldestActiveAndLockedPackage(ctx)
+
+	switch err {
+	default:
+		logrus.WithError(err).Error("failed to get oldest active locked package")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		return &InitializeATECQuestionnaireOutput{
+			ID:            pack.ID,
+			Questionnaire: pack.Questionnaire,
+			Name:          pack.Name,
+		}, nil
 	}
 }

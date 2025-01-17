@@ -126,6 +126,13 @@ definitions:
         type: string
     type: object
   rest.GetATECQuestionnaireOutput:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      questionnaire:
+        $ref: '#/definitions/model.Questionnaire'
     type: object
   rest.GetMyChildernOutput:
     properties:
@@ -585,6 +592,38 @@ paths:
       tags:
       - ATEC Package
   /v1/atec/questionnaires:
+    get:
+      consumes:
+      - application/json
+      description: Used when a user wants to get an active ATEC questionnaire to be
+        filled later
+      parameters:
+      - in: query
+        name: packageID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.GetATECQuestionnaireOutput'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Initialize ATEC questionnaire or get one
+      tags:
+      - Questionnaire
     post:
       consumes:
       - application/json
@@ -623,39 +662,6 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       summary: Submit questionnaire result
-      tags:
-      - Questionnaire
-  /v1/atec/questionnaires/:
-    get:
-      consumes:
-      - application/json
-      description: Used when a user wants to get an active ATEC questionnaire to be
-        filled later
-      parameters:
-      - in: query
-        name: packageID
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success response
-          schema:
-            allOf:
-            - $ref: '#/definitions/rest.StandardSuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/rest.GetATECQuestionnaireOutput'
-              type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/rest.StandardErrorResponse'
-        "500":
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/rest.StandardErrorResponse'
-      summary: Initialize ATEC questionnaire or get one
       tags:
       - Questionnaire
   /v1/atec/questionnaires/results:
