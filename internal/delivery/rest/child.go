@@ -86,12 +86,27 @@ func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 			})
 		}
 
-		output, err := s.childUsecase.Update(c.Request().Context(), usecase.UpdateChildInput{
+		ucUpdateChildInput := usecase.UpdateChildInput{
 			ChildID:     input.ChildID,
-			DateOfBirth: input.DateOfBirth,
+			DateOfBirth: nil,
 			Gender:      input.Gender,
 			Name:        input.Name,
-		})
+		}
+
+		if input.DateOfBirth != "" {
+			dateOfBirth, err := time.Parse("2006-01-02", input.DateOfBirth)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+					StatusCode:   http.StatusBadRequest,
+					ErrorMessage: "invalid time format. should be: 2001-11-29 (YYYY-MM-DD)",
+					ErrorCode:    http.StatusText(http.StatusBadRequest),
+				})
+			}
+
+			ucUpdateChildInput.DateOfBirth = &dateOfBirth
+		}
+
+		output, err := s.childUsecase.Update(c.Request().Context(), ucUpdateChildInput)
 
 		if err != nil {
 			return usecaseErrorToRESTResponse(c, err)

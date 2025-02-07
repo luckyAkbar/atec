@@ -152,7 +152,7 @@ func (r *ChildRepository) Search(ctx context.Context, input SearchChildInput) ([
 	cursor := r.db.WithContext(ctx)
 	query := input.buildSearchField(cursor)
 
-	err := query.Find(&children).Error
+	err := query.Order("created_at DESC").Find(&children).Error
 	if err != nil {
 		return nil, err
 	}
