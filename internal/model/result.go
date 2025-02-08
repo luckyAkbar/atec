@@ -95,3 +95,13 @@ func (rd *ResultDetail) Scan(_ context.Context, _ *schema.Field, _ reflect.Value
 
 	return nil
 }
+
+// CountTotalScore will count the total score of each subtest
+func (rd ResultDetail) CountTotalScore() int {
+	total := 0
+	for _, v := range rd {
+		total += v.Grade
+	}
+
+	return total
+}

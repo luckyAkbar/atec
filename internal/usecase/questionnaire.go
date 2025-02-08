@@ -132,6 +132,7 @@ type SubmitQuestionnaireOutput struct {
 	Result    model.ResultDetail `json:"result"`
 	ChildID   uuid.UUID          `json:"child_id"`
 	CreatedBy uuid.UUID          `json:"created_by"`
+	CreatedAt time.Time          `json:"created_at"`
 }
 
 // HandleSubmitQuestionnaire will handle the submission of a questionnaire result.
@@ -185,6 +186,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 
 		result, err := u.resultRepo.Create(ctx, createInput)
+		logger.Info(result)
 
 		if err != nil {
 			logger.WithError(err).Error("failed to write questionnaire result to database")
@@ -201,6 +203,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 			Answers:   result.Answer,
 			Result:    result.Result,
 			CreatedBy: result.CreatedBy,
+			CreatedAt: result.CreatedAt,
 		}, nil
 	}
 
@@ -260,6 +263,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		Result:    result.Result,
 		ChildID:   result.ChildID,
 		CreatedBy: result.CreatedBy,
+		CreatedAt: result.CreatedAt,
 	}, nil
 }
 

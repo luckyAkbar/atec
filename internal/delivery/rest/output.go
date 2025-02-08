@@ -15,12 +15,19 @@ type SearchActivePackageOutput struct {
 	Name          string              `json:"name"`
 }
 
+// GetPackageOutput components of what is considered grade or score from each submitted questionnaire
+type QuestionnaireGrade struct {
+	Detail model.ResultDetail `json:"detail"`
+	Total  int                `json:"total"`
+}
+
 // SubmitQuestionnaireOutput output
 type SubmitQuestionnaireOutput struct {
 	ResultID  uuid.UUID          `json:"result_id"`
-	Grade     model.ResultDetail `json:"grade"`
+	Grade     QuestionnaireGrade `json:"grade"`
 	ChildID   uuid.UUID          `json:"child_id,omitempty"`
 	CreatedBy uuid.UUID          `json:"created_by,omitempty"`
+	CreatedAt time.Time          `json:"created_at"`
 }
 
 // GetChildStatOutput output
