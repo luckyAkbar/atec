@@ -47,10 +47,14 @@ func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 			StatusCode: http.StatusOK,
 			Message:    http.StatusText(http.StatusOK),
 			Data: SubmitQuestionnaireOutput{
-				ResultID:  output.ResultID,
-				Grade:     output.Result,
+				ResultID: output.ResultID,
+				Grade: QuestionnaireGrade{
+					Detail: output.Result,
+					Total:  output.Result.CountTotalScore(),
+				},
 				ChildID:   output.ChildID,
 				CreatedBy: output.CreatedBy,
+				CreatedAt: output.CreatedAt,
 			},
 		})
 	}

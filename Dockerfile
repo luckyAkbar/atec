@@ -29,6 +29,3 @@ COPY --from=builder /app/docs .
 # static files, unlikely to change
 RUN mkdir -p ./assets
 COPY ./assets ./assets
-
-# copy the config
-COPY ./config.yaml .

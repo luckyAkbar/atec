@@ -1601,6 +1601,17 @@ const docTemplate = `{
                 }
             }
         },
+        "rest.QuestionnaireGrade": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "$ref": "#/definitions/model.ResultDetail"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "rest.RegisterChildInput": {
             "type": "object",
             "required": [
@@ -1813,11 +1824,14 @@ const docTemplate = `{
                 "child_id": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "created_by": {
                     "type": "string"
                 },
                 "grade": {
-                    "$ref": "#/definitions/model.ResultDetail"
+                    "$ref": "#/definitions/rest.QuestionnaireGrade"
                 },
                 "result_id": {
                     "type": "string"
