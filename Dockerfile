@@ -21,6 +21,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 # final stage
 FROM alpine:3.18.4
 
+RUN apk add curl
+
 WORKDIR /app
 
 COPY --from=builder /app/main .
@@ -30,3 +32,6 @@ COPY --from=builder /app/docs .
 RUN mkdir -p ./assets ./db
 COPY ./assets ./assets
 COPY ./db ./db
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
+CMD curl --fail http://0.0.0.0:5000/ping || exit 1

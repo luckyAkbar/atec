@@ -78,6 +78,15 @@ func serverFn(_ *cobra.Command, _ []string) {
 	httpServer.Use(middleware.Recover())
 	httpServer.Use(middleware.CORS())
 
+	rootGroup := httpServer.Group("")
+	rootGroup.GET("/ping", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, struct {
+			Message string `json:"message"`
+		}{
+			Message: "pong",
+		})
+	})
+
 	v1Group := httpServer.Group("v1")
 
 	rest.NewService(v1Group, authUsecase, packageUsecase, childUsecase, questionnaireUsecase)
