@@ -27,5 +27,6 @@ COPY --from=builder /app/main .
 COPY --from=builder /app/docs .
 
 # static files, unlikely to change
-RUN mkdir -p ./assets
+RUN mkdir -p ./assets ./db
 COPY ./assets ./assets
+COPY ./db ./db
