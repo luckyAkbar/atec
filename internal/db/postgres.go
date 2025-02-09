@@ -3,6 +3,7 @@ package db
 
 import (
 	"os"
+	"time"
 
 	"github.com/luckyAkbar/atec/internal/config"
 	"github.com/sirupsen/logrus"
@@ -20,13 +21,28 @@ var (
 
 // InitializePostgresConn initializes the postgres connection
 func InitializePostgresConn() {
-	conn, err := libdb.NewPostgresDB(config.PostgresDSN())
-	if err != nil {
+	retryLimit := 10
+	retryDelaySec := 3
+
+	success := false
+
+	for i := 0; i < retryLimit; i++ {
+		conn, err := libdb.NewPostgresDB(config.PostgresDSN())
+		if err != nil {
+			logrus.WithError(err).Error("failed to initialize postgres connection")
+
+			time.Sleep(time.Duration(retryDelaySec) * time.Second)
+		} else {
+			success = true
+			PostgresDB = conn
+			break
+		}
+	}
+
+	if !success {
 		logrus.Error("failed to initialize postgres connection")
 		os.Exit(1)
 	}
-
-	PostgresDB = conn
 
 	switch config.LogLevel() {
 	case "error":
