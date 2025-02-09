@@ -18,6 +18,7 @@ var migrateCMD = &cobra.Command{
 	Run:  migrateFn,
 }
 
+//nolint:gochecknoinits
 func init() {
 	migrateCMD.PersistentFlags().Int("step", 0, "maximum migration steps")
 	migrateCMD.PersistentFlags().String("direction", "up", "migration direction")
@@ -28,6 +29,7 @@ func migrateFn(cmd *cobra.Command, _ []string) {
 	direction := cmd.Flag("direction").Value.String()
 	stepStr := cmd.Flag("step").Value.String()
 	step, err := strconv.Atoi(stepStr)
+
 	if err != nil {
 		logrus.WithField("stepStr", stepStr).Fatal("Failed to parse step to int: ", err)
 	}
@@ -51,6 +53,7 @@ func migrateFn(cmd *cobra.Command, _ []string) {
 	} else {
 		n, err = migrate.ExecMax(pgdb, "postgres", migrations, migrate.Up, step)
 	}
+
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"migrations": utils.Dump(migrations),
