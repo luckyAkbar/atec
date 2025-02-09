@@ -15,7 +15,7 @@ type SearchActivePackageOutput struct {
 	Name          string              `json:"name"`
 }
 
-// GetPackageOutput components of what is considered grade or score from each submitted questionnaire
+// QuestionnaireGrade components of what is considered grade or score from each submitted questionnaire
 type QuestionnaireGrade struct {
 	Detail model.ResultDetail `json:"detail"`
 	Total  int                `json:"total"`
