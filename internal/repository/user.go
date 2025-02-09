@@ -21,6 +21,8 @@ type UserRepositoryIface interface {
 	Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.User, error)
 	Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error)
+
+	IsAdminAccountExists(ctx context.Context) (bool, error)
 }
 
 // NewUserRepository create a new instance of UserRepository
@@ -131,4 +133,18 @@ func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input Upd
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error) {
+	user := &model.User{}
+
+	err := r.db.WithContext(ctx).Take(user, "roles = ?", model.RolesAdmin).Error
+	switch err {
+	default:
+		return false, err
+	case gorm.ErrRecordNotFound:
+		return false, nil
+	case nil:
+		return true, nil
+	}
 }
