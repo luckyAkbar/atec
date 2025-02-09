@@ -14,6 +14,7 @@ import (
 	"github.com/luckyAkbar/atec/internal/config"
 	"github.com/luckyAkbar/atec/internal/db"
 	"github.com/luckyAkbar/atec/internal/delivery/rest"
+	"github.com/luckyAkbar/atec/internal/model"
 	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/luckyAkbar/atec/internal/usecase"
 	"github.com/sirupsen/logrus"
@@ -30,10 +31,12 @@ var serverCMD = &cobra.Command{
 
 //nolint:gochecknoinits
 func init() {
+	serverCMD.Flags().Bool("init-admin-account", false, "if set, will check whether an admin account already exists or not, if not will create one")
+
 	rootCMD.AddCommand(serverCMD)
 }
 
-func serverFn(_ *cobra.Command, _ []string) {
+func serverFn(cmd *cobra.Command, _ []string) {
 	key, err := encryption.ReadKeyFromFile(config.PrivateKeyFilePath())
 	if err != nil {
 		panic(err)
@@ -71,6 +74,15 @@ func serverFn(_ *cobra.Command, _ []string) {
 	packageUsecase := usecase.NewPackageUsecase(packageRepo)
 	childUsecase := usecase.NewChildUsecase(childRepo, resultRepo)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo, font)
+
+	initAdmin, err := cmd.Flags().GetBool("init-admin-account")
+	if err != nil {
+		panic(err)
+	}
+
+	if initAdmin {
+		init_admin_account(userRepo, sharedCryptor)
+	}
 
 	httpServer := echo.New()
 
@@ -130,4 +142,61 @@ func gracefulShutdown(srv *echo.Echo) {
 	if err := srv.Shutdown(ctx); err != nil {
 		srv.Logger.Fatal(err)
 	}
+}
+
+// init_admin_account is a function to initialize admin account to be used in the application.
+// This works by first checking whether an account with Admin level are already created or not.
+// If found nothing, will initialize one using predetermined email and password read from environment values.
+// if the envionment values are not set, will fail.
+func init_admin_account(userRepo *repository.UserRepository, sc *common.SharedCryptor) {
+	adminEmail := os.Getenv("INIT_ADMIN_EMAIL")
+	adminPassword := os.Getenv("INIT_ADMIN_PASSWORD")
+	adminUsername := os.Getenv("INIT_ADMIN_USERNAME")
+
+	found, err := userRepo.IsAdminAccountExists(context.Background())
+	if err != nil {
+		logrus.WithError(err).Error("failed to check whether admin account exists on database or not")
+		os.Exit(1)
+	}
+
+	if found {
+		logrus.Info("admin account already exists, skipping initialization")
+		return
+	}
+
+	if adminEmail == "" || adminPassword == "" {
+		logrus.Error("admin email or password is not set when running initialization of admin account")
+		os.Exit(1)
+	}
+
+	if adminUsername == "" {
+		adminUsername = "admin"
+	}
+
+	emailEncrypted, err := sc.Encrypt(adminEmail)
+	if err != nil {
+		logrus.WithError(err).Error("failed to encrypt admin email when initializing the first admin account")
+		os.Exit(1)
+	}
+
+	hashedPassword, err := sc.Hash([]byte(adminPassword))
+	if err != nil {
+		logrus.WithError(err).Error("failed to hash admin password when initializing the first admin account")
+		os.Exit(1)
+	}
+
+	adminUser, err := userRepo.Create(context.Background(), repository.CreateUserInput{
+		Email:    emailEncrypted,
+		Password: hashedPassword,
+		Username: adminUsername,
+		IsActive: true,
+		Roles:    model.RolesAdmin,
+	})
+
+	if err != nil {
+		logrus.WithError(err).Error("failed to create admin account when initializing the first admin account")
+		os.Exit(1)
+	}
+
+	logrus.Info("admin account created: ", adminUser.ID)
 }
