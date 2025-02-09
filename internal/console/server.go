@@ -81,7 +81,7 @@ func serverFn(cmd *cobra.Command, _ []string) {
 	}
 
 	if initAdmin {
-		init_admin_account(userRepo, sharedCryptor)
+		initAdminAccount(userRepo, sharedCryptor)
 	}
 
 	httpServer := echo.New()
@@ -144,11 +144,11 @@ func gracefulShutdown(srv *echo.Echo) {
 	}
 }
 
-// init_admin_account is a function to initialize admin account to be used in the application.
+// initAdminAccount is a function to initialize admin account to be used in the application.
 // This works by first checking whether an account with Admin level are already created or not.
 // If found nothing, will initialize one using predetermined email and password read from environment values.
 // if the envionment values are not set, will fail.
-func init_admin_account(userRepo *repository.UserRepository, sc *common.SharedCryptor) {
+func initAdminAccount(userRepo *repository.UserRepository, sc *common.SharedCryptor) {
 	adminEmail := os.Getenv("INIT_ADMIN_EMAIL")
 	adminPassword := os.Getenv("INIT_ADMIN_PASSWORD")
 	adminUsername := os.Getenv("INIT_ADMIN_USERNAME")
@@ -161,6 +161,7 @@ func init_admin_account(userRepo *repository.UserRepository, sc *common.SharedCr
 
 	if found {
 		logrus.Info("admin account already exists, skipping initialization")
+
 		return
 	}
 

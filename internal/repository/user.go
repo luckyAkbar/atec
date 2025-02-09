@@ -135,6 +135,8 @@ func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input Upd
 	return user, nil
 }
 
+// IsAdminAccountExists check if there is an admin account in the database.
+// If atleast 1 admin account is found, will return true, otherwise false
 func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error) {
 	user := &model.User{}
 

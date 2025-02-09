@@ -71,6 +71,7 @@ linters-settings:
       - j
       - f
       - y
+      - n
       - err
 
 issues:

@@ -26,7 +26,7 @@ func InitializePostgresConn() {
 
 	success := false
 
-	for i := 0; i < retryLimit; i++ {
+	for range retryLimit {
 		conn, err := libdb.NewPostgresDB(config.PostgresDSN())
 		if err != nil {
 			logrus.WithError(err).Error("failed to initialize postgres connection")
@@ -35,6 +35,7 @@ func InitializePostgresConn() {
 		} else {
 			success = true
 			PostgresDB = conn
+
 			break
 		}
 	}
