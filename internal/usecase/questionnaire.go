@@ -126,13 +126,14 @@ func performGrading(questionnaire model.Questionnaire, answers model.AnswerDetai
 
 // SubmitQuestionnaireOutput output
 type SubmitQuestionnaireOutput struct {
-	ResultID  uuid.UUID          `json:"result_id"`
-	PackageID uuid.UUID          `json:"package_id"`
-	Answers   model.AnswerDetail `json:"answers"`
-	Result    model.ResultDetail `json:"result"`
-	ChildID   uuid.UUID          `json:"child_id"`
-	CreatedBy uuid.UUID          `json:"created_by"`
-	CreatedAt time.Time          `json:"created_at"`
+	ResultID   uuid.UUID                `json:"result_id"`
+	PackageID  uuid.UUID                `json:"package_id"`
+	Answers    model.AnswerDetail       `json:"answers"`
+	Result     model.ResultDetail       `json:"result"`
+	Indication model.IndicationCategory `json:"indication"`
+	ChildID    uuid.UUID                `json:"child_id"`
+	CreatedBy  uuid.UUID                `json:"created_by"`
+	CreatedAt  time.Time                `json:"created_at"`
 }
 
 // HandleSubmitQuestionnaire will handle the submission of a questionnaire result.
@@ -172,6 +173,11 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 	}
 
+	// choosen not to save this to database because it not necessary, and it is fairly cheap to compute
+	// and also not many places need this. If on the future decide to save this to database, this is the place
+	// to start
+	indication := pack.IndicationCategories.GetIndicationCategoryByScore(grade.CountTotalScore())
+
 	requester := model.GetUserFromCtx(ctx)
 
 	if input.ChildID == uuid.Nil {
@@ -186,7 +192,6 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 
 		result, err := u.resultRepo.Create(ctx, createInput)
-		logger.Info(result)
 
 		if err != nil {
 			logger.WithError(err).Error("failed to write questionnaire result to database")
@@ -198,12 +203,13 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 
 		return &SubmitQuestionnaireOutput{
-			ResultID:  result.ID,
-			PackageID: input.PackageID,
-			Answers:   result.Answer,
-			Result:    result.Result,
-			CreatedBy: result.CreatedBy,
-			CreatedAt: result.CreatedAt,
+			ResultID:   result.ID,
+			PackageID:  input.PackageID,
+			Answers:    result.Answer,
+			Result:     result.Result,
+			Indication: indication,
+			CreatedBy:  result.CreatedBy,
+			CreatedAt:  result.CreatedAt,
 		}, nil
 	}
 
@@ -257,13 +263,14 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 	}
 
 	return &SubmitQuestionnaireOutput{
-		ResultID:  result.ID,
-		PackageID: result.PackageID,
-		Answers:   result.Answer,
-		Result:    result.Result,
-		ChildID:   result.ChildID,
-		CreatedBy: result.CreatedBy,
-		CreatedAt: result.CreatedAt,
+		ResultID:   result.ID,
+		PackageID:  result.PackageID,
+		Answers:    result.Answer,
+		Result:     result.Result,
+		Indication: indication,
+		ChildID:    result.ChildID,
+		CreatedBy:  result.CreatedBy,
+		CreatedAt:  result.CreatedAt,
 	}, nil
 }
 
