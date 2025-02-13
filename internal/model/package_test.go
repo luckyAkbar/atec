@@ -42,5 +42,4 @@ func TestChecklistGroupValidation(t *testing.T) {
 			t.Errorf("on empty options, expected error, but got nil")
 		}
 	})
-
 }

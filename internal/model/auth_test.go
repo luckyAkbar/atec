@@ -10,8 +10,6 @@ import (
 )
 
 func TestSetUserToCtx(t *testing.T) {
-	t.Parallel()
-
 	user := model.AuthUser{
 		ID:   uuid.New(),
 		Role: model.RolesAdmin,
@@ -36,8 +34,6 @@ func TestSetUserToCtx(t *testing.T) {
 }
 
 func TestGetUserFromCtx(t *testing.T) {
-	t.Parallel()
-
 	user := model.AuthUser{
 		ID:   uuid.New(),
 		Role: model.RolesAdmin,
@@ -64,6 +60,7 @@ func TestGetUserFromCtx(t *testing.T) {
 
 	t.Run("if the user data is not in the ctx, must return nil", func(t *testing.T) {
 		emptyCtx := context.Background()
+
 		got := model.GetUserFromCtx(emptyCtx)
 		if got != nil {
 			t.Errorf("on empty context value, should return nil")
