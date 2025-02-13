@@ -4,7 +4,7 @@ name: Mock Generation Check
 on:
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Allows manual triggering
+  workflow_call:  # Allows manual triggering
 
 jobs:
   verify-mocks:
