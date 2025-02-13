@@ -183,6 +183,8 @@ definitions:
     properties:
       detail:
         $ref: '#/definitions/model.ResultDetail'
+      indication:
+        $ref: '#/definitions/model.IndicationCategory'
       total:
         type: integer
     type: object

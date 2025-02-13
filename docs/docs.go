@@ -1607,6 +1607,9 @@ const docTemplate = `{
                 "detail": {
                     "$ref": "#/definitions/model.ResultDetail"
                 },
+                "indication": {
+                    "$ref": "#/definitions/model.IndicationCategory"
+                },
                 "total": {
                     "type": "integer"
                 }
