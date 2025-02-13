@@ -1,0 +1,13 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yaml
+
+  mocks:
+    needs: lint  # This ensures mocks runs after lint
+    uses: ./.github/workflows/mocks.yaml
