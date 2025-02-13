@@ -1,13 +1,17 @@
 name: PR Checks
 
+env:
+  GO_VERSION: '1.22.3'
+
 on:
   pull_request:
     branches: [ master ]
+  workflow_call:  # Allow this workflow to be called manually or by other workflows
 
 jobs:
   lint:
     uses: ./.github/workflows/lint.yaml
 
   mocks:
-    needs: lint  # This ensures mocks runs after lint
+    needs: lint  # Ensure mocks runs only if lint succeeds
     uses: ./.github/workflows/mocks.yaml
