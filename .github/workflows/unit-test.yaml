@@ -1,0 +1,20 @@
+name: Unit Test
+
+on:
+  workflow_call:
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Performing Unit Test
+        run: make unit-tests || exit 1
+```     
+      # may add coverage check later on
