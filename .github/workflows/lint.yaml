@@ -1,28 +1,31 @@
 name: GolangCI-Lint
 
 on:
-  pull_request:
-    branches:
-      - 'master' # Trigger on pull requests to any branch
   workflow_call:
-    
+
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+<<<<<<< HEAD
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.6' # Adjust the Go version to match your project
+=======
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+>>>>>>> 49b7634 (fix: sync and fix the pipeline order of execution)
 
-    - name: Install GolangCI-Lint
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.2
+      - name: Install GolangCI-Lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.2
 
-    - name: Run GolangCI-Lint
-      run: |
-        golangci-lint run --print-issued-lines=false --exclude-use-default=false --enable=goimports --enable=unconvert --enable=unparam --concurrency=4
+      - name: Run GolangCI-Lint
+        run: golangci-lint run
