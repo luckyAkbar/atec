@@ -12,8 +12,6 @@ import (
 func TestSetUserToCtx(t *testing.T) {
 	t.Parallel()
 
-	t.Fail()
-
 	user := model.AuthUser{
 		ID:   uuid.New(),
 		Role: model.RolesAdmin,
