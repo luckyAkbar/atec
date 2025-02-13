@@ -39,4 +39,6 @@ install-mockery:
 .PHONY: mocks
 mocks:
 	mockery
-	
+
+unit-tests:
+	go test -v -cover ./...
