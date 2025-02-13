@@ -18,8 +18,9 @@ type SearchActivePackageOutput struct {
 
 // QuestionnaireGrade components of what is considered grade or score from each submitted questionnaire
 type QuestionnaireGrade struct {
-	Detail model.ResultDetail `json:"detail"`
-	Total  int                `json:"total"`
+	Detail     model.ResultDetail       `json:"detail"`
+	Indication model.IndicationCategory `json:"indication"`
+	Total      int                      `json:"total"`
 }
 
 // SubmitQuestionnaireOutput output

@@ -49,8 +49,9 @@ func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 			Data: SubmitQuestionnaireOutput{
 				ResultID: output.ResultID,
 				Grade: QuestionnaireGrade{
-					Detail: output.Result,
-					Total:  output.Result.CountTotalScore(),
+					Detail:     output.Result,
+					Total:      output.Result.CountTotalScore(),
+					Indication: output.Indication,
 				},
 				ChildID:   output.ChildID,
 				CreatedBy: output.CreatedBy,
