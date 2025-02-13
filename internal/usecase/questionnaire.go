@@ -173,7 +173,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 	}
 
-	// choosen not to save this to database because it not necessary, and it is fairly cheap to compute
+	// chosen not to save this to database because it not necessary, and it is fairly cheap to compute
 	// and also not many places need this. If on the future decide to save this to database, this is the place
 	// to start
 	indication := pack.IndicationCategories.GetIndicationCategoryByScore(grade.CountTotalScore())
