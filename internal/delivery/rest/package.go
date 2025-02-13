@@ -398,9 +398,10 @@ func (s *service) HandleSearchActivePackage() echo.HandlerFunc {
 		output := []SearchActivePackageOutput{}
 		for _, pack := range packages {
 			output = append(output, SearchActivePackageOutput{
-				ID:            pack.ID,
-				Questionnaire: pack.Questionnaire,
-				Name:          pack.Name,
+				ID:                   pack.ID,
+				Questionnaire:        pack.Questionnaire,
+				IndicationCategories: pack.IndicationCategories,
+				Name:                 pack.Name,
 			})
 		}
 

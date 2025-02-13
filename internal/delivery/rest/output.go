@@ -10,9 +10,10 @@ import (
 
 // SearchActivePackageOutput output
 type SearchActivePackageOutput struct {
-	ID            uuid.UUID           `json:"id"`
-	Questionnaire model.Questionnaire `json:"questionnaire"`
-	Name          string              `json:"name"`
+	ID                   uuid.UUID                  `json:"id"`
+	Questionnaire        model.Questionnaire        `json:"questionnaire"`
+	IndicationCategories model.IndicationCategories `json:"indication_categories"`
+	Name                 string                     `json:"name"`
 }
 
 // QuestionnaireGrade components of what is considered grade or score from each submitted questionnaire
