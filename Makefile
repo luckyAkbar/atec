@@ -31,3 +31,12 @@ lint:
 # original docs: https://github.com/cortesi/modd
 install-modd:
 	go install github.com/cortesi/modd/cmd/modd@latest
+
+# source of truth which mockery version will be used
+install-mockery:
+	go install github.com/vektra/mockery/v2@v2.52.2
+
+.PHONY: mocks
+mocks:
+	mockery
+	

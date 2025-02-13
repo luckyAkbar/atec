@@ -1,0 +1,12 @@
+with-expecter: True
+dir: mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }} 
+mockname: "{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+filename: "{{.InterfaceName}}.go"
+resolve-type-alias: False
+issue-845-fix: True
+all: True
+packages:
+  github.com/luckyAkbar/atec:
+    config:
+      recursive: True

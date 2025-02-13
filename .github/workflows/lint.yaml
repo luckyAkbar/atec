@@ -3,8 +3,9 @@ name: GolangCI-Lint
 on:
   pull_request:
     branches:
-      - '**' # Trigger on pull requests to any branch
-
+      - 'master' # Trigger on pull requests to any branch
+    workflow_call:
+    
 jobs:
   lint:
     runs-on: ubuntu-latest
