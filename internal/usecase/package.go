@@ -274,9 +274,10 @@ func (u *PackageUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 
 // FindActiveQuestionnaireOutput output
 type FindActiveQuestionnaireOutput struct {
-	ID            uuid.UUID
-	Questionnaire model.Questionnaire
-	Name          string
+	ID                   uuid.UUID
+	Questionnaire        model.Questionnaire
+	IndicationCategories model.IndicationCategories
+	Name                 string
 }
 
 // FindActiveQuestionnaires will find any packages on database that have is_active set to true
@@ -306,9 +307,10 @@ func (u *PackageUsecase) FindActiveQuestionnaires(ctx context.Context) ([]FindAc
 	output := []FindActiveQuestionnaireOutput{}
 	for _, pack := range packages {
 		output = append(output, FindActiveQuestionnaireOutput{
-			ID:            pack.ID,
-			Questionnaire: pack.Questionnaire,
-			Name:          pack.Name,
+			ID:                   pack.ID,
+			Questionnaire:        pack.Questionnaire,
+			IndicationCategories: pack.IndicationCategories,
+			Name:                 pack.Name,
 		})
 	}
 

@@ -225,6 +225,10 @@ definitions:
     properties:
       id:
         type: string
+      indication_categories:
+        items:
+          $ref: '#/definitions/model.IndicationCategory'
+        type: array
       name:
         type: string
       questionnaire:

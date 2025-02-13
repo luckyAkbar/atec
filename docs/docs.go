@@ -1670,6 +1670,12 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "indication_categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.IndicationCategory"
+                    }
+                },
                 "name": {
                     "type": "string"
                 },
