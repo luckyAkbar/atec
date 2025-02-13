@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - 'master' # Trigger on pull requests to any branch
-    workflow_call:
+  workflow_call:
     
 jobs:
   lint:
