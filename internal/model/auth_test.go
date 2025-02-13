@@ -10,6 +10,8 @@ import (
 )
 
 func TestSetUserToCtx(t *testing.T) {
+	t.Parallel()
+
 	user := model.AuthUser{
 		ID:   uuid.New(),
 		Role: model.RolesAdmin,
