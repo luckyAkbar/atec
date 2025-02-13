@@ -16,5 +16,3 @@ jobs:
 
       - name: Performing Unit Test
         run: make unit-tests || exit 1
-```     
-      # may add coverage check later on
