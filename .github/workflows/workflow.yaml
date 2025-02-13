@@ -15,3 +15,7 @@ jobs:
   mocks:
     needs: lint  # Ensure mocks runs only if lint succeeds
     uses: ./.github/workflows/mocks.yaml
+  
+  unit-test:
+    needs: mocks  # Ensure unit-test runs only if mocks succeeds
+    uses: ./.github/workflows/unit-test.yaml
