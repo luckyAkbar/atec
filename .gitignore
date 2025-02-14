@@ -1,3 +1,4 @@
 config.yaml
 private.pem
 compose.yaml
+coverage.out
