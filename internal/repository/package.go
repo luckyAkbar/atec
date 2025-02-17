@@ -16,9 +16,9 @@ type PackageRepo struct {
 
 // PackageRepoIface interface for PackageRepo
 type PackageRepoIface interface {
-	Create(ctx context.Context, input CreatePackageInput) (*model.Package, error)
+	Create(ctx context.Context, input CreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Package, error)
-	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput) (*model.Package, error)
+	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error)
 	FindOldestActiveAndLockedPackage(ctx context.Context) (*model.Package, error)
@@ -41,7 +41,12 @@ type CreatePackageInput struct {
 }
 
 // Create insert new record of packages to the database
-func (r *PackageRepo) Create(ctx context.Context, input CreatePackageInput) (*model.Package, error) {
+func (r *PackageRepo) Create(ctx context.Context, input CreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+	tx := r.db
+	if len(txControllers) > 0 {
+		tx = txControllers[0]
+	}
+
 	pack := &model.Package{
 		CreatedBy:               input.UserID,
 		Questionnaire:           input.Questionnaire,
@@ -50,7 +55,7 @@ func (r *PackageRepo) Create(ctx context.Context, input CreatePackageInput) (*mo
 		ImageResultAttributeKey: input.ImageResultAttributeKey,
 	}
 
-	if err := r.db.WithContext(ctx).Create(pack).Error; err != nil {
+	if err := tx.WithContext(ctx).Create(pack).Error; err != nil {
 		return nil, err
 	}
 
@@ -100,10 +105,15 @@ func (upi UpdatePackageInput) ToUpdateFields() map[string]interface{} {
 }
 
 // Update update package record by its id
-func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput) (*model.Package, error) {
+func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+	tx := r.db
+	if len(txControllers) > 0 {
+		tx = txControllers[0]
+	}
+
 	pack := &model.Package{}
 
-	err := r.db.WithContext(ctx).Model(pack).
+	err := tx.WithContext(ctx).Model(pack).
 		Clauses(clause.Returning{}).Where("id = ?", id).
 		Updates(input.ToUpdateFields()).Error
 
