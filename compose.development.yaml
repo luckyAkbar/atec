@@ -2,7 +2,7 @@
 services:
   atec_api:
     container_name: atec_api
-    command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account"]
+    command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
     build:
       context: .
       dockerfile: Dockerfile
