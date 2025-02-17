@@ -56,7 +56,7 @@ func NewAuthUsecase(
 
 // LoginInput input
 type LoginInput struct {
-	Email    string `vallidate:"required,email"`
+	Email    string `validate:"required,email"`
 	Password string `validate:"required,min=8"`
 }
 
