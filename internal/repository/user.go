@@ -21,7 +21,7 @@ type UserRepositoryIface interface {
 	Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.User, error)
 	Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error)
-
+	Search(ctx context.Context, input SearchUserInput) ([]model.User, error)
 	IsAdminAccountExists(ctx context.Context) (bool, error)
 }
 
@@ -149,4 +149,44 @@ func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error)
 	case nil:
 		return true, nil
 	}
+}
+
+// SearchUserInput options to search users
+type SearchUserInput struct {
+	Role   model.Roles
+	Limit  int
+	Offset int
+}
+
+func (sui SearchUserInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+	if sui.Role != "" {
+		cursor = cursor.Where("roles = ?", sui.Role)
+	}
+
+	if sui.Limit > 0 {
+		cursor = cursor.Limit(sui.Limit)
+	}
+
+	if sui.Offset > 0 {
+		cursor = cursor.Offset(sui.Offset)
+	}
+
+	return cursor
+}
+
+// Search search users with given options
+func (r *UserRepository) Search(ctx context.Context, input SearchUserInput) ([]model.User, error) {
+	users := []model.User{}
+	cursor := r.db.WithContext(ctx)
+	cursor = input.toSearchFields(cursor)
+
+	if err := cursor.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return nil, ErrNotFound
+	}
+
+	return users, nil
 }
