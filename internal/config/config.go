@@ -3,14 +3,33 @@ package config
 
 import (
 	"fmt"
+	"testing"
 	"time"
 
 	"github.com/sendinblue/APIv3-go-library/lib"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-
-	// used to indirectly call the init function of this stdlib/config package
-	_ "github.com/sweet-go/stdlib/config"
 )
+
+// init this function is used to read the config file, preferably in yaml format (config.yaml)
+// this was made to prevent failure to read config file when running inside testing environment where the config file is not available and not needed
+func init() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("../")
+	viper.AddConfigPath("../../")
+	viper.AddConfigPath("../../../")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		logrus.WithError(err).Error("failed to read config file")
+
+		if !testing.Testing() {
+			panic("missing config file while run outside testing environment")
+		}
+	}
+}
 
 // LogLevel log level
 func LogLevel() string {
