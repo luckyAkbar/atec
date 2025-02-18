@@ -13,6 +13,8 @@ import (
 
 // init this function is used to read the config file, preferably in yaml format (config.yaml)
 // this was made to prevent failure to read config file when running inside testing environment where the config file is not available and not needed
+//
+//nolint:gochecknoinits
 func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
