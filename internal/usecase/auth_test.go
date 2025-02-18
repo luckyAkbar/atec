@@ -111,7 +111,7 @@ func TestSignupInput(t *testing.T) {
 	t.Run("password must be atleast 8 chars", func(t *testing.T) {
 		si := usecase.SignupInput{
 			Email:    "valid@mail.test",
-			Password: "only7ch",
+			Password: "1234567",
 			Username: "valid",
 		}
 
