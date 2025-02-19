@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/golang/freetype/truetype"
@@ -40,6 +41,17 @@ func init() {
 
 //nolint:funlen
 func serverFn(cmd *cobra.Command, _ []string) {
+	switch strings.ToLower(config.LogLevel()) {
+	default:
+		logrus.SetLevel(logrus.InfoLevel)
+	case "error":
+		logrus.SetLevel(logrus.ErrorLevel)
+	case "warn":
+		logrus.SetLevel(logrus.WarnLevel)
+	case "debug":
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
 	key, err := encryption.ReadKeyFromFile(config.PrivateKeyFilePath())
 	if err != nil {
 		panic(err)
@@ -68,8 +80,28 @@ func serverFn(cmd *cobra.Command, _ []string) {
 
 	db.InitializePostgresConn()
 
+	redisClient := db.NewRedisClient(db.RedisConnOpts{
+		Addr:               config.RedisAddr(),
+		Password:           config.RedisPassword(),
+		DB:                 config.RedisDB(),
+		MinIdleConns:       config.RedisMinIdleConns(),
+		ConnMaxLifetimeSec: config.RedisConnMaxLifetimeSec(),
+	})
+
+	redisLockClient := db.NewRedisClient(db.RedisConnOpts{
+		Addr:               config.RedisLockAddr(),
+		Password:           config.RedisLockPassword(),
+		DB:                 config.RedisLockDB(),
+		MinIdleConns:       config.RedisLockMinIdleConns(),
+		ConnMaxLifetimeSec: config.RedisLockConnMaxLifetimeSec(),
+	})
+
+	distributedLocker := common.NewDistributedLocker(redisLockClient)
+
+	cacheKeeper := db.NewCacheKeeper(redisClient, distributedLocker)
+
 	userRepo := repository.NewUserRepository(db.PostgresDB)
-	packageRepo := repository.NewPackageRepo(db.PostgresDB)
+	packageRepo := repository.NewPackageRepo(db.PostgresDB, cacheKeeper)
 	childRepo := repository.NewChildRepository(db.PostgresDB)
 	resultRepo := repository.NewResultRepository(db.PostgresDB)
 

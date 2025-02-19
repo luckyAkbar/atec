@@ -88,3 +88,67 @@ func ChangePasswordTokenExpiry() time.Duration {
 func ServerResetPasswordBaseURL() string {
 	return viper.GetString("server.reset_password_base_url")
 }
+
+// RedisAddr get redis address
+func RedisAddr() string {
+	return viper.GetString("caching.redis.host")
+}
+
+// RedisPassword get redis password
+func RedisPassword() string {
+	return viper.GetString("caching.redis.password")
+}
+
+// RedisDB get redis db
+func RedisDB() int {
+	return viper.GetInt("caching.redis.db")
+}
+
+// RedisMinIdleConns get redis min idle connections
+func RedisMinIdleConns() int {
+	return viper.GetInt("caching.redis.min_idle_conns")
+}
+
+// RedisConnMaxLifetimeSec get redis connection max lifetime in seconds
+func RedisConnMaxLifetimeSec() int {
+	return viper.GetInt("caching.redis.conn_max_lifetime_sec")
+}
+
+// CacheExpiryDuration get cache expiry duration
+func CacheExpiryDuration() struct {
+	AllActivePackage       time.Duration
+	DefaultNilCacheTimeout time.Duration
+} {
+	return struct {
+		AllActivePackage       time.Duration
+		DefaultNilCacheTimeout time.Duration
+	}{
+		AllActivePackage:       viper.GetDuration("caching.expiration.all_active_packages"),
+		DefaultNilCacheTimeout: viper.GetDuration("caching.expiration.default_nil_value"),
+	}
+}
+
+// RedisLockAddr redis lock address
+func RedisLockAddr() string {
+	return viper.GetString("caching.redis_lock.host")
+}
+
+// RedisLockPassword redis lock password
+func RedisLockPassword() string {
+	return viper.GetString("caching.redis_lock.password")
+}
+
+// RedisLockDB redis lock db
+func RedisLockDB() int {
+	return viper.GetInt("caching.redis_lock.db")
+}
+
+// RedisLockMinIdleConns redis lock min idle connections
+func RedisLockMinIdleConns() int {
+	return viper.GetInt("caching.redis_lock.min_idle_conns")
+}
+
+// RedisLockConnMaxLifetimeSec redis lock connection max lifetime in seconds
+func RedisLockConnMaxLifetimeSec() int {
+	return viper.GetInt("caching.redis_lock.conn_max_lifetime_sec")
+}
