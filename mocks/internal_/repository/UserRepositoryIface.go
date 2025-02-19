@@ -277,6 +277,65 @@ func (_c *UserRepositoryIface_IsAdminAccountExists_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// Search provides a mock function with given fields: ctx, input
+func (_m *UserRepositoryIface) Search(ctx context.Context, input repository.SearchUserInput) ([]model.User, error) {
+	ret := _m.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Search")
+	}
+
+	var r0 []model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, repository.SearchUserInput) ([]model.User, error)); ok {
+		return rf(ctx, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, repository.SearchUserInput) []model.User); ok {
+		r0 = rf(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, repository.SearchUserInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UserRepositoryIface_Search_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Search'
+type UserRepositoryIface_Search_Call struct {
+	*mock.Call
+}
+
+// Search is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input repository.SearchUserInput
+func (_e *UserRepositoryIface_Expecter) Search(ctx interface{}, input interface{}) *UserRepositoryIface_Search_Call {
+	return &UserRepositoryIface_Search_Call{Call: _e.mock.On("Search", ctx, input)}
+}
+
+func (_c *UserRepositoryIface_Search_Call) Run(run func(ctx context.Context, input repository.SearchUserInput)) *UserRepositoryIface_Search_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(repository.SearchUserInput))
+	})
+	return _c
+}
+
+func (_c *UserRepositoryIface_Search_Call) Return(_a0 []model.User, _a1 error) *UserRepositoryIface_Search_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *UserRepositoryIface_Search_Call) RunAndReturn(run func(context.Context, repository.SearchUserInput) ([]model.User, error)) *UserRepositoryIface_Search_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function with given fields: ctx, userID, input
 func (_m *UserRepositoryIface) Update(ctx context.Context, userID uuid.UUID, input repository.UpdateUserInput) (*model.User, error) {
 	ret := _m.Called(ctx, userID, input)
