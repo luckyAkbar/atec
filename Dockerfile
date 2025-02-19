@@ -19,7 +19,7 @@ COPY ./main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # final stage
-FROM alpine:3.18.4
+FROM alpine:3.21
 
 RUN apk add curl
 
