@@ -282,10 +282,7 @@ type FindActiveQuestionnaireOutput struct {
 
 // FindActiveQuestionnaires will find any packages on database that have is_active set to true
 func (u *PackageUsecase) FindActiveQuestionnaires(ctx context.Context) ([]FindActiveQuestionnaireOutput, error) {
-	truth := true
-	packages, err := u.packageRepo.Search(ctx, repository.SearchPackageInput{
-		IsActive: &truth,
-	})
+	packages, err := u.packageRepo.FindAllActivePackages(ctx)
 
 	switch err {
 	default:

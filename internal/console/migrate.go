@@ -4,12 +4,12 @@ package console
 import (
 	"strconv"
 
-	"github.com/kumparan/go-utils"
 	"github.com/luckyAkbar/atec/internal/config"
 	"github.com/luckyAkbar/atec/internal/db"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/sweet-go/stdlib/helper"
 )
 
 var migrateCMD = &cobra.Command{
@@ -56,7 +56,7 @@ func migrateFn(cmd *cobra.Command, _ []string) {
 
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"migrations": utils.Dump(migrations),
+			"migrations": helper.Dump(migrations),
 			"direction":  direction}).
 			Fatal("Failed to migrate database: ", err)
 	}
