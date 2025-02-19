@@ -1,6 +1,6 @@
 module github.com/luckyAkbar/atec
 
-go 1.22.3
+go 1.23.6
 
 require (
 	github.com/go-playground/validator/v10 v10.23.0
