@@ -15,17 +15,17 @@ import (
 
 // Package represent packages table on database
 type Package struct {
-	ID                      uuid.UUID `gorm:"default:uuid_generate_v4()"`
-	CreatedBy               uuid.UUID
-	Questionnaire           Questionnaire
-	IndicationCategories    IndicationCategories
-	ImageResultAttributeKey ImageResultAttributeKey
-	Name                    string
-	IsActive                bool
-	IsLocked                bool
-	CreatedAt               time.Time `gorm:"default:now()"`
-	UpdatedAt               time.Time `gorm:"default:now()"`
-	DeletedAt               gorm.DeletedAt
+	ID                      uuid.UUID               `gorm:"default:uuid_generate_v4()" json:"id"`
+	CreatedBy               uuid.UUID               `json:"created_by"`
+	Questionnaire           Questionnaire           `json:"questionnaire"`
+	IndicationCategories    IndicationCategories    `json:"indication_categories"`
+	ImageResultAttributeKey ImageResultAttributeKey `json:"image_result_attribute_key"`
+	Name                    string                  `json:"name"`
+	IsActive                bool                    `json:"is_active"`
+	IsLocked                bool                    `json:"is_locked"`
+	CreatedAt               time.Time               `gorm:"default:now()" json:"created_at"`
+	UpdatedAt               time.Time               `gorm:"default:now()" json:"updated_at"`
+	DeletedAt               gorm.DeletedAt          `json:"deleted_at"`
 }
 
 // AnswerOption each singular answer option for a given question along with its detail
