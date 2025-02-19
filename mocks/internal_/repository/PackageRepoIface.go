@@ -5,8 +5,11 @@ package repository
 import (
 	context "context"
 
-	model "github.com/luckyAkbar/atec/internal/model"
+	gorm "gorm.io/gorm"
+
 	mock "github.com/stretchr/testify/mock"
+
+	model "github.com/luckyAkbar/atec/internal/model"
 
 	repository "github.com/luckyAkbar/atec/internal/repository"
 
@@ -26,9 +29,16 @@ func (_m *PackageRepoIface) EXPECT() *PackageRepoIface_Expecter {
 	return &PackageRepoIface_Expecter{mock: &_m.Mock}
 }
 
-// Create provides a mock function with given fields: ctx, input
-func (_m *PackageRepoIface) Create(ctx context.Context, input repository.CreatePackageInput) (*model.Package, error) {
-	ret := _m.Called(ctx, input)
+// Create provides a mock function with given fields: ctx, input, txControllers
+func (_m *PackageRepoIface) Create(ctx context.Context, input repository.CreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+	_va := make([]interface{}, len(txControllers))
+	for _i := range txControllers {
+		_va[_i] = txControllers[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, input)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
@@ -36,19 +46,19 @@ func (_m *PackageRepoIface) Create(ctx context.Context, input repository.CreateP
 
 	var r0 *model.Package
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, repository.CreatePackageInput) (*model.Package, error)); ok {
-		return rf(ctx, input)
+	if rf, ok := ret.Get(0).(func(context.Context, repository.CreatePackageInput, ...*gorm.DB) (*model.Package, error)); ok {
+		return rf(ctx, input, txControllers...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, repository.CreatePackageInput) *model.Package); ok {
-		r0 = rf(ctx, input)
+	if rf, ok := ret.Get(0).(func(context.Context, repository.CreatePackageInput, ...*gorm.DB) *model.Package); ok {
+		r0 = rf(ctx, input, txControllers...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Package)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, repository.CreatePackageInput) error); ok {
-		r1 = rf(ctx, input)
+	if rf, ok := ret.Get(1).(func(context.Context, repository.CreatePackageInput, ...*gorm.DB) error); ok {
+		r1 = rf(ctx, input, txControllers...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -64,13 +74,21 @@ type PackageRepoIface_Create_Call struct {
 // Create is a helper method to define mock.On call
 //   - ctx context.Context
 //   - input repository.CreatePackageInput
-func (_e *PackageRepoIface_Expecter) Create(ctx interface{}, input interface{}) *PackageRepoIface_Create_Call {
-	return &PackageRepoIface_Create_Call{Call: _e.mock.On("Create", ctx, input)}
+//   - txControllers ...*gorm.DB
+func (_e *PackageRepoIface_Expecter) Create(ctx interface{}, input interface{}, txControllers ...interface{}) *PackageRepoIface_Create_Call {
+	return &PackageRepoIface_Create_Call{Call: _e.mock.On("Create",
+		append([]interface{}{ctx, input}, txControllers...)...)}
 }
 
-func (_c *PackageRepoIface_Create_Call) Run(run func(ctx context.Context, input repository.CreatePackageInput)) *PackageRepoIface_Create_Call {
+func (_c *PackageRepoIface_Create_Call) Run(run func(ctx context.Context, input repository.CreatePackageInput, txControllers ...*gorm.DB)) *PackageRepoIface_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(repository.CreatePackageInput))
+		variadicArgs := make([]*gorm.DB, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(*gorm.DB)
+			}
+		}
+		run(args[0].(context.Context), args[1].(repository.CreatePackageInput), variadicArgs...)
 	})
 	return _c
 }
@@ -80,7 +98,7 @@ func (_c *PackageRepoIface_Create_Call) Return(_a0 *model.Package, _a1 error) *P
 	return _c
 }
 
-func (_c *PackageRepoIface_Create_Call) RunAndReturn(run func(context.Context, repository.CreatePackageInput) (*model.Package, error)) *PackageRepoIface_Create_Call {
+func (_c *PackageRepoIface_Create_Call) RunAndReturn(run func(context.Context, repository.CreatePackageInput, ...*gorm.DB) (*model.Package, error)) *PackageRepoIface_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -128,6 +146,64 @@ func (_c *PackageRepoIface_Delete_Call) Return(_a0 error) *PackageRepoIface_Dele
 }
 
 func (_c *PackageRepoIface_Delete_Call) RunAndReturn(run func(context.Context, uuid.UUID) error) *PackageRepoIface_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FindAllActivePackages provides a mock function with given fields: ctx
+func (_m *PackageRepoIface) FindAllActivePackages(ctx context.Context) ([]model.Package, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindAllActivePackages")
+	}
+
+	var r0 []model.Package
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]model.Package, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []model.Package); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.Package)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PackageRepoIface_FindAllActivePackages_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindAllActivePackages'
+type PackageRepoIface_FindAllActivePackages_Call struct {
+	*mock.Call
+}
+
+// FindAllActivePackages is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *PackageRepoIface_Expecter) FindAllActivePackages(ctx interface{}) *PackageRepoIface_FindAllActivePackages_Call {
+	return &PackageRepoIface_FindAllActivePackages_Call{Call: _e.mock.On("FindAllActivePackages", ctx)}
+}
+
+func (_c *PackageRepoIface_FindAllActivePackages_Call) Run(run func(ctx context.Context)) *PackageRepoIface_FindAllActivePackages_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *PackageRepoIface_FindAllActivePackages_Call) Return(_a0 []model.Package, _a1 error) *PackageRepoIface_FindAllActivePackages_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *PackageRepoIface_FindAllActivePackages_Call) RunAndReturn(run func(context.Context) ([]model.Package, error)) *PackageRepoIface_FindAllActivePackages_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -308,9 +384,16 @@ func (_c *PackageRepoIface_Search_Call) RunAndReturn(run func(context.Context, r
 	return _c
 }
 
-// Update provides a mock function with given fields: ctx, id, input
-func (_m *PackageRepoIface) Update(ctx context.Context, id uuid.UUID, input repository.UpdatePackageInput) (*model.Package, error) {
-	ret := _m.Called(ctx, id, input)
+// Update provides a mock function with given fields: ctx, id, input, txControllers
+func (_m *PackageRepoIface) Update(ctx context.Context, id uuid.UUID, input repository.UpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+	_va := make([]interface{}, len(txControllers))
+	for _i := range txControllers {
+		_va[_i] = txControllers[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, input)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
@@ -318,19 +401,19 @@ func (_m *PackageRepoIface) Update(ctx context.Context, id uuid.UUID, input repo
 
 	var r0 *model.Package
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, repository.UpdatePackageInput) (*model.Package, error)); ok {
-		return rf(ctx, id, input)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, repository.UpdatePackageInput, ...*gorm.DB) (*model.Package, error)); ok {
+		return rf(ctx, id, input, txControllers...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, repository.UpdatePackageInput) *model.Package); ok {
-		r0 = rf(ctx, id, input)
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, repository.UpdatePackageInput, ...*gorm.DB) *model.Package); ok {
+		r0 = rf(ctx, id, input, txControllers...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Package)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, repository.UpdatePackageInput) error); ok {
-		r1 = rf(ctx, id, input)
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, repository.UpdatePackageInput, ...*gorm.DB) error); ok {
+		r1 = rf(ctx, id, input, txControllers...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -347,13 +430,21 @@ type PackageRepoIface_Update_Call struct {
 //   - ctx context.Context
 //   - id uuid.UUID
 //   - input repository.UpdatePackageInput
-func (_e *PackageRepoIface_Expecter) Update(ctx interface{}, id interface{}, input interface{}) *PackageRepoIface_Update_Call {
-	return &PackageRepoIface_Update_Call{Call: _e.mock.On("Update", ctx, id, input)}
+//   - txControllers ...*gorm.DB
+func (_e *PackageRepoIface_Expecter) Update(ctx interface{}, id interface{}, input interface{}, txControllers ...interface{}) *PackageRepoIface_Update_Call {
+	return &PackageRepoIface_Update_Call{Call: _e.mock.On("Update",
+		append([]interface{}{ctx, id, input}, txControllers...)...)}
 }
 
-func (_c *PackageRepoIface_Update_Call) Run(run func(ctx context.Context, id uuid.UUID, input repository.UpdatePackageInput)) *PackageRepoIface_Update_Call {
+func (_c *PackageRepoIface_Update_Call) Run(run func(ctx context.Context, id uuid.UUID, input repository.UpdatePackageInput, txControllers ...*gorm.DB)) *PackageRepoIface_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(repository.UpdatePackageInput))
+		variadicArgs := make([]*gorm.DB, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(*gorm.DB)
+			}
+		}
+		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(repository.UpdatePackageInput), variadicArgs...)
 	})
 	return _c
 }
@@ -363,7 +454,7 @@ func (_c *PackageRepoIface_Update_Call) Return(_a0 *model.Package, _a1 error) *P
 	return _c
 }
 
-func (_c *PackageRepoIface_Update_Call) RunAndReturn(run func(context.Context, uuid.UUID, repository.UpdatePackageInput) (*model.Package, error)) *PackageRepoIface_Update_Call {
+func (_c *PackageRepoIface_Update_Call) RunAndReturn(run func(context.Context, uuid.UUID, repository.UpdatePackageInput, ...*gorm.DB) (*model.Package, error)) *PackageRepoIface_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }
