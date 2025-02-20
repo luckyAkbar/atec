@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redsync/redsync/v4"
+	redsync "github.com/go-redsync/redsync/v4"
 	"github.com/jpillora/backoff"
 	"github.com/luckyAkbar/atec/internal/common"
-	"github.com/redis/go-redis/v9"
+	redis "github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
 
