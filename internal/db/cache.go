@@ -95,7 +95,7 @@ func NewCacheKeeper(redisClient *redis.Client, distributedLock *common.Distribut
 
 // Get get a key from cache
 func (ck *CacheKeeper) Get(ctx context.Context, key string) (string, error) {
-	val, err := ck.redisClient.Conn().Get(ctx, key).Result()
+	val, err := ck.redisClient.Get(ctx, key).Result()
 	switch err {
 	default:
 		return "", err
