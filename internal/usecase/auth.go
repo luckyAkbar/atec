@@ -652,7 +652,7 @@ func (u *AuthUsecase) HandleInitesetPassword(ctx context.Context, input InitRese
 					<div class="content">
 						<p>Baru saja sistem menerima permintaan reset kata sandi terhadap akun Anda. Apabila Anda merasa melakukannya, silahkan klik tombol di bawah ini:</p>
 						<div class="btn-container">
-							<a href="%s?change_password_token=%s" class="btn">Reset Kata Sandi</a>
+							<a href="%s?%s=%s" class="btn">Reset Kata Sandi</a>
 						</div>
 					</div>
 					<div class="footer">
@@ -661,7 +661,7 @@ func (u *AuthUsecase) HandleInitesetPassword(ctx context.Context, input InitRese
 				</div>
 			</body>
 			</html>
-			`, config.ServerResetPasswordBaseURL(), changePassToken),
+			`, config.ServerResetPasswordBaseURL(), model.ChangePasswordTokenQuery, changePassToken),
 	})
 
 	if err != nil {

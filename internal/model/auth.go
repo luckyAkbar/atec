@@ -40,3 +40,7 @@ type LoginTokenClaims struct {
 
 	jwt.RegisteredClaims
 }
+
+// ChangePasswordTokenQuery is the key in the query parameters to handle
+// change password request
+const ChangePasswordTokenQuery = "change_password_token"
