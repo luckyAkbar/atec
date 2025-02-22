@@ -851,6 +851,30 @@ paths:
       tags:
       - Authentication
   /v1/auth/password:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: |-
+        After user click the link from email for reset password, he will be redirected here to change the password. This might not work in this page
+        since the returned value in this API is HTML
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: '#/definitions/rest.StandardSuccessResponse'
+        "400":
+          description: "Bad request\"\t\"validation error"
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Webpage's form to change user's account password
+      tags:
+      - Authentication
     patch:
       consumes:
       - application/json
