@@ -383,15 +383,15 @@ func changePasswordWebpage(token string) string {
 	<body>
 		<div class="email-container">
 			<div class="header">
-				<h2>Change Password</h2>
+				<h2>Atur Ulang Kata Sandi</h2>
 			</div>
 			
 			<div class="content">
-				<p>Please enter your new password below.</p>
+				<p>Mohon masukan kata sandi baru anda di formulir di bawah ini.</p>
 				
 				<form id="passwordForm">
 					<div class="form-group">
-						<label for="password">New Password</label>
+						<label for="password">Kata Sandi</label>
 						<input type="password" id="password" name="password" required>
 						<button type="button" class="password-toggle" onclick="togglePassword('password')">
 							👁️
@@ -399,7 +399,7 @@ func changePasswordWebpage(token string) string {
 					</div>
 					
 					<div class="form-group">
-						<label for="confirmPassword">Confirm Password</label>
+						<label for="confirmPassword">Konfirmasi Kata Sandi</label>
 						<input type="password" id="confirmPassword" name="confirmPassword" required>
 						<button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
 							👁️
@@ -420,8 +420,8 @@ func changePasswordWebpage(token string) string {
 		<!-- Modal HTML -->
 		<div id="successModal" class="modal">
 			<div class="modal-content">
-				<div class="modal-title">Password Berhasil Diubah</div>
-				<div class="modal-body">Silahkan login kembali di aplikasi dengan menggunakan akun Anda</div>
+				<div class="modal-title">Kata Sandi Berhasil Diubah</div>
+				<div class="modal-body">Silahkan <i>login</i> kembali di aplikasi dengan menggunakan akun Anda</div>
 				<button class="modal-close-btn" onclick="closeModal()">Tutup</button>
 			</div>
 		</div>
@@ -452,15 +452,15 @@ func changePasswordWebpage(token string) string {
 						
 						// Validation
 						if (password === '' || confirmPassword === '') {
-							throw new Error('Harap isi kedua kolom password!');
+							throw new Error('Harap isi kedua kolom kata sandi!');
 						}
 						
 						if (password !== confirmPassword) {
-							throw new Error('Password tidak cocok!');
+							throw new Error('kata sandi tidak cocok!');
 						}
 
 						if (password.length < 8 || confirmPassword.length < 8) {
-							throw new Error('Password minimal 8 karakter!');
+							throw new Error('kata sandi minimal 8 karakter!');
 						}
 
 						await resetPasswordAPI(password);
@@ -472,14 +472,14 @@ func changePasswordWebpage(token string) string {
 						alert(error.message);
 					} finally {
 						changePasswordBtn.disabled = false;
-						changePasswordBtn.textContent = 'Ganti Password';
+						changePasswordBtn.textContent = 'Ganti Kata Sandi';
 						changePasswordBtn.style.opacity = '1';
 						changePasswordBtn.style.cursor = 'pointer';
 					}
 				});
 			});
 
-			 // Get modal element
+			// Get modal element
 			const modal = document.getElementById('successModal');
 
 			function showModal() {
