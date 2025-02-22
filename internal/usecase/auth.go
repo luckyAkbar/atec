@@ -563,6 +563,13 @@ func (u *AuthUsecase) HandleInitesetPassword(ctx context.Context, input InitRese
 		break
 	}
 
+	if !user.IsActive {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "this account active status is disabled",
+		}
+	}
+
 	changePassToken, err := u.sharedCryptor.CreateJWT(jwt.RegisteredClaims{
 		Issuer:    string(TokenIssuerSystem),
 		Subject:   string(ChangePasswordToken),
