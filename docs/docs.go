@@ -731,6 +731,39 @@ const docTemplate = `{
             }
         },
         "/v1/auth/password": {
+            "get": {
+                "description": "After user click the link from email for reset password, he will be redirected here to change the password. This might not work in this page\nsince the returned value in this API is HTML",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Webpage's form to change user's account password",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request\"\t\"validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "After using init reset password method, the resulting JWT token can be used here\nto authorize the password changes.",
                 "consumes": [

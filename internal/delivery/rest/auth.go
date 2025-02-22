@@ -1,9 +1,12 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/luckyAkbar/atec/internal/config"
+	"github.com/luckyAkbar/atec/internal/model"
 	"github.com/luckyAkbar/atec/internal/usecase"
 )
 
@@ -70,7 +73,7 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 			})
 		}
 
-		output, err := s.authUsecase.HandleAccountVerification(c.Request().Context(), usecase.AccountVerificationInput{
+		_, err := s.authUsecase.HandleAccountVerification(c.Request().Context(), usecase.AccountVerificationInput{
 			VerificationToken: input.ValidationToken,
 		})
 
@@ -78,13 +81,7 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 			return usecaseErrorToRESTResponse(c, err)
 		}
 
-		return c.JSON(http.StatusOK, StandardSuccessResponse{
-			StatusCode: http.StatusOK,
-			Message:    http.StatusText(http.StatusOK),
-			Data: SignupOutput{
-				Message: output.Message,
-			},
-		})
+		return c.HTML(http.StatusOK, accountVerifiedWebpage())
 	}
 }
 
@@ -209,4 +206,393 @@ func (s *service) HandleResetPassword() echo.HandlerFunc {
 			},
 		})
 	}
+}
+
+// @Summary		Webpage's form to change user's account password
+// @Description	After user click the link from email for reset password, he will be redirected here to change the password. This might not work in this page
+// @Description	since the returned value in this API is HTML
+// @Tags			Authentication
+// @Accept			application/x-www-form-urlencoded
+// @Produce		html
+// @Success		200	{object}	StandardSuccessResponse	"Successful response"
+// @Failure		400	{object}	StandardErrorResponse	"Bad request"	"validation error"
+// @Failure		500	{object}	StandardErrorResponse	"Internal Error"
+// @Router			/v1/auth/password [get]
+func (s *service) HandleRenderChangePasswordPage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		changePasswordTokenb := c.QueryParam(model.ChangePasswordTokenQuery)
+		if changePasswordTokenb == "" {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "missing required query parameter",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		return c.HTML(http.StatusOK, changePasswordWebpage(changePasswordTokenb))
+	}
+}
+
+//nolint:funlen
+func changePasswordWebpage(token string) string {
+	return fmt.Sprintf(`
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Formulir Penggantian Kata Sandi</title>
+		<style>
+			/* General styles */
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 0;
+				background-color: #f6f6f6;
+				color: #333;
+			}
+			
+			.email-container {
+				max-width: 600px;
+				margin: 20px auto;
+				background-color: #ffffff;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+			
+			.header {
+				background-color: #4CAF50;
+				color: white;
+				padding: 20px;
+				text-align: center;
+			}
+			
+			.content {
+				padding: 20px;
+			}
+			
+			.content p {
+				margin: 0 0 15px;
+				line-height: 1.6;
+			}
+			
+			.form-group {
+				margin-bottom: 20px;
+				position: relative;
+			}
+			
+			.form-group label {
+				display: block;
+				margin-bottom: 8px;
+				font-weight: bold;
+			}
+			
+			.form-group input {
+				width: 100%%;
+				padding: 10px;
+				border: 1px solid #ddd;
+				border-radius: 4px;
+				box-sizing: border-box;
+				font-size: 16px;
+			}
+			
+			.password-toggle {
+				position: absolute;
+				right: 10px;
+				top: 38px;
+				cursor: pointer;
+				color: #666;
+				background: none;
+				border: none;
+			}
+			
+			.btn-container {
+				text-align: center;
+				margin: 20px 0;
+			}
+			
+			.btn {
+				display: inline-block;
+				background-color: #4CAF50;
+				color: white;
+				text-decoration: none;
+				padding: 10px 20px;
+				font-size: 16px;
+				border-radius: 5px;
+				border: none;
+				cursor: pointer;
+			}
+			
+			.btn:hover {
+				background-color: #45a049;
+			}
+			
+			.footer {
+				background-color: #f1f1f1;
+				text-align: center;
+				padding: 10px;
+				font-size: 12px;
+				color: #666;
+			}
+
+			/* Modal styles */
+			.modal {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%%;
+				height: 100%%;
+				background-color: rgba(0, 0, 0, 0.5);
+				justify-content: center;
+				align-items: center;
+			}
+			.modal-content {
+				background-color: white;
+				padding: 20px;
+				border-radius: 8px;
+				width: 300px;
+				text-align: center;
+				box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			}
+			.modal-title {
+				font-size: 20px;
+				font-weight: bold;
+				color: #4CAF50;
+				margin-bottom: 15px;
+			}
+			.modal-body {
+				font-size: 14px;
+				color: #333;
+				margin-bottom: 20px;
+			}
+			.modal-close-btn {
+				background-color: #4CAF50;
+				color: white;
+				border: none;
+				padding: 8px 16px;
+				border-radius: 4px;
+				cursor: pointer;
+			}
+			.modal-close-btn:hover {
+				background-color: #45a049;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="email-container">
+			<div class="header">
+				<h2>Change Password</h2>
+			</div>
+			
+			<div class="content">
+				<p>Please enter your new password below.</p>
+				
+				<form id="passwordForm">
+					<div class="form-group">
+						<label for="password">New Password</label>
+						<input type="password" id="password" name="password" required>
+						<button type="button" class="password-toggle" onclick="togglePassword('password')">
+							👁️
+						</button>
+					</div>
+					
+					<div class="form-group">
+						<label for="confirmPassword">Confirm Password</label>
+						<input type="password" id="confirmPassword" name="confirmPassword" required>
+						<button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+							👁️
+						</button>
+					</div>
+					
+					<div class="btn-container">
+						<button type="button" class="btn" onclick="changePassword()">Ganti Password</button>
+					</div>
+				</form>
+			</div>
+			
+			<div class="footer">
+							<p>&copy; 2025. Hak Cipta Dilindungi.</p>
+			</div>
+		</div>
+
+		<!-- Modal HTML -->
+		<div id="successModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-title">Password Berhasil Diubah</div>
+				<div class="modal-body">Silahkan login kembali di aplikasi dengan menggunakan akun Anda</div>
+				<button class="modal-close-btn" onclick="closeModal()">Tutup</button>
+			</div>
+		</div>
+
+		<script>
+			function togglePassword(inputId) {
+				const passwordInput = document.getElementById(inputId);
+				if (passwordInput.type === "password") {
+					passwordInput.type = "text";
+				} else {
+					passwordInput.type = "password";
+				}
+			}
+			
+			document.addEventListener('DOMContentLoaded', function() {
+				const changePasswordBtn = document.querySelector('.btn');
+				
+				changePasswordBtn.addEventListener('click', async function() {
+					// Disable the button
+					changePasswordBtn.disabled = true;
+					changePasswordBtn.textContent = 'Memproses...';
+					changePasswordBtn.style.opacity = '0.7';
+					changePasswordBtn.style.cursor = 'not-allowed';
+
+					try {
+						const password = document.getElementById('password').value;
+						const confirmPassword = document.getElementById('confirmPassword').value;
+						
+						// Validation
+						if (password === '' || confirmPassword === '') {
+							throw new Error('Harap isi kedua kolom password!');
+						}
+						
+						if (password !== confirmPassword) {
+							throw new Error('Password tidak cocok!');
+						}
+
+						if (password.length < 8 || confirmPassword.length < 8) {
+							throw new Error('Password minimal 8 karakter!');
+						}
+
+						await resetPasswordAPI(password);
+						
+						showModal();
+						
+						document.getElementById('passwordForm').reset();
+					} catch (error) {
+						alert(error.message);
+					} finally {
+						changePasswordBtn.disabled = false;
+						changePasswordBtn.textContent = 'Ganti Password';
+						changePasswordBtn.style.opacity = '1';
+						changePasswordBtn.style.cursor = 'pointer';
+					}
+				});
+			});
+
+			 // Get modal element
+			const modal = document.getElementById('successModal');
+
+			function showModal() {
+				modal.style.display = 'flex';
+			}
+
+			function closeModal() {
+				modal.style.display = 'none';
+			}
+
+
+			async function resetPasswordAPI(new_password) {
+				const baseURL = '%s';
+				const body = {
+					'token': '%s',
+					'new_password': new_password,
+				};
+
+				headers = {
+					'Content-Type': 'application/json',
+				}
+
+				const response = await fetch(baseURL, {
+					method: 'POST',
+					headers: headers,
+					body: JSON.stringify(body),
+				});
+
+				const data = await response.json();
+
+				if (response.status !== 200) {
+					throw new Error(data.error_message);
+				}
+			}
+		</script>
+		</body>
+	</html>`, config.ServerResetPasswordBaseURL(), token)
+}
+
+func accountVerifiedWebpage() string {
+	return `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Aktifasi Akun</title>
+				<style>
+					/* General styles */
+					body {
+						font-family: Arial, sans-serif;
+						margin: 0;
+						padding: 0;
+						background-color: #f6f6f6;
+						color: #333;
+					}
+					.email-container {
+						max-width: 600px;
+						margin: 20px auto;
+						background-color: #ffffff;
+						border: 1px solid #ddd;
+						border-radius: 8px;
+						overflow: hidden;
+					}
+					.header {
+						background-color: #4CAF50;
+						color: white;
+						padding: 20px;
+						text-align: center;
+					}
+					.content {
+						padding: 20px;
+					}
+					.content p {
+						margin: 0 0 15px;
+						line-height: 1.6;
+					}
+					.btn-container {
+						text-align: center;
+						margin: 20px 0;
+					}
+					.btn {
+						display: inline-block;
+						background-color: #4CAF50;
+						color: white;
+						text-decoration: none;
+						padding: 10px 20px;
+						font-size: 16px;
+						border-radius: 5px;
+					}
+					.btn:hover {
+						background-color: #45a049;
+					}
+					.footer {
+						background-color: #f1f1f1;
+						text-align: center;
+						padding: 10px;
+						font-size: 12px;
+						color: #666;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="email-container">
+					<div class="header">
+						<h2>Verifikasi Akun</h2>
+					</div>
+					<div class="content">
+						<p>Akun Anda telah diaktifasi dan sudah bisa digunakan.</p>
+						<p>Silakan <i>Log In </i> kembali dengan akun yang telah dibuat.</p>
+					</div>
+					<div class="footer">
+						<p>&copy; 2025. Hak Cipta Dilindungi.</p>
+					</div>
+				</div>
+			</body>
+			</html>`
 }
