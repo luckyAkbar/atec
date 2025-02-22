@@ -73,6 +73,10 @@ linters-settings:
       - y
       - n
       - err
+  # i don't think we need to apply parallel in each tests. For now,
+  # this will do check to report incorrect usage of t.Parallel.
+  paralleltest:
+    ignore-missing: true
 
 issues:
   exclude-rules:
