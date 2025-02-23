@@ -4,6 +4,7 @@ go 1.23.6
 
 require (
 	github.com/go-playground/validator/v10 v10.25.0
+	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-redsync/redsync/v4 v4.13.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

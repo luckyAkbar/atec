@@ -47,6 +47,7 @@ func NewService(
 
 func (s *service) initV1Routes() {
 	s.v1.POST("/auth/signup", s.HandleSignUp())
+	s.v1.POST("/auth/signup/resend", s.HandleResendSignupVerification())
 	s.v1.GET("/auth/verify", s.HandleVerifyAccount())
 	s.v1.POST("/auth/login", s.HandleLogin())
 	s.v1.PATCH("/auth/password", s.HandleInitResetPassword())

@@ -207,6 +207,18 @@ definitions:
       id:
         type: string
     type: object
+  rest.ResendVerificationInput:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  rest.ResendVerificationOutput:
+    properties:
+      message:
+        type: string
+    type: object
   rest.ResetPasswordInput:
     properties:
       new_password:
@@ -977,6 +989,47 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       summary: Create a new account to access user only resources within this system
+      tags:
+      - Authentication
+  /v1/auth/signup/resend:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        If something happen during account verification that cause the email not received
+        or the email is lost, use this API to resend the verification email
+      parameters:
+      - description: resend signup input
+        in: body
+        name: resend_signup_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.ResendVerificationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.ResendVerificationOutput'
+              type: object
+        "400":
+          description: Bad request / validation error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "429":
+          description: Too many requests
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      summary: Resend email for account verification
       tags:
       - Authentication
   /v1/auth/verify:

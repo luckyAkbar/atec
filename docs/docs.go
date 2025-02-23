@@ -929,6 +929,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/auth/signup/resend": {
+            "post": {
+                "description": "If something happen during account verification that cause the email not received\nor the email is lost, use this API to resend the verification email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Resend email for account verification",
+                "parameters": [
+                    {
+                        "description": "resend signup input",
+                        "name": "resend_signup_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.ResendVerificationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.StandardSuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rest.ResendVerificationOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request / validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/verify": {
             "get": {
                 "description": "Confirmation method to ensure the email used when signup is active and owned by requester.\nIf the confirmation token is valid, the account will be activated\nand will be able to be used on login. Otherwise, the opposite will happen.",
@@ -1672,6 +1736,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.ResendVerificationInput": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.ResendVerificationOutput": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }

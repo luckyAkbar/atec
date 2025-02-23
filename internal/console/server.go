@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	redis_rate "github.com/go-redis/redis_rate/v10"
 	"github.com/golang/freetype/truetype"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -100,12 +101,14 @@ func serverFn(cmd *cobra.Command, _ []string) {
 
 	cacheKeeper := db.NewCacheKeeper(redisClient, distributedLocker)
 
+	rateLimiter := redis_rate.NewLimiter(redisClient)
+
 	userRepo := repository.NewUserRepository(db.PostgresDB)
 	packageRepo := repository.NewPackageRepo(db.PostgresDB, cacheKeeper)
 	childRepo := repository.NewChildRepository(db.PostgresDB)
 	resultRepo := repository.NewResultRepository(db.PostgresDB)
 
-	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer)
+	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer, rateLimiter)
 	packageUsecase := usecase.NewPackageUsecase(packageRepo)
 	childUsecase := usecase.NewChildUsecase(childRepo, resultRepo)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo, font)

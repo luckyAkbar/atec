@@ -152,3 +152,21 @@ func RedisLockMinIdleConns() int {
 func RedisLockConnMaxLifetimeSec() int {
 	return viper.GetInt("caching.redis_lock.conn_max_lifetime_sec")
 }
+
+// ResendSignupVerificationLimiterDuration resend signup verification limiter duration.
+// If left unset or below 1 minutes, will return the default duration of 5 minutes.
+func ResendSignupVerificationLimiterDuration() time.Duration {
+	const defaultDurationMinutes = 5
+
+	const minimumDurationMinutes = 1
+
+	defaultDuration := defaultDurationMinutes * time.Minute
+	minimumDuration := minimumDurationMinutes * time.Minute
+
+	cfg := viper.GetDuration("resend_signup_verification_limiter_duration")
+	if cfg == 0 || cfg < minimumDuration {
+		return defaultDuration
+	}
+
+	return cfg
+}

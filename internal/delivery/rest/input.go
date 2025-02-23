@@ -143,3 +143,8 @@ type DownloadQuestionnaireResultInput struct {
 type GetChildStatInput struct {
 	ChildID uuid.UUID `param:"child_id" validate:"required"`
 }
+
+// ResendVerificationInput input
+type ResendVerificationInput struct {
+	Email string `json:"email" validate:"required,email"`
+}

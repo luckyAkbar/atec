@@ -50,6 +50,47 @@ func (s *service) HandleSignUp() echo.HandlerFunc {
 	}
 }
 
+// @Summary		Resend email for account verification
+// @Description	If something happen during account verification that cause the email not received
+// @Description	or the email is lost, use this API to resend the verification email
+// @Tags			Authentication
+// @Accept			json
+// @Param			resend_signup_input	body	ResendVerificationInput	true	"resend signup input"
+// @Produce		json
+// @Success		200	{object}	StandardSuccessResponse{data=ResendVerificationOutput}	"Successful response"
+// @Failure		400	{object}	StandardErrorResponse									"Bad request / validation error"
+// @Failure		429 {object}	StandardErrorResponse									"Too many requests"
+// @Failure		500	{object}	StandardErrorResponse									"Internal Error"
+// @Router			/v1/auth/signup/resend [post]
+func (s *service) HandleResendSignupVerification() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		input := &ResendVerificationInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		output, err := s.authUsecase.HandleResendSignupVerification(c.Request().Context(), usecase.ResendSignupVerificationInput{
+			Email: input.Email,
+		})
+
+		if err != nil {
+			return usecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.JSON(http.StatusOK, StandardSuccessResponse{
+			StatusCode: http.StatusOK,
+			Message:    http.StatusText(http.StatusOK),
+			Data: ResendVerificationOutput{
+				Message: output.Message,
+			},
+		})
+	}
+}
+
 // @Summary		Validate account after signup
 // @Description	Confirmation method to ensure the email used when signup is active and owned by requester.
 // @Description	If the confirmation token is valid, the account will be activated
