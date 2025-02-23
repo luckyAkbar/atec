@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/go-redis/redis_rate/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
@@ -24,6 +25,7 @@ type AuthUsecase struct {
 	sharedCryptor common.SharedCryptorIface
 	userRepo      repository.UserRepositoryIface
 	mailer        *common.Mailer
+	rateLimiter   *redis_rate.Limiter
 }
 
 // AuthUsecaseIface interface exported by AuthUsecase to help ease mocking
@@ -34,6 +36,7 @@ type AuthUsecaseIface interface {
 	HandleInitesetPassword(ctx context.Context, input InitResetPasswordInput) (*InitResetPasswordOutput, error)
 	HandleResetPassword(ctx context.Context, input ResetPasswordInput) (*ResetPasswordOutput, error)
 	AllowAccess(ctx context.Context, input AllowAccessInput) (*AllowAccessOutput, error)
+	HandleResendSignupVerification(ctx context.Context, input ResendSignupVerificationInput) (*ResendSignupVerificationOutput, error)
 }
 
 // NewAuthUsecase create new instance for AuthUsecase
@@ -41,11 +44,13 @@ func NewAuthUsecase(
 	sharedCryptor common.SharedCryptorIface,
 	userRepo repository.UserRepositoryIface,
 	mailer *common.Mailer,
+	rateLimiter *redis_rate.Limiter,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		sharedCryptor: sharedCryptor,
 		userRepo:      userRepo,
 		mailer:        mailer,
+		rateLimiter:   rateLimiter,
 	}
 }
 
@@ -280,84 +285,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		ReceiverName:  user.Username,
 		ReceiverEmail: input.Email,
 		Subject:       "Verifikasi Akun",
-		//nolint:lll
-		HTMLContent: fmt.Sprintf(`
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<style>
-					/* General styles */
-					body {
-						font-family: Arial, sans-serif;
-						margin: 0;
-						padding: 0;
-						background-color: #f6f6f6;
-						color: #333;
-					}
-					.email-container {
-						max-width: 600px;
-						margin: 20px auto;
-						background-color: #ffffff;
-						border: 1px solid #ddd;
-						border-radius: 8px;
-						overflow: hidden;
-					}
-					.header {
-						background-color: #4CAF50;
-						color: white;
-						padding: 20px;
-						text-align: center;
-					}
-					.content {
-						padding: 20px;
-					}
-					.content p {
-						margin: 0 0 15px;
-						line-height: 1.6;
-					}
-					.btn-container {
-						text-align: center;
-						margin: 20px 0;
-					}
-					.btn {
-						display: inline-block;
-						background-color: #4CAF50;
-						color: white;
-						text-decoration: none;
-						padding: 10px 20px;
-						font-size: 16px;
-						border-radius: 5px;
-					}
-					.btn:hover {
-						background-color: #45a049;
-					}
-					.footer {
-						background-color: #f1f1f1;
-						text-align: center;
-						padding: 10px;
-						font-size: 12px;
-						color: #666;
-					}
-				</style>
-			</head>
-			<body>
-				<div class="email-container">
-					<div class="header">
-						<h1>Konfirmasi Akun</h1>
-					</div>
-					<div class="content">
-						<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC). Untuk mengaktifkan akun Anda, silakan klik tombol berikut:</p>
-						<div class="btn-container">
-							<a href="%s?validation_token=%s" class="btn">Aktifkan Akun</a>
-						</div>
-					</div>
-					<div class="footer">
-						<p>Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
-					</div>
-				</div>
-			</body>
-			</html>
-			`, config.ServerAccountVerificationBaseURL(), token),
+		HTMLContent:   accountVerificationEmailTemplate(token),
 	})
 
 	if err != nil {
@@ -874,6 +802,132 @@ func (u *AuthUsecase) AllowAccess(_ context.Context, input AllowAccessInput) (*A
 	}, nil
 }
 
+// ResendSignupVerificationInput input
+type ResendSignupVerificationInput struct {
+	Email string `validate:"required,email"`
+}
+
+func (rsvi ResendSignupVerificationInput) validate() error {
+	return common.Validator.Struct(rsvi)
+}
+
+// ResendSignupVerificationOutput output
+type ResendSignupVerificationOutput struct {
+	Message string `json:"message"`
+}
+
+// HandleResendSignupVerification will resend the email verification to the user's email
+func (u *AuthUsecase) HandleResendSignupVerification(ctx context.Context, input ResendSignupVerificationInput) (
+	*ResendSignupVerificationOutput,
+	error,
+) {
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"email": input.Email,
+		"func":  "HandleResendSignupVerification",
+	})
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	emailEnc, err := u.sharedCryptor.Encrypt(input.Email)
+	if err != nil {
+		logger.WithError(err).Error("failed to encrypt email")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	resendLimit := redis_rate.Limit{
+		Rate:   1,
+		Burst:  1,
+		Period: config.ResendSignupVerificationLimiterDuration(),
+	}
+
+	rateLimit, err := u.rateLimiter.Allow(ctx, emailEnc, resendLimit)
+	if err != nil {
+		logger.WithError(err).Error("failed to perform rate limiter ops")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	if rateLimit.Allowed == 0 {
+		return nil, UsecaseError{
+			ErrType: ErrTooManyRequests,
+			Message: fmt.Sprintf("please retry again after %d", int64(rateLimit.ResetAfter.Seconds())),
+		}
+	}
+
+	user, err := u.userRepo.FindByEmail(ctx, emailEnc)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find user by email")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case repository.ErrNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if user.IsActive {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: "this account has been activated",
+		}
+	}
+
+	token, err := u.sharedCryptor.CreateJWT(jwt.RegisteredClaims{
+		Issuer:    string(TokenIssuerSystem),
+		Subject:   string(SignupVerificationToken),
+		Audience:  []string{user.ID.String()},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.SignupTokenExpiry())),
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to create JWT token for resend signup verification")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	_, err = u.mailer.SendEmail(ctx, common.SendEmailInput{
+		ReceiverName:  user.Username,
+		ReceiverEmail: input.Email,
+		Subject:       "Verifikasi Akun",
+		HTMLContent:   accountVerificationEmailTemplate(token),
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to send verification email to user's mail")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &ResendSignupVerificationOutput{
+		Message: "email confirmation sent",
+	}, nil
+}
+
 type parseJWTTokenInput struct {
 	expectedIssuer      JWTTokenIssuer
 	expectedSubject     JWTTokenType
@@ -958,4 +1012,85 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (*jw
 	}
 
 	return jwtToken, claims, nil
+}
+
+//nolint:lll
+func accountVerificationEmailTemplate(token string) string {
+	return fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<style>
+				/* General styles */
+				body {
+					font-family: Arial, sans-serif;
+					margin: 0;
+					padding: 0;
+					background-color: #f6f6f6;
+					color: #333;
+				}
+				.email-container {
+					max-width: 600px;
+					margin: 20px auto;
+					background-color: #ffffff;
+					border: 1px solid #ddd;
+					border-radius: 8px;
+					overflow: hidden;
+				}
+				.header {
+					background-color: #4CAF50;
+					color: white;
+					padding: 20px;
+					text-align: center;
+				}
+				.content {
+					padding: 20px;
+				}
+				.content p {
+					margin: 0 0 15px;
+					line-height: 1.6;
+				}
+				.btn-container {
+					text-align: center;
+					margin: 20px 0;
+				}
+				.btn {
+					display: inline-block;
+					background-color: #4CAF50;
+					color: white;
+					text-decoration: none;
+					padding: 10px 20px;
+					font-size: 16px;
+					border-radius: 5px;
+				}
+				.btn:hover {
+					background-color: #45a049;
+				}
+				.footer {
+					background-color: #f1f1f1;
+					text-align: center;
+					padding: 10px;
+					font-size: 12px;
+					color: #666;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="email-container">
+				<div class="header">
+					<h1>Konfirmasi Akun</h1>
+				</div>
+				<div class="content">
+					<p>Terimakasih telah mendaftar pada layanan Autism Treatment Evaluation Checklist (ATEC). Untuk mengaktifkan akun Anda, silakan klik tombol berikut:</p>
+					<div class="btn-container">
+						<a href="%s?validation_token=%s" class="btn">Aktifkan Akun</a>
+					</div>
+				</div>
+				<div class="footer">
+					<p>Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+				</div>
+			</div>
+		</body>
+		</html>
+		`, config.ServerAccountVerificationBaseURL(), token)
 }

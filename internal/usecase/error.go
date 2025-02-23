@@ -26,4 +26,6 @@ var (
 	ErrNotFound = errors.New("not found")
 
 	ErrForbidden = errors.New("forbidden")
+
+	ErrTooManyRequests = errors.New("too many requests")
 )

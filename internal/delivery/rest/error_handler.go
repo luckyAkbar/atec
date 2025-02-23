@@ -53,6 +53,12 @@ func usecaseErrorToRESTResponse(c echo.Context, err error) error {
 				ErrorCode:    http.StatusText(http.StatusForbidden),
 				ErrorMessage: e.Message,
 			})
+		case usecase.ErrTooManyRequests:
+			return c.JSON(http.StatusTooManyRequests, StandardErrorResponse{
+				StatusCode:   http.StatusTooManyRequests,
+				ErrorCode:    http.StatusText(http.StatusTooManyRequests),
+				ErrorMessage: e.Message,
+			})
 		}
 	}
 }
