@@ -133,7 +133,11 @@ func serverFn(cmd *cobra.Command, _ []string) {
 
 	httpServer := echo.New()
 
-	httpServer.Use(middleware.Logger())
+	httpServer.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper: func(c echo.Context) bool {
+			return c.Path() == "/ping"
+		},
+	}))
 	httpServer.Use(middleware.Recover())
 	httpServer.Use(middleware.CORS())
 
