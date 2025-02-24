@@ -1,0 +1,72 @@
+---
+services:
+  atec_api:
+    container_name: perf_test_atec_api
+    command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
+    build:
+      context: ../../.
+      dockerfile: Dockerfile
+    volumes:
+      - ../../private.pem:/app/private.pem # mount the private key here
+      - ../../config.yaml:/app/config.yaml
+    restart: unless-stopped
+    cpus: '4'
+    mem_limit: '4G'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # these environments value will be read if running the app with flag init-admin-account set.
+      # never use these values in production
+      - INIT_ADMIN_EMAIL=admin@example.com
+      - INIT_ADMIN_PASSWORD=secure_password
+      - INIT_ADMIN_USERNAME=admin
+
+  postgres:
+    container_name: perf_test_atec_api_postgres
+    image: postgres:14
+    environment:
+    # never use these values in production
+      - POSTGRES_USER=atec_api
+      - POSTGRES_PASSWORD=atec_api_password
+      - POSTGRES_DB=atec_api
+    restart: unless-stopped
+    cpus: '2'
+    mem_limit: '1G'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atec_api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+  redis:
+    container_name: perf_test_atec_api_redis
+    image: redis:7.4.2-alpine3.21
+    restart: unless-stopped
+    command: redis-server
+    cpus: '1'
+    mem_limit: '2G'
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  k6:
+    container_name: k6_perf_test_atec_api
+    image: grafana/k6
+    ports:
+      - 5665:5665
+    depends_on:
+      atec_api:
+        condition: service_healthy 
+    volumes:
+      - ./performance_test.js:/performance_test.js
+    command: run /performance_test.js
+    cpus: '2'
+    mem_limit: '4G'
+    environment:
+      - K6_WEB_DASHBOARD=true
+
