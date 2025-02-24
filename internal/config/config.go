@@ -173,3 +173,39 @@ func ResendSignupVerificationLimiterDuration() time.Duration {
 
 	return cfg
 }
+
+// DBMaxIdleConn max idle conn
+func DBMaxIdleConn() int {
+	const defaultMaxIdleConn = 30
+
+	cfg := viper.GetInt("postgres.pool.max_idle_conn")
+	if cfg == 0 {
+		return defaultMaxIdleConn
+	}
+
+	return cfg
+}
+
+// DBMaxOpenConn max open conn
+func DBMaxOpenConn() int {
+	const defaultMaxOpenConn = 50
+
+	cfg := viper.GetInt("postgres.pool.max_open_conn")
+	if cfg == 0 {
+		return defaultMaxOpenConn
+	}
+
+	return cfg
+}
+
+// DBConnMaxLifetime max lifetime
+func DBConnMaxLifetime() time.Duration {
+	const defaultMaxLifetime = 30 * time.Minute
+
+	cfg := viper.GetInt("postgres.pool.conn_max_lifetime_sec")
+	if cfg == 0 {
+		return defaultMaxLifetime
+	}
+
+	return time.Duration(cfg) * time.Second
+}
