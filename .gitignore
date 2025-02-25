@@ -1,3 +1,4 @@
 config.yaml
 private.pem
 ./compose.yaml
+tests/performance/config_multi.yaml
