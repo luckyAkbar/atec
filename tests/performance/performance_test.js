@@ -17,7 +17,7 @@ export const options = {
       exec: 'burst_get_active_questionnaire',
       tags: { scenario: 'burst_get_active_questionnaire' },
       stages: [
-        { target: 300, duration: '100s' },
+        { target: 350, duration: '100s' },
       ],
       gracefulRampDown: '30s',
       startTime: '101s',
@@ -44,7 +44,7 @@ export const options = {
 
 // fetch the available active questionnaire to be used to submit
 export function setup() {
-    const url = "http://perf_test_atec_api:5000/v1/atec/packages/active";
+    const url = "http://nginx_load_balancer/v1/atec/packages/active";
     const headers = {
         "accept": "application/json",
     };
@@ -71,7 +71,7 @@ export function setup() {
 // The default exported function is gonna be picked up by k6 as the entry point for the test script. It will be executed repeatedly in "iterations" for the whole duration of the test.
 export function burst_submit_questionnaire(data) {
     const { activeQuestionnaireId } = data;
-    const url = "http://perf_test_atec_api:5000/v1/atec/questionnaires"
+    const url = "http://nginx_load_balancer/v1/atec/questionnaires"
     const payload = {
         answers: {
             0: {
@@ -178,12 +178,10 @@ export function burst_submit_questionnaire(data) {
     check(res, {
         "burst_submit_questionnaire response must 200": (res) => res.status == 200,
     });
-
-    sleep(1)
 }
 
 export function burst_get_active_questionnaire () {
-  const res = http.get('http://perf_test_atec_api:5000/v1/atec/packages/active',
+  const res = http.get('http://nginx_load_balancer/v1/atec/packages/active',
         {
             tags: { scenario: 'burst_get_active_questionnaire' },
         },
