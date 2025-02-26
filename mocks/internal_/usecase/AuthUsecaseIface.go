@@ -258,6 +258,65 @@ func (_c *AuthUsecaseIface_HandleLogin_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
+// HandleResendSignupVerification provides a mock function with given fields: ctx, input
+func (_m *AuthUsecaseIface) HandleResendSignupVerification(ctx context.Context, input usecase.ResendSignupVerificationInput) (*usecase.ResendSignupVerificationOutput, error) {
+	ret := _m.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HandleResendSignupVerification")
+	}
+
+	var r0 *usecase.ResendSignupVerificationOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.ResendSignupVerificationInput) (*usecase.ResendSignupVerificationOutput, error)); ok {
+		return rf(ctx, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.ResendSignupVerificationInput) *usecase.ResendSignupVerificationOutput); ok {
+		r0 = rf(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*usecase.ResendSignupVerificationOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, usecase.ResendSignupVerificationInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// AuthUsecaseIface_HandleResendSignupVerification_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HandleResendSignupVerification'
+type AuthUsecaseIface_HandleResendSignupVerification_Call struct {
+	*mock.Call
+}
+
+// HandleResendSignupVerification is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.ResendSignupVerificationInput
+func (_e *AuthUsecaseIface_Expecter) HandleResendSignupVerification(ctx interface{}, input interface{}) *AuthUsecaseIface_HandleResendSignupVerification_Call {
+	return &AuthUsecaseIface_HandleResendSignupVerification_Call{Call: _e.mock.On("HandleResendSignupVerification", ctx, input)}
+}
+
+func (_c *AuthUsecaseIface_HandleResendSignupVerification_Call) Run(run func(ctx context.Context, input usecase.ResendSignupVerificationInput)) *AuthUsecaseIface_HandleResendSignupVerification_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(usecase.ResendSignupVerificationInput))
+	})
+	return _c
+}
+
+func (_c *AuthUsecaseIface_HandleResendSignupVerification_Call) Return(_a0 *usecase.ResendSignupVerificationOutput, _a1 error) *AuthUsecaseIface_HandleResendSignupVerification_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AuthUsecaseIface_HandleResendSignupVerification_Call) RunAndReturn(run func(context.Context, usecase.ResendSignupVerificationInput) (*usecase.ResendSignupVerificationOutput, error)) *AuthUsecaseIface_HandleResendSignupVerification_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // HandleResetPassword provides a mock function with given fields: ctx, input
 func (_m *AuthUsecaseIface) HandleResetPassword(ctx context.Context, input usecase.ResetPasswordInput) (*usecase.ResetPasswordOutput, error) {
 	ret := _m.Called(ctx, input)

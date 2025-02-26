@@ -83,6 +83,53 @@ func (_c *CacheKeeperIface_AcquireLock_Call) RunAndReturn(run func(string) (*red
 	return _c
 }
 
+// Del provides a mock function with given fields: ctx, key
+func (_m *CacheKeeperIface) Del(ctx context.Context, key string) error {
+	ret := _m.Called(ctx, key)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Del")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, key)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CacheKeeperIface_Del_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Del'
+type CacheKeeperIface_Del_Call struct {
+	*mock.Call
+}
+
+// Del is a helper method to define mock.On call
+//   - ctx context.Context
+//   - key string
+func (_e *CacheKeeperIface_Expecter) Del(ctx interface{}, key interface{}) *CacheKeeperIface_Del_Call {
+	return &CacheKeeperIface_Del_Call{Call: _e.mock.On("Del", ctx, key)}
+}
+
+func (_c *CacheKeeperIface_Del_Call) Run(run func(ctx context.Context, key string)) *CacheKeeperIface_Del_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *CacheKeeperIface_Del_Call) Return(_a0 error) *CacheKeeperIface_Del_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *CacheKeeperIface_Del_Call) RunAndReturn(run func(context.Context, string) error) *CacheKeeperIface_Del_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function with given fields: ctx, key
 func (_m *CacheKeeperIface) Get(ctx context.Context, key string) (string, error) {
 	ret := _m.Called(ctx, key)

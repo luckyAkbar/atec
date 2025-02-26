@@ -1,5 +1,11 @@
 package repository
 
+import (
+	"fmt"
+
+	"github.com/luckyAkbar/atec/internal/model"
+)
+
 // CacheKey is the standart cache key type
 // and should be used to represent a cache key
 // from a resource that is unique or have special use
@@ -11,3 +17,8 @@ type CacheKey string
 const (
 	AllActivePackageCacheKey CacheKey = "github.com/luckyAkbar/atec:cache-key:const:all_active_packages"
 )
+
+// CacheKeyForPackage will return a unique cache key for a package
+func CacheKeyForPackage(pack model.Package) string {
+	return fmt.Sprintf("github.com/luckyAkbar/atec:cache-key:package:%s", pack.ID)
+}

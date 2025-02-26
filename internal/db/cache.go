@@ -69,6 +69,7 @@ type CacheKeeperIface interface {
 	SetJSON(ctx context.Context, key string, value any, expiration time.Duration) error
 	GetOrLock(ctx context.Context, key string) (string, *redsync.Mutex, error)
 	AcquireLock(key string) (*redsync.Mutex, error)
+	Del(ctx context.Context, key string) error
 }
 
 // CacheKeeper cache keeper
@@ -202,4 +203,9 @@ func (ck *CacheKeeper) GetOrLock(ctx context.Context, key string) (string, *reds
 // AcquireLock acquire a lock for a given key
 func (ck *CacheKeeper) AcquireLock(key string) (*redsync.Mutex, error) {
 	return ck.distributedLock.GetLock(key)
+}
+
+// Del delete a key from cache
+func (ck *CacheKeeper) Del(ctx context.Context, key string) error {
+	return ck.redisClient.Del(ctx, key).Err()
 }
