@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../../private.pem:/app/private.pem # mount the private key here
-      - ../../config.yaml:/app/config.yaml
+      - ./config_multi.yaml:/app/config.yaml
     restart: unless-stopped
     cpus: '1'
     mem_limit: '1G'
@@ -48,53 +48,53 @@ services:
       - INIT_ADMIN_PASSWORD=secure_password
       - INIT_ADMIN_USERNAME=admin
 
-  # atec_api_3:
-  #   container_name: multi_perf_test_atec_api_3
-  #   command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
-  #   build:
-  #     context: ../../.
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ../../private.pem:/app/private.pem # mount the private key here
-  #     - ../../config.yaml:/app/config.yaml
-  #   restart: unless-stopped
-  #   cpus: '1'
-  #   mem_limit: '1G'
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   environment:
-  #     # these environments value will be read if running the app with flag init-admin-account set.
-  #     # never use these values in production
-  #     - INIT_ADMIN_EMAIL=admin@example.com
-  #     - INIT_ADMIN_PASSWORD=secure_password
-  #     - INIT_ADMIN_USERNAME=admin
+  atec_api_3:
+    container_name: multi_perf_test_atec_api_3
+    command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
+    build:
+      context: ../../.
+      dockerfile: Dockerfile
+    volumes:
+      - ../../private.pem:/app/private.pem # mount the private key here
+      - ./config_multi.yaml:/app/config.yaml
+    restart: unless-stopped
+    cpus: '1'
+    mem_limit: '1G'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # these environments value will be read if running the app with flag init-admin-account set.
+      # never use these values in production
+      - INIT_ADMIN_EMAIL=admin@example.com
+      - INIT_ADMIN_PASSWORD=secure_password
+      - INIT_ADMIN_USERNAME=admin
 
-  # atec_api_4:
-  #   container_name: multi_perf_test_atec_api_4
-  #   command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
-  #   build:
-  #     context: ../../.
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ../../private.pem:/app/private.pem # mount the private key here
-  #     - ../../config.yaml:/app/config.yaml
-  #   restart: unless-stopped
-  #   cpus: '1'
-  #   mem_limit: '1G'
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   environment:
-  #     # these environments value will be read if running the app with flag init-admin-account set.
-  #     # never use these values in production
-  #     - INIT_ADMIN_EMAIL=admin@example.com
-  #     - INIT_ADMIN_PASSWORD=secure_password
-  #     - INIT_ADMIN_USERNAME=admin
+  atec_api_4:
+    container_name: multi_perf_test_atec_api_4
+    command: ["/bin/sh", "-c", "/app/main migrate && /app/main server --init-admin-account --init-package"]
+    build:
+      context: ../../.
+      dockerfile: Dockerfile
+    volumes:
+      - ../../private.pem:/app/private.pem # mount the private key here
+      - ./config_multi.yaml:/app/config.yaml
+    restart: unless-stopped
+    cpus: '1'
+    mem_limit: '1G'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # these environments value will be read if running the app with flag init-admin-account set.
+      # never use these values in production
+      - INIT_ADMIN_EMAIL=admin@example.com
+      - INIT_ADMIN_PASSWORD=secure_password
+      - INIT_ADMIN_USERNAME=admin
 
   postgres:
     container_name: multi_perf_test_atec_api_postgres
@@ -106,7 +106,7 @@ services:
       - POSTGRES_DB=atec_api
     restart: unless-stopped
     cpus: '8'
-    mem_limit: '4G'
+    mem_limit: '8G'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U atec_api"]
       interval: 5s
