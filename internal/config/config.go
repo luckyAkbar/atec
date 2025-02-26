@@ -118,13 +118,16 @@ func RedisConnMaxLifetimeSec() int {
 func CacheExpiryDuration() struct {
 	AllActivePackage       time.Duration
 	DefaultNilCacheTimeout time.Duration
+	Package                time.Duration
 } {
 	return struct {
 		AllActivePackage       time.Duration
 		DefaultNilCacheTimeout time.Duration
+		Package                time.Duration
 	}{
 		AllActivePackage:       viper.GetDuration("caching.expiration.all_active_packages"),
 		DefaultNilCacheTimeout: viper.GetDuration("caching.expiration.default_nil_value"),
+		Package:                viper.GetDuration("caching.expiration.package"),
 	}
 }
 
