@@ -135,7 +135,16 @@ func serverFn(cmd *cobra.Command, _ []string) {
 
 	httpServer.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
-			return c.Path() == "/ping"
+			if c.Path() == "/ping" {
+				return true
+			}
+
+			ua := c.Request().UserAgent()
+			if strings.Contains(ua, "https://k6.io/") {
+				return true
+			}
+
+			return false
 		},
 	}))
 	httpServer.Use(middleware.Recover())
