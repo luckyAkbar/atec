@@ -354,7 +354,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "packageID",
+                        "description": "optional to get questionnaire from its package id. if empty, a default one will be returned",
+                        "name": "package_id",
                         "in": "query"
                     }
                 ],

@@ -111,7 +111,7 @@ type CreateATECTemplateInput struct {
 
 // GetATECQuestionnaireInput input
 type GetATECQuestionnaireInput struct {
-	PackageID uuid.UUID `query:"package_id,omitempty"`
+	PackageID uuid.UUID `query:"package_id"`
 }
 
 // DeletePackageInput input

@@ -625,8 +625,10 @@ paths:
       description: Used when a user wants to get an active ATEC questionnaire to be
         filled later
       parameters:
-      - in: query
-        name: packageID
+      - description: optional to get questionnaire from its package id. if empty,
+          a default one will be returned
+        in: query
+        name: package_id
         type: string
       produces:
       - application/json
