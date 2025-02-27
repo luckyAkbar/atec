@@ -139,12 +139,8 @@ func serverFn(cmd *cobra.Command, _ []string) {
 				return true
 			}
 
-			ua := c.Request().UserAgent()
-			if strings.Contains(ua, "https://k6.io/") {
-				return true
-			}
-
-			return false
+			// to make performance testing yield better result
+			return strings.Contains(c.Request().UserAgent(), "https://k6.io/")
 		},
 	}))
 	httpServer.Use(middleware.Recover())
