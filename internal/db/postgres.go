@@ -56,24 +56,13 @@ func InitializePostgresConn() {
 		os.Exit(1)
 	}
 
-	var logLevel logger.LogLevel
-
-	switch config.LogLevel() {
-	case "error":
-		logLevel = logger.Error
-	case "warn":
-		logLevel = logger.Warn
-	default:
-		logLevel = logger.Info
-	}
-
 	const defaultSlowThreshold = 500 * time.Millisecond
 
 	gormLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
 			SlowThreshold:             defaultSlowThreshold, // Slow SQL threshold
-			LogLevel:                  logLevel,             // Log level
+			LogLevel:                  logger.Silent,        // Log level
 			IgnoreRecordNotFoundError: true,                 // Ignore ErrRecordNotFound error for logger
 			ParameterizedQueries:      true,                 // Don't include params in the SQL log
 			Colorful:                  true,                 // Disable color
