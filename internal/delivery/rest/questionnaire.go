@@ -216,10 +216,10 @@ func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 // @Tags			Questionnaire
 // @Accept			json
 // @Produce		json
-// @Param			get_atec_questionnaire	query		GetATECQuestionnaireInput									false	"optional to get questionnaire from its package id. if empty, a default one will be returned"
-// @Success		200						{object}	StandardSuccessResponse{data=GetATECQuestionnaireOutput}	"success response"
-// @Failure		400						{object}	StandardErrorResponse										"Bad request"
-// @Failure		500						{object}	StandardErrorResponse										"Internal Error"
+// @Param			package_id	query		string														false	"optional to get questionnaire from its package id. if empty, a default one will be returned"
+// @Success		200			{object}	StandardSuccessResponse{data=GetATECQuestionnaireOutput}	"success response"
+// @Failure		400			{object}	StandardErrorResponse										"Bad request"
+// @Failure		500			{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/atec/questionnaires [get]
 func (s *service) HandleGetATECQuestionaire() echo.HandlerFunc {
 	return func(c echo.Context) error {
