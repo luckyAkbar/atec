@@ -174,25 +174,9 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 	}
 
 	mustLockPackage := make(chan bool, 1)
-	go func() {
-		mustLock := <-mustLockPackage
-		if !mustLock {
-			return
-		}
-
-		logrus.WithField("package_id", pack.ID).Info("this package is not locked, locking it now")
-
-		truth := true
-		_, err := u.packageRepo.Update(context.Background(), pack.ID, repository.UpdatePackageInput{
-			LockStatus: &truth,
-		})
-
-		if err != nil {
-			logger.WithField("package_id", pack.ID).WithError(err).Error("failed to lock package")
-
-			return
-		}
-	}()
+	go func(ctx context.Context) {
+		u.lockPackageIfNecessary(ctx, pack.ID, mustLockPackage)
+	}(context.WithoutCancel(ctx))
 
 	// chosen not to save this to database because it not necessary, and it is fairly cheap to compute
 	// and also not many places need this. If on the future decide to save this to database, this is the place
@@ -305,6 +289,26 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		CreatedBy:  result.CreatedBy,
 		CreatedAt:  result.CreatedAt,
 	}, nil
+}
+
+func (u *QuestionnaireUsecase) lockPackageIfNecessary(ctx context.Context, packID uuid.UUID, mustLockPackage chan bool) {
+	mustLock := <-mustLockPackage
+	if !mustLock {
+		return
+	}
+
+	logrus.WithField("package_id", packID).Info("this package is not locked, locking it now")
+
+	truth := true
+	_, err := u.packageRepo.Update(ctx, packID, repository.UpdatePackageInput{
+		LockStatus: &truth,
+	})
+
+	if err != nil {
+		logrus.WithField("package_id", packID).WithError(err).Error("failed to lock package")
+
+		return
+	}
 }
 
 // SearchQuestionnaireResultInput search questionnaire result
