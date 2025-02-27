@@ -173,6 +173,27 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 	}
 
+	mustLockPackage := make(chan bool, 1)
+	go func() {
+		mustLock := <-mustLockPackage
+		if !mustLock {
+			return
+		}
+
+		logrus.WithField("package_id", pack.ID).Info("this package is not locked, locking it now")
+
+		truth := true
+		_, err := u.packageRepo.Update(context.Background(), pack.ID, repository.UpdatePackageInput{
+			LockStatus: &truth,
+		})
+
+		if err != nil {
+			logger.WithField("package_id", pack.ID).WithError(err).Error("failed to lock package")
+
+			return
+		}
+	}()
+
 	// chosen not to save this to database because it not necessary, and it is fairly cheap to compute
 	// and also not many places need this. If on the future decide to save this to database, this is the place
 	// to start
@@ -201,6 +222,12 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 				Message: ErrInternal.Error(),
 			}
 		}
+
+		if !pack.IsLocked {
+			mustLockPackage <- true
+		}
+
+		close(mustLockPackage)
 
 		return &SubmitQuestionnaireOutput{
 			ResultID:   result.ID,
@@ -261,6 +288,12 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 			Message: ErrInternal.Error(),
 		}
 	}
+
+	if !pack.IsLocked {
+		mustLockPackage <- true
+	}
+
+	close(mustLockPackage)
 
 	return &SubmitQuestionnaireOutput{
 		ResultID:   result.ID,
