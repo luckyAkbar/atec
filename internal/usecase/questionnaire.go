@@ -165,6 +165,13 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		break
 	}
 
+	if !pack.IsActive {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: "this package is not activated yet",
+		}
+	}
+
 	grade, err := performGrading(pack.Questionnaire, input.Answers)
 	if err != nil {
 		return nil, UsecaseError{
