@@ -277,6 +277,10 @@ func (r *PackageRepo) Delete(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
+	if err := r.cacheKeeper.SetNil(ctx, packageCacheKey); err != nil {
+		logrus.WithField("package_id", id).WithError(err).Warn("failed to set nil cache for package, just reporting")
+	}
+
 	err = r.refreshAllActivePackagesCache(ctx, []uuid.UUID{id}, forceRefreshActivePackagesCache)
 	if err != nil {
 		logrus.WithError(err).Warn("failure to update active packages cache after deletion (report only)")
