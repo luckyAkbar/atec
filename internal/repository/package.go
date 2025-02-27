@@ -153,6 +153,7 @@ func (r *PackageRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Packag
 // UpdatePackageInput input
 type UpdatePackageInput struct {
 	ActiveStatus *bool
+	LockStatus   *bool
 
 	Questionnaire *model.Questionnaire
 	PackageName   string
@@ -172,6 +173,10 @@ func (upi UpdatePackageInput) ToUpdateFields() map[string]interface{} {
 
 	if upi.Questionnaire != nil {
 		fields["questionnaire"] = upi.Questionnaire
+	}
+
+	if upi.LockStatus != nil {
+		fields["is_locked"] = *upi.LockStatus
 	}
 
 	return fields
