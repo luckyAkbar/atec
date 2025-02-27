@@ -1,35 +1,10 @@
 ---
 services:
-  atec_api:
-    container_name: atec_api
-    command: ["/bin/sh", "-c", "make watch"]
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - 5000:5000
-    volumes:
-      - ./private.pem:/app/private.pem # mount the private key here
-      - ./config.yaml:/app/config.yaml
-      - ./.modd:/app/.modd
-      - ./main.go:/app/main.go
-      - ./db:/app/db
-      - ./internal:/app/internal
-      - ./assets:/app/assets
-    restart: unless-stopped
-    depends_on:
-      - postgres
-      - redis
-    environment:
-      # these environments value will be read if running the app with flag init-admin-account set.
-      # never use these values in production
-      - INIT_ADMIN_EMAIL=admin@example.com
-      - INIT_ADMIN_PASSWORD=secure_password
-      - INIT_ADMIN_USERNAME=admin
-
   postgres:
     container_name: atec_api_postgres
     image: postgres:14
+    ports:
+      - "5432:5432"
     volumes:
       -  atec_api_postgres:/var/lib/postgresql/data
     environment:
@@ -49,6 +24,8 @@ services:
     image: redis:7.4.2-alpine3.21
     restart: unless-stopped
     command: redis-server
+    ports:
+      - "6379:6379"
 
 
 volumes:
