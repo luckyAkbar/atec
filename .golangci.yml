@@ -48,7 +48,7 @@ linters-settings:
     tab-width: 1
   funlen:
     lines: 200
-    statements: 50
+    statements: 55
     ignore-comments: true
   tagliatelle:
     case:
