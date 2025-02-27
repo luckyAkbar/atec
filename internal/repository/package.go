@@ -220,10 +220,13 @@ func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePack
 		logrus.WithError(err).Warn("failed to cache package, just reporting")
 	}
 
-	// there is a good chance where updating a package will impact the active packages cache
-	// but, force option is set to false thus making it only refresh the cache if
-	// the updated package is in fact and cached active package
-	if err := r.refreshAllActivePackagesCache(ctx, []uuid.UUID{id}, false); err != nil {
+	// handle edge case where when activate a package, force refresh the active packages cache
+	forceRefresh := false
+	if input.ActiveStatus != nil {
+		forceRefresh = true
+	}
+
+	if err := r.refreshAllActivePackagesCache(ctx, []uuid.UUID{id}, forceRefresh); err != nil {
 		logrus.WithError(err).Warn("failure to update active packages cache after update (report only)")
 	}
 
