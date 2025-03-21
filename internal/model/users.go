@@ -1,10 +1,10 @@
 package model
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // Roles represent database's enum for roles
@@ -26,5 +26,5 @@ type User struct {
 	Roles     Roles
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt sql.NullTime
+	DeletedAt gorm.DeletedAt
 }
