@@ -4,6 +4,7 @@ package db
 import (
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/luckyAkbar/atec/internal/config"
@@ -58,11 +59,24 @@ func InitializePostgresConn() {
 
 	const defaultSlowThreshold = 500 * time.Millisecond
 
+	var logLevel logger.LogLevel
+
+	switch strings.ToLower(config.LogLevel()) {
+	default:
+		logLevel = logger.Silent
+	case "error":
+		logLevel = logger.Error
+	case "warn":
+		logLevel = logger.Warn
+	case "info":
+		logLevel = logger.Info
+	}
+
 	gormLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
 			SlowThreshold:             defaultSlowThreshold, // Slow SQL threshold
-			LogLevel:                  logger.Silent,        // Log level
+			LogLevel:                  logLevel,             // Log level
 			IgnoreRecordNotFoundError: true,                 // Ignore ErrRecordNotFound error for logger
 			ParameterizedQueries:      true,                 // Don't include params in the SQL log
 			Colorful:                  true,                 // Disable color
