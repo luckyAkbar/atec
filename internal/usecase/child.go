@@ -8,15 +8,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/model"
-	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/sirupsen/logrus"
 	"github.com/sweet-go/stdlib/helper"
 )
 
 // ChildUsecase child usecase
 type ChildUsecase struct {
-	childRepo  repository.ChildRepositoryIface
-	resultRepo repository.ResultRepositoryIface
+	childRepo  ChildRepository
+	resultRepo ResultRepository
 }
 
 // ChildUsecaseIface interface
@@ -29,7 +28,7 @@ type ChildUsecaseIface interface {
 }
 
 // NewChildUsecase create new ChildUsecase instance
-func NewChildUsecase(childRepo *repository.ChildRepository, resultRepo *repository.ResultRepository) *ChildUsecase {
+func NewChildUsecase(childRepo ChildRepository, resultRepo ResultRepository) *ChildUsecase {
 	return &ChildUsecase{
 		childRepo:  childRepo,
 		resultRepo: resultRepo,
@@ -72,7 +71,7 @@ func (u *ChildUsecase) Register(ctx context.Context, input RegisterChildInput) (
 		}
 	}
 
-	child, err := u.childRepo.Create(ctx, repository.CreateChildInput{
+	child, err := u.childRepo.Create(ctx, RepoCreateChildInput{
 		ParentUserID: requester.ID,
 		DateOfBirth:  input.DateOfBirth,
 		Gender:       input.Gender,
@@ -139,7 +138,7 @@ func (u *ChildUsecase) Update(ctx context.Context, input UpdateChildInput) (*Upd
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -155,7 +154,7 @@ func (u *ChildUsecase) Update(ctx context.Context, input UpdateChildInput) (*Upd
 		}
 	}
 
-	_, err = u.childRepo.Update(ctx, child.ID, repository.UpdateChildInput{
+	_, err = u.childRepo.Update(ctx, child.ID, RepoUpdateChildInput{
 		DateOfBirth: input.DateOfBirth,
 		Gender:      input.Gender,
 		Name:        input.Name,
@@ -212,7 +211,7 @@ func (u *ChildUsecase) GetRegisteredChildren(ctx context.Context, input GetRegis
 		}
 	}
 
-	children, err := u.childRepo.Search(ctx, repository.SearchChildInput{
+	children, err := u.childRepo.Search(ctx, RepoSearchChildInput{
 		ParentUserID: &requester.ID,
 		Limit:        input.Limit,
 		Offset:       input.Offset,
@@ -226,7 +225,7 @@ func (u *ChildUsecase) GetRegisteredChildren(ctx context.Context, input GetRegis
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -287,7 +286,7 @@ func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]Se
 		}
 	}
 
-	children, err := u.childRepo.Search(ctx, repository.SearchChildInput{
+	children, err := u.childRepo.Search(ctx, RepoSearchChildInput{
 		ParentUserID: input.ParentUserID,
 		Name:         input.Name,
 		Gender:       input.Gender,
@@ -303,7 +302,7 @@ func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]Se
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -374,7 +373,7 @@ func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisti
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -405,7 +404,7 @@ func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisti
 	statComponents := []StatisticComponent{}
 
 	for {
-		results, err := u.resultRepo.Search(ctx, repository.SearchResultInput{
+		results, err := u.resultRepo.Search(ctx, RepoSearchResultInput{
 			ChildID: input.ChildID,
 			Limit:   batchSize,
 			Offset:  offset,
@@ -419,7 +418,7 @@ func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisti
 				ErrType: ErrInternal,
 				Message: ErrInternal.Error(),
 			}
-		case repository.ErrNotFound:
+		case ErrRepoNotFound:
 			if isFirst {
 				return nil, UsecaseError{
 					ErrType: ErrNotFound,

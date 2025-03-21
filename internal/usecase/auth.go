@@ -13,19 +13,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/config"
-	"github.com/luckyAkbar/atec/internal/db"
 	"github.com/luckyAkbar/atec/internal/model"
-	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/sirupsen/logrus"
 	"github.com/sweet-go/stdlib/helper"
 )
 
 // AuthUsecase object containing all usecase level logic related to auth process
 type AuthUsecase struct {
-	sharedCryptor common.SharedCryptorIface
-	userRepo      repository.UserRepositoryIface
-	mailer        *common.Mailer
-	rateLimiter   *redis_rate.Limiter
+	sharedCryptor                common.SharedCryptorIface
+	userRepo                     UserRepository
+	transactionControllerFactory TransactionControllerFactory
+	mailer                       *common.Mailer
+	rateLimiter                  *redis_rate.Limiter
 }
 
 // AuthUsecaseIface interface exported by AuthUsecase to help ease mocking
@@ -42,15 +41,17 @@ type AuthUsecaseIface interface {
 // NewAuthUsecase create new instance for AuthUsecase
 func NewAuthUsecase(
 	sharedCryptor common.SharedCryptorIface,
-	userRepo repository.UserRepositoryIface,
+	userRepo UserRepository,
+	transactionControllerFactory TransactionControllerFactory,
 	mailer *common.Mailer,
 	rateLimiter *redis_rate.Limiter,
 ) *AuthUsecase {
 	return &AuthUsecase{
-		sharedCryptor: sharedCryptor,
-		userRepo:      userRepo,
-		mailer:        mailer,
-		rateLimiter:   rateLimiter,
+		sharedCryptor:                sharedCryptor,
+		userRepo:                     userRepo,
+		transactionControllerFactory: transactionControllerFactory,
+		mailer:                       mailer,
+		rateLimiter:                  rateLimiter,
 	}
 }
 
@@ -98,7 +99,7 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -229,7 +230,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 			ErrType: ErrBadRequest,
 			Message: "your email has been used by another account",
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		break
 	}
 
@@ -243,7 +244,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		}
 	}
 
-	createUserInput := repository.CreateUserInput{
+	createUserInput := RepoCreateUserInput{
 		Email:    emailEncrypted,
 		Password: hashedPassword,
 		Username: input.Username,
@@ -251,12 +252,16 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		Roles:    model.RoleUser,
 	}
 
-	tx := db.TxController()
+	txCtrl := u.transactionControllerFactory.New()
+	tx := txCtrl.Begin()
 
 	user, err := u.userRepo.Create(ctx, createUserInput, tx)
 	if err != nil {
 		logger.WithError(err).Error("failed to create user to database")
-		tx.Rollback()
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
 
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
@@ -273,7 +278,10 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 
 	if err != nil {
 		logger.WithError(err).Error("failed to create JWT token for signup verification")
-		tx.Rollback()
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
 
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
@@ -290,7 +298,10 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 
 	if err != nil {
 		logger.WithError(err).Error("failed to send verification email to user's mail")
-		tx.Rollback()
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
 
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
@@ -298,7 +309,9 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		}
 	}
 
-	tx.Commit()
+	if err := txCtrl.Commit(); err != nil {
+		logger.WithError(err).Error("failed to commit transaction, just reporting")
+	}
 
 	return &SignupOutput{
 		Message: "email confirmation sent",
@@ -403,7 +416,7 @@ func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input Accou
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -420,7 +433,7 @@ func (u *AuthUsecase) HandleAccountVerification(ctx context.Context, input Accou
 	}
 
 	activeTrue := true
-	_, err = u.userRepo.Update(ctx, user.ID, repository.UpdateUserInput{
+	_, err = u.userRepo.Update(ctx, user.ID, RepoUpdateUserInput{
 		IsActive: &activeTrue,
 	})
 
@@ -482,7 +495,7 @@ func (u *AuthUsecase) HandleInitesetPassword(ctx context.Context, input InitRese
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -673,7 +686,7 @@ func (u *AuthUsecase) HandleResetPassword(ctx context.Context, input ResetPasswo
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -692,7 +705,7 @@ func (u *AuthUsecase) HandleResetPassword(ctx context.Context, input ResetPasswo
 		}
 	}
 
-	_, err = u.userRepo.Update(ctx, user.ID, repository.UpdateUserInput{
+	_, err = u.userRepo.Update(ctx, user.ID, RepoUpdateUserInput{
 		Password: newPasswordHashed,
 	})
 
@@ -875,7 +888,7 @@ func (u *AuthUsecase) HandleResendSignupVerification(ctx context.Context, input 
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),

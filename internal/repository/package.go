@@ -9,6 +9,7 @@ import (
 	"github.com/luckyAkbar/atec/internal/config"
 	"github.com/luckyAkbar/atec/internal/db"
 	"github.com/luckyAkbar/atec/internal/model"
+	"github.com/luckyAkbar/atec/internal/usecase"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -20,17 +21,6 @@ type PackageRepo struct {
 	cacheKeeper db.CacheKeeperIface
 }
 
-// PackageRepoIface interface for PackageRepo
-type PackageRepoIface interface {
-	Create(ctx context.Context, input CreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error)
-	FindByID(ctx context.Context, id uuid.UUID) (*model.Package, error)
-	Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error)
-	Delete(ctx context.Context, id uuid.UUID) error
-	Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error)
-	FindOldestActiveAndLockedPackage(ctx context.Context) (*model.Package, error)
-	FindAllActivePackages(ctx context.Context) ([]model.Package, error)
-}
-
 // NewPackageRepo create new package repo instance
 func NewPackageRepo(db *gorm.DB, cacheKeeper *db.CacheKeeper) *PackageRepo {
 	return &PackageRepo{
@@ -39,17 +29,8 @@ func NewPackageRepo(db *gorm.DB, cacheKeeper *db.CacheKeeper) *PackageRepo {
 	}
 }
 
-// CreatePackageInput input
-type CreatePackageInput struct {
-	UserID                  uuid.UUID
-	PackageName             string
-	Questionnaire           model.Questionnaire
-	IndicationCategories    model.IndicationCategories
-	ImageResultAttributeKey model.ImageResultAttributeKey
-}
-
 // Create insert new record of packages to the database
-func (r *PackageRepo) Create(ctx context.Context, input CreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+func (r *PackageRepo) Create(ctx context.Context, input usecase.RepoCreatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
 	tx := r.db
 	if len(txControllers) > 0 {
 		tx = txControllers[0]
@@ -150,17 +131,8 @@ func (r *PackageRepo) FindByID(ctx context.Context, id uuid.UUID) (*model.Packag
 	return pack, nil
 }
 
-// UpdatePackageInput input
-type UpdatePackageInput struct {
-	ActiveStatus *bool
-	LockStatus   *bool
-
-	Questionnaire *model.Questionnaire
-	PackageName   string
-}
-
-// ToUpdateFields convert the update params to gorm dynamic update fields
-func (upi UpdatePackageInput) ToUpdateFields() map[string]interface{} {
+// updatePackageInputToUpdateFields convert the update params to gorm dynamic update fields
+func updatePackageInputToUpdateFields(upi usecase.RepoUpdatePackageInput) map[string]interface{} {
 	fields := map[string]interface{}{}
 
 	if upi.ActiveStatus != nil {
@@ -183,7 +155,9 @@ func (upi UpdatePackageInput) ToUpdateFields() map[string]interface{} {
 }
 
 // Update update package record by its id
-func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
+//
+//nolint:lll
+func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input usecase.RepoUpdatePackageInput, txControllers ...*gorm.DB) (*model.Package, error) {
 	tx := r.db
 	if len(txControllers) > 0 {
 		tx = txControllers[0]
@@ -214,7 +188,7 @@ func (r *PackageRepo) Update(ctx context.Context, id uuid.UUID, input UpdatePack
 
 	err = tx.WithContext(ctx).Model(pack).
 		Clauses(clause.Returning{}).Where("id = ?", id).
-		Updates(input.ToUpdateFields()).Error
+		Updates(updatePackageInputToUpdateFields(input)).Error
 
 	if err != nil {
 		return nil, err
@@ -294,13 +268,7 @@ func (r *PackageRepo) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// SearchPackageInput input to search package. any fields typed with a pointer means it is optional
-type SearchPackageInput struct {
-	IsActive *bool
-	Limit    int
-}
-
-func (spi SearchPackageInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+func searchPackageInputToSearchFields(cursor *gorm.DB, spi usecase.RepoSearchPackageInput) *gorm.DB {
 	if spi.IsActive != nil {
 		cursor = cursor.Where("is_active = ?", *spi.IsActive)
 	}
@@ -313,11 +281,11 @@ func (spi SearchPackageInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
 }
 
 // Search search package based on provided parameters
-func (r *PackageRepo) Search(ctx context.Context, input SearchPackageInput) ([]model.Package, error) {
+func (r *PackageRepo) Search(ctx context.Context, input usecase.RepoSearchPackageInput) ([]model.Package, error) {
 	packages := []model.Package{}
 
 	conn := r.db.WithContext(ctx)
-	cursor := input.toSearchFields(conn)
+	cursor := searchPackageInputToSearchFields(conn, input)
 
 	if err := cursor.Find(&packages).Error; err != nil {
 		return nil, err
@@ -448,7 +416,7 @@ func (r *PackageRepo) findAndSetAllActivePackagesToCache(ctx context.Context) ([
 	limit := 100
 	active := true
 
-	packages, err := r.Search(ctx, SearchPackageInput{
+	packages, err := r.Search(ctx, usecase.RepoSearchPackageInput{
 		IsActive: &active,
 		Limit:    limit,
 	})
