@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
+	"github.com/luckyAkbar/atec/internal/usecase"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -13,16 +14,6 @@ import (
 // UserRepository is an instance containing functions to interact specifically to users database
 type UserRepository struct {
 	db *gorm.DB
-}
-
-// UserRepositoryIface interface exported by UserRepository to help ease mocking
-type UserRepositoryIface interface {
-	FindByEmail(ctx context.Context, email string) (*model.User, error)
-	Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error)
-	FindByID(ctx context.Context, id uuid.UUID) (*model.User, error)
-	Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error)
-	Search(ctx context.Context, input SearchUserInput) ([]model.User, error)
-	IsAdminAccountExists(ctx context.Context) (bool, error)
 }
 
 // NewUserRepository create a new instance of UserRepository
@@ -47,17 +38,8 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.
 	}
 }
 
-// CreateUserInput input to create a new user data
-type CreateUserInput struct {
-	Email    string
-	Password string
-	Username string
-	IsActive bool
-	Roles    model.Roles
-}
-
 // Create insert a new records to users table
-func (r *UserRepository) Create(ctx context.Context, input CreateUserInput, txController ...*gorm.DB) (*model.User, error) {
+func (r *UserRepository) Create(ctx context.Context, input usecase.RepoCreateUserInput, txController ...*gorm.DB) (*model.User, error) {
 	tx := r.db.WithContext(ctx)
 	if len(txController) > 0 {
 		tx = txController[0]
@@ -94,16 +76,8 @@ func (r *UserRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Use
 	}
 }
 
-// UpdateUserInput options to update user record
-type UpdateUserInput struct {
-	Email    string
-	Password string `json:"-"`
-	Username string
-	IsActive *bool
-}
-
-// ToUpdatedFields helper function to translate update options to gorm dynamic fields update
-func (uui UpdateUserInput) ToUpdatedFields() map[string]interface{} {
+// updateUserInputToUpdatedFields helper function to translate update options to gorm dynamic fields update
+func updateUserInputToUpdatedFields(uui usecase.RepoUpdateUserInput) map[string]interface{} {
 	fields := map[string]interface{}{}
 
 	if uui.Email != "" {
@@ -122,12 +96,12 @@ func (uui UpdateUserInput) ToUpdatedFields() map[string]interface{} {
 }
 
 // Update update a users record by its id
-func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input UpdateUserInput) (*model.User, error) {
+func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input usecase.RepoUpdateUserInput) (*model.User, error) {
 	user := &model.User{}
 
 	err := r.db.WithContext(ctx).Model(user).
 		Clauses(clause.Returning{}).Where("id = ?", userID).
-		Updates(input.ToUpdatedFields()).Error
+		Updates(updateUserInputToUpdatedFields(input)).Error
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +114,7 @@ func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input Upd
 func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error) {
 	user := &model.User{}
 
-	err := r.db.WithContext(ctx).Take(user, "roles = ?", model.RolesAdmin).Error
+	err := r.db.WithContext(ctx).First(user, "roles = ?", model.RolesAdmin).Error
 	switch err {
 	default:
 		return false, err
@@ -151,14 +125,7 @@ func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error)
 	}
 }
 
-// SearchUserInput options to search users
-type SearchUserInput struct {
-	Role   model.Roles
-	Limit  int
-	Offset int
-}
-
-func (sui SearchUserInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+func toSearchFields(cursor *gorm.DB, sui usecase.RepoSearchUserInput) *gorm.DB {
 	if sui.Role != "" {
 		cursor = cursor.Where("roles = ?", sui.Role)
 	}
@@ -175,10 +142,10 @@ func (sui SearchUserInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
 }
 
 // Search search users with given options
-func (r *UserRepository) Search(ctx context.Context, input SearchUserInput) ([]model.User, error) {
+func (r *UserRepository) Search(ctx context.Context, input usecase.RepoSearchUserInput) ([]model.User, error) {
 	users := []model.User{}
 	cursor := r.db.WithContext(ctx)
-	cursor = input.toSearchFields(cursor)
+	cursor = toSearchFields(cursor, input)
 
 	if err := cursor.Find(&users).Error; err != nil {
 		return nil, err

@@ -108,10 +108,17 @@ func serverFn(cmd *cobra.Command, _ []string) {
 	childRepo := repository.NewChildRepository(db.PostgresDB)
 	resultRepo := repository.NewResultRepository(db.PostgresDB)
 
-	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepo, mailer, rateLimiter)
-	packageUsecase := usecase.NewPackageUsecase(packageRepo)
-	childUsecase := usecase.NewChildUsecase(childRepo, resultRepo)
-	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepo, childRepo, resultRepo, font)
+	transactionControllerFactory := repository.NewTransactionControllerFactory(db.PostgresDB)
+
+	userRepoUCAdapter := repository.NewUserRepositoryUCAdapter(userRepo)
+	packageRepoUCAdapter := repository.NewPackageRepositoryUCAdapter(packageRepo)
+	childRepoUCAdapter := repository.NewChildRepositoryUCAdapter(childRepo)
+	resultRepoUCAdapter := repository.NewResultRepositoryUCAdapter(resultRepo)
+
+	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepoUCAdapter, transactionControllerFactory, mailer, rateLimiter)
+	packageUsecase := usecase.NewPackageUsecase(packageRepoUCAdapter)
+	childUsecase := usecase.NewChildUsecase(childRepoUCAdapter, resultRepoUCAdapter)
+	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepoUCAdapter, childRepoUCAdapter, resultRepoUCAdapter, font)
 
 	initAdmin, err := cmd.Flags().GetBool("init-admin-account")
 	if err != nil {
@@ -242,7 +249,7 @@ func initAdminAccount(userRepo *repository.UserRepository, sc *common.SharedCryp
 		os.Exit(1)
 	}
 
-	adminUser, err := userRepo.Create(context.Background(), repository.CreateUserInput{
+	adminUser, err := userRepo.Create(context.Background(), usecase.RepoCreateUserInput{
 		Email:    emailEncrypted,
 		Password: hashedPassword,
 		Username: adminUsername,
@@ -263,12 +270,12 @@ func initAdminAccount(userRepo *repository.UserRepository, sc *common.SharedCryp
 // If however, more languages option want to be implemented here, it should update this function to accept more parameters.
 //
 //nolint:funlen,lll,mnd
-func initPackage(packageRepo repository.PackageRepoIface, userRepo repository.UserRepositoryIface) {
+func initPackage(packageRepo *repository.PackageRepo, userRepo *repository.UserRepository) {
 	ctx := context.Background()
 	truth := true
 	logger := logrus.WithField("function", "initPackage")
 
-	activePackages, err := packageRepo.Search(ctx, repository.SearchPackageInput{
+	activePackages, err := packageRepo.Search(ctx, usecase.RepoSearchPackageInput{
 		IsActive: &truth,
 	})
 
@@ -290,7 +297,7 @@ func initPackage(packageRepo repository.PackageRepoIface, userRepo repository.Us
 	logger.Info("no active package found, initializing package")
 	logger.Info("start to find admin account to be used as package creator")
 
-	admin, err := userRepo.Search(ctx, repository.SearchUserInput{
+	admin, err := userRepo.Search(ctx, usecase.RepoSearchUserInput{
 		Role:   model.RolesAdmin,
 		Limit:  1,
 		Offset: 0,
@@ -311,7 +318,7 @@ func initPackage(packageRepo repository.PackageRepoIface, userRepo repository.Us
 
 	logger.WithField("adminAccountID", adminAccount.ID).Info("admin account found, creating package")
 
-	input := repository.CreatePackageInput{
+	input := usecase.RepoCreatePackageInput{
 		UserID:      adminAccount.ID,
 		PackageName: "Kuesioner ATEC Bahasa Indonesia dari ATEC Jatmika",
 		Questionnaire: model.Questionnaire{
@@ -474,7 +481,7 @@ func initPackage(packageRepo repository.PackageRepoIface, userRepo repository.Us
 
 	logger.WithField("packageID", createdPackage.ID).Info("package created successfully. will try to activate it")
 
-	_, err = packageRepo.Update(ctx, createdPackage.ID, repository.UpdatePackageInput{
+	_, err = packageRepo.Update(ctx, createdPackage.ID, usecase.RepoUpdatePackageInput{
 		ActiveStatus: &truth,
 	}, tx)
 

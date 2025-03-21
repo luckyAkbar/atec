@@ -17,7 +17,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/model"
-	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/sirupsen/logrus"
 	"github.com/sweet-go/stdlib/helper"
 	"golang.org/x/image/font"
@@ -26,9 +25,9 @@ import (
 
 // QuestionnaireUsecase usecase for questionnaire
 type QuestionnaireUsecase struct {
-	packageRepo repository.PackageRepoIface
-	childRepo   repository.ChildRepositoryIface
-	resultRepo  repository.ResultRepositoryIface
+	packageRepo PackageRepo
+	childRepo   ChildRepository
+	resultRepo  ResultRepository
 	font        *truetype.Font
 }
 
@@ -43,8 +42,8 @@ type QuestionnaireUsecaseIface interface {
 
 // NewQuestionnaireUsecase create new QuestionnaireUsecase instance
 func NewQuestionnaireUsecase(
-	packageRepo *repository.PackageRepo, childRepo *repository.ChildRepository,
-	resultRepo *repository.ResultRepository, font *truetype.Font,
+	packageRepo PackageRepo, childRepo ChildRepository,
+	resultRepo ResultRepository, font *truetype.Font,
 ) *QuestionnaireUsecase {
 	return &QuestionnaireUsecase{
 		packageRepo: packageRepo,
@@ -156,7 +155,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -193,7 +192,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 	requester := model.GetUserFromCtx(ctx)
 
 	if input.ChildID == uuid.Nil {
-		createInput := repository.CreateResultInput{
+		createInput := RepoCreateResultInput{
 			PackageID: input.PackageID,
 			Answer:    input.Answers,
 			Result:    *grade,
@@ -240,7 +239,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -263,7 +262,7 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}
 	}
 
-	result, err := u.resultRepo.Create(ctx, repository.CreateResultInput{
+	result, err := u.resultRepo.Create(ctx, RepoCreateResultInput{
 		PackageID: input.PackageID,
 		Answer:    input.Answers,
 		Result:    *grade,
@@ -307,7 +306,7 @@ func (u *QuestionnaireUsecase) lockPackageIfNecessary(ctx context.Context, packI
 	logrus.WithField("package_id", packID).Info("this package is not locked, locking it now")
 
 	truth := true
-	_, err := u.packageRepo.Update(ctx, packID, repository.UpdatePackageInput{
+	_, err := u.packageRepo.Update(ctx, packID, RepoUpdatePackageInput{
 		LockStatus: &truth,
 	})
 
@@ -359,7 +358,7 @@ func (u *QuestionnaireUsecase) HandleSearchQuestionnaireResult(
 		}
 	}
 
-	results, err := u.resultRepo.Search(ctx, repository.SearchResultInput{
+	results, err := u.resultRepo.Search(ctx, RepoSearchResultInput{
 		ID:        input.ID,
 		PackageID: input.PackageID,
 		ChildID:   input.ChildID,
@@ -376,7 +375,7 @@ func (u *QuestionnaireUsecase) HandleSearchQuestionnaireResult(
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -447,7 +446,7 @@ func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input G
 		}
 	}
 
-	results, err := u.resultRepo.FindAllUserHistory(ctx, repository.FindAllUserHistoryInput{
+	results, err := u.resultRepo.FindAllUserHistory(ctx, RepoFindAllUserHistoryInput{
 		UserID: requester.ID,
 		Limit:  input.Limit,
 		Offset: input.Offset,
@@ -461,7 +460,7 @@ func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input G
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -527,7 +526,7 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -563,7 +562,7 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -871,7 +870,7 @@ func (u *QuestionnaireUsecase) HandleInitializeATECQuestionnaire(ctx context.Con
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -896,7 +895,7 @@ func (u *QuestionnaireUsecase) getDefaultATECQuestionnaire(ctx context.Context) 
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),

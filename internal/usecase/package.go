@@ -6,14 +6,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/common"
 	"github.com/luckyAkbar/atec/internal/model"
-	"github.com/luckyAkbar/atec/internal/repository"
 	"github.com/sirupsen/logrus"
 	"github.com/sweet-go/stdlib/helper"
 )
 
 // PackageUsecase usecase for package
 type PackageUsecase struct {
-	packageRepo repository.PackageRepoIface
+	packageRepo PackageRepo
 }
 
 // PackageUsecaseIface interface
@@ -26,7 +25,7 @@ type PackageUsecaseIface interface {
 }
 
 // NewPackageUsecase create new PackageUsecase instance
-func NewPackageUsecase(packageRepo *repository.PackageRepo) *PackageUsecase {
+func NewPackageUsecase(packageRepo PackageRepo) *PackageUsecase {
 	return &PackageUsecase{
 		packageRepo: packageRepo,
 	}
@@ -81,7 +80,7 @@ func (u *PackageUsecase) Create(ctx context.Context, input CreatePackageInput) (
 		}
 	}
 
-	pack, err := u.packageRepo.Create(ctx, repository.CreatePackageInput{
+	pack, err := u.packageRepo.Create(ctx, RepoCreatePackageInput{
 		UserID:                  user.ID,
 		PackageName:             input.PackageName,
 		Questionnaire:           input.Questionnaire,
@@ -139,7 +138,7 @@ func (u *PackageUsecase) ChangeActiveStatus(ctx context.Context, input ChangeAct
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -162,7 +161,7 @@ func (u *PackageUsecase) ChangeActiveStatus(ctx context.Context, input ChangeAct
 		}
 	}
 
-	_, err = u.packageRepo.Update(ctx, input.PackageID, repository.UpdatePackageInput{
+	_, err = u.packageRepo.Update(ctx, input.PackageID, RepoUpdatePackageInput{
 		ActiveStatus: &input.ActiveStatus,
 	})
 
@@ -221,7 +220,7 @@ func (u *PackageUsecase) Update(ctx context.Context, input UpdatePackageInput) (
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: ErrNotFound.Error(),
@@ -237,7 +236,7 @@ func (u *PackageUsecase) Update(ctx context.Context, input UpdatePackageInput) (
 		}
 	}
 
-	_, err = u.packageRepo.Update(ctx, input.PackageID, repository.UpdatePackageInput{
+	_, err = u.packageRepo.Update(ctx, input.PackageID, RepoUpdatePackageInput{
 		PackageName:   input.PackageName,
 		Questionnaire: &input.Questionnaire,
 	})
@@ -292,7 +291,7 @@ func (u *PackageUsecase) FindActiveQuestionnaires(ctx context.Context) ([]FindAc
 			ErrType: ErrInternal,
 			Message: ErrInternal.Error(),
 		}
-	case repository.ErrNotFound:
+	case ErrRepoNotFound:
 		return nil, UsecaseError{
 			ErrType: ErrNotFound,
 			Message: "system still doesn't have any questionnaire to be used yet",

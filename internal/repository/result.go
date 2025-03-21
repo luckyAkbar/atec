@@ -5,20 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
+	"github.com/luckyAkbar/atec/internal/usecase"
 	"gorm.io/gorm"
 )
 
 // ResultRepository result repository
 type ResultRepository struct {
 	db *gorm.DB
-}
-
-// ResultRepositoryIface result repository interface
-type ResultRepositoryIface interface {
-	Create(ctx context.Context, input CreateResultInput) (*model.Result, error)
-	FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error)
-	Search(ctx context.Context, input SearchResultInput) ([]model.Result, error)
-	FindAllUserHistory(ctx context.Context, input FindAllUserHistoryInput) ([]model.Result, error)
 }
 
 // NewResultRepository create new instance of ResultRepository
@@ -28,17 +21,8 @@ func NewResultRepository(db *gorm.DB) *ResultRepository {
 	}
 }
 
-// CreateResultInput create result input
-type CreateResultInput struct {
-	PackageID uuid.UUID
-	ChildID   uuid.UUID
-	CreatedBy uuid.UUID
-	Answer    model.AnswerDetail
-	Result    model.ResultDetail
-}
-
 // Create insert new record of results to the database
-func (r *ResultRepository) Create(ctx context.Context, input CreateResultInput) (*model.Result, error) {
+func (r *ResultRepository) Create(ctx context.Context, input usecase.RepoCreateResultInput) (*model.Result, error) {
 	result := &model.Result{
 		PackageID: input.PackageID,
 		ChildID:   input.ChildID,
@@ -69,17 +53,7 @@ func (r *ResultRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.R
 	}
 }
 
-// SearchResultInput search result input
-type SearchResultInput struct {
-	ID        uuid.UUID
-	PackageID uuid.UUID
-	ChildID   uuid.UUID
-	CreatedBy uuid.UUID
-	Limit     int
-	Offset    int
-}
-
-func (sri SearchResultInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
+func searchResultInputoSearchFields(cursor *gorm.DB, sri usecase.RepoSearchResultInput) *gorm.DB {
 	if sri.ID != uuid.Nil {
 		cursor = cursor.Where("id = ?", sri.ID)
 	}
@@ -108,9 +82,9 @@ func (sri SearchResultInput) toSearchFields(cursor *gorm.DB) *gorm.DB {
 }
 
 // Search search results based on provided search parameters
-func (r *ResultRepository) Search(ctx context.Context, input SearchResultInput) ([]model.Result, error) {
+func (r *ResultRepository) Search(ctx context.Context, input usecase.RepoSearchResultInput) ([]model.Result, error) {
 	cursor := r.db.WithContext(ctx)
-	cursor = input.toSearchFields(cursor)
+	cursor = searchResultInputoSearchFields(cursor, input)
 
 	results := []model.Result{}
 
@@ -125,15 +99,8 @@ func (r *ResultRepository) Search(ctx context.Context, input SearchResultInput) 
 	return results, nil
 }
 
-// FindAllUserHistoryInput input
-type FindAllUserHistoryInput struct {
-	UserID uuid.UUID
-	Limit  int
-	Offset int
-}
-
 // FindAllUserHistory find the result made by the userID or the child of the userID
-func (r *ResultRepository) FindAllUserHistory(ctx context.Context, input FindAllUserHistoryInput) ([]model.Result, error) {
+func (r *ResultRepository) FindAllUserHistory(ctx context.Context, input usecase.RepoFindAllUserHistoryInput) ([]model.Result, error) {
 	results := []model.Result{}
 
 	err := r.db.WithContext(ctx).Where("created_by = ?", input.UserID).

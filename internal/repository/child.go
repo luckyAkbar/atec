@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
+	"github.com/luckyAkbar/atec/internal/usecase"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -16,14 +16,6 @@ type ChildRepository struct {
 	db *gorm.DB
 }
 
-// ChildRepositoryIface interface
-type ChildRepositoryIface interface {
-	Create(ctx context.Context, input CreateChildInput) (*model.Child, error)
-	Update(ctx context.Context, id uuid.UUID, input UpdateChildInput) (*model.Child, error)
-	FindByID(ctx context.Context, id uuid.UUID) (*model.Child, error)
-	Search(ctx context.Context, input SearchChildInput) ([]model.Child, error)
-}
-
 // NewChildRepository create new instance of ChildRepository
 func NewChildRepository(db *gorm.DB) *ChildRepository {
 	return &ChildRepository{
@@ -31,16 +23,8 @@ func NewChildRepository(db *gorm.DB) *ChildRepository {
 	}
 }
 
-// CreateChildInput input
-type CreateChildInput struct {
-	ParentUserID uuid.UUID
-	DateOfBirth  time.Time
-	Gender       bool
-	Name         string
-}
-
 // Create create a new record on children table
-func (r *ChildRepository) Create(ctx context.Context, input CreateChildInput) (*model.Child, error) {
+func (r *ChildRepository) Create(ctx context.Context, input usecase.RepoCreateChildInput) (*model.Child, error) {
 	child := &model.Child{
 		ParentUserID: input.ParentUserID,
 		DateOfBirth:  input.DateOfBirth,
@@ -56,15 +40,8 @@ func (r *ChildRepository) Create(ctx context.Context, input CreateChildInput) (*
 	return child, nil
 }
 
-// UpdateChildInput input
-type UpdateChildInput struct {
-	DateOfBirth *time.Time
-	Gender      *bool
-	Name        *string
-}
-
 // ToUpdateFields converts UpdateChildInput to dynamic gorm update fields
-func (uci UpdateChildInput) ToUpdateFields() map[string]interface{} {
+func updateChildInputToUpdateFields(uci usecase.RepoUpdateChildInput) map[string]interface{} {
 	fields := map[string]interface{}{}
 
 	if uci.DateOfBirth != nil {
@@ -83,12 +60,12 @@ func (uci UpdateChildInput) ToUpdateFields() map[string]interface{} {
 }
 
 // Update update child records on database based on id
-func (r *ChildRepository) Update(ctx context.Context, id uuid.UUID, input UpdateChildInput) (*model.Child, error) {
+func (r *ChildRepository) Update(ctx context.Context, id uuid.UUID, input usecase.RepoUpdateChildInput) (*model.Child, error) {
 	child := &model.Child{}
 
 	err := r.db.WithContext(ctx).Model(child).
 		Clauses(clause.Returning{}).Where("id = ?", id).
-		Updates(input.ToUpdateFields()).Error
+		Updates(updateChildInputToUpdateFields(input)).Error
 
 	if err != nil {
 		return nil, err
@@ -112,16 +89,7 @@ func (r *ChildRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Ch
 	}
 }
 
-// SearchChildInput input to search child data. everything marked as pointer to a datatype means it is optional
-type SearchChildInput struct {
-	ParentUserID *uuid.UUID
-	Name         *string
-	Gender       *bool
-	Limit        int
-	Offset       int
-}
-
-func (sci SearchChildInput) buildSearchField(cursor *gorm.DB) *gorm.DB {
+func buildSearchFieldFromSearchChildInput(cursor *gorm.DB, sci usecase.RepoSearchChildInput) *gorm.DB {
 	if sci.ParentUserID != nil {
 		cursor = cursor.Where("parent_user_id = ?", sci.ParentUserID)
 	}
@@ -146,11 +114,11 @@ func (sci SearchChildInput) buildSearchField(cursor *gorm.DB) *gorm.DB {
 }
 
 // Search search children data based on provided search parameters
-func (r *ChildRepository) Search(ctx context.Context, input SearchChildInput) ([]model.Child, error) {
+func (r *ChildRepository) Search(ctx context.Context, input usecase.RepoSearchChildInput) ([]model.Child, error) {
 	children := []model.Child{}
 
 	cursor := r.db.WithContext(ctx)
-	query := input.buildSearchField(cursor)
+	query := buildSearchFieldFromSearchChildInput(cursor, input)
 
 	err := query.Order("created_at DESC").Find(&children).Error
 	if err != nil {
