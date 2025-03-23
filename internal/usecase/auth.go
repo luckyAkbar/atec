@@ -23,8 +23,8 @@ type AuthUsecase struct {
 	sharedCryptor                common.SharedCryptorIface
 	userRepo                     UserRepository
 	transactionControllerFactory TransactionControllerFactory
-	mailer                       *common.Mailer
-	rateLimiter                  *redis_rate.Limiter
+	mailer                       common.MailerIface
+	rateLimiter                  RateLimiter
 }
 
 // AuthUsecaseIface interface exported by AuthUsecase to help ease mocking
@@ -43,8 +43,8 @@ func NewAuthUsecase(
 	sharedCryptor common.SharedCryptorIface,
 	userRepo UserRepository,
 	transactionControllerFactory TransactionControllerFactory,
-	mailer *common.Mailer,
-	rateLimiter *redis_rate.Limiter,
+	mailer common.MailerIface,
+	rateLimiter RateLimiter,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		sharedCryptor:                sharedCryptor,
