@@ -15,6 +15,11 @@ func NewBrevoClient(apiKey string) *sendinblue.APIClient {
 	return sendinblue.NewAPIClient(brevoCfg)
 }
 
+// MailerIface interface for mailer
+type MailerIface interface {
+	SendEmail(ctx context.Context, input SendEmailInput) (*sendinblue.CreateSmtpEmail, error)
+}
+
 // Mailer contains utility relates to mailing functionalities
 type Mailer struct {
 	senderName  string
