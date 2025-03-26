@@ -45,6 +45,11 @@ type TxControllerWrapper struct {
 	impl TransactionController
 }
 
+// NewTxControllerWrapper create new TxControllerWrapper instance
+func NewTxControllerWrapper(impl TransactionController) *TxControllerWrapper {
+	return &TxControllerWrapper{impl}
+}
+
 // NewTransactionControllerFactory create new TransactionControllerFactory instance
 func NewTransactionControllerFactory(impl TransactionController) *TxControllerWrapper {
 	return &TxControllerWrapper{impl}

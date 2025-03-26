@@ -104,7 +104,6 @@ func TestChecklistGroupValidation(t *testing.T) {
 	})
 }
 
-//nolint:funlen,maintidx
 func TestQuestionnaireValidation(t *testing.T) {
 	t.Run("missing atleast 1 quesionnaire (against default template) grup should trigger an error", func(t *testing.T) {
 		questionnaire := model.Questionnaire{
@@ -751,7 +750,6 @@ func TestIndicationCategoriesValidate(t *testing.T) {
 	})
 }
 
-//nolint:lll
 func TestIndicationCategoriesValuerAndScanner(t *testing.T) {
 	// Define a sample IndicationCategories
 	indicationCategories := model.IndicationCategories{
@@ -1058,7 +1056,6 @@ func TestImageResultAttributeKeyValidate(t *testing.T) {
 	})
 }
 
-//nolint:lll
 func TestImageResultAttributeKeyValuerAndScanner(t *testing.T) {
 	// Define a sample ImageResultAttributeKey
 	imageResultAttributeKey := model.ImageResultAttributeKey{
