@@ -310,7 +310,12 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 	}
 
 	if err := txCtrl.Commit(); err != nil {
-		logger.WithError(err).Error("failed to commit transaction, just reporting")
+		logger.WithError(err).Error("failed to commit transaction")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
 	}
 
 	return &SignupOutput{
