@@ -357,6 +357,14 @@ type GetStatisticOutput struct {
 func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisticInput) (*GetStatisticOutput, error) {
 	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
 
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "getting statistic requires valid authorization",
+		}
+	}
+
 	if err := input.validate(); err != nil {
 		return nil, UsecaseError{
 			ErrType: ErrBadRequest,
@@ -380,14 +388,6 @@ func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisti
 		}
 	case nil:
 		break
-	}
-
-	requester := model.GetUserFromCtx(ctx)
-	if requester == nil {
-		return nil, UsecaseError{
-			ErrType: ErrUnauthorized,
-			Message: "getting statistic requires valid authorization",
-		}
 	}
 
 	if child.ParentUserID != requester.ID && requester.Role != model.RolesAdmin {

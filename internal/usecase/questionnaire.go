@@ -230,6 +230,13 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		}, nil
 	}
 
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "filling questionnaire for a child requires valid authorization",
+		}
+	}
+
 	child, err := u.childRepo.FindByID(ctx, input.ChildID)
 	switch err {
 	default:
@@ -248,16 +255,9 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		break
 	}
 
-	if requester == nil {
-		return nil, UsecaseError{
-			ErrType: ErrUnauthorized,
-			Message: "filling questionnaire for a child requires valid authorization",
-		}
-	}
-
 	if requester.Role != model.RolesAdmin && requester.ID != child.ParentUserID {
 		return nil, UsecaseError{
-			ErrType: ErrUnauthorized,
+			ErrType: ErrForbidden,
 			Message: "filling questionnaire for a child must be done by either the parents or admin",
 		}
 	}
