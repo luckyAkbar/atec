@@ -83,6 +83,12 @@ issues:
     - linters:
         - lll
       source: "^// @" # avoid lll from checking comment meant to be used for swaggo
+    - path: _test\.go
+      linters:
+        - funlen
+        - lll
+        - maintidx
+        - containedctx
 
 # Timeout for linters to run
 timeout: 5m
