@@ -43,5 +43,10 @@ migrate:
 mocks:
 	mockery
 
+EXCLUDED_UNIT_TEST_PATHS := ./mocks ./docs
+EXCLUDED_PATTERN := $(shell echo $(EXCLUDED_UNIT_TEST_PATHS) | sed 's/ /|/g')
+UNIT_TEST_PACKAGES := $(shell go list ./... | grep -Ev '$(EXCLUDED_PATTERN)')
+
 unit-tests:
-	go test -cover ./...
+	@echo "Running unit tests on: $(UNIT_TEST_PACKAGES)"
+	go test -race -cover -coverprofile=coverage.out -count=1 $(UNIT_TEST_PACKAGES)
