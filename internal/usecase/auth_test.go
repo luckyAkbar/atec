@@ -1603,16 +1603,6 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 	invalidUUIDAudTokenString, _ := invalidUUIDAudToken.SignedString(signingKey)
 
 	userID := uuid.New()
-	validToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss":  string(usecase.TokenIssuerSystem),
-		"sub":  string(usecase.LoginToken),
-		"aud":  []string{userID.String()},
-		"exp":  jwt.NewNumericDate(time.Now().Add(time.Hour * 1)).Unix(),
-		"role": string(model.RolesTherapist),
-	})
-	validToken.Valid = true
-	validTokenString, _ := validToken.SignedString(signingKey)
-
 	invalidRoleToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":  string(usecase.TokenIssuerSystem),
 		"sub":  string(usecase.LoginToken),
@@ -1621,7 +1611,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		"role": "invalid",
 	})
 	invalidRoleToken.Valid = true
-	invalidRoleTokenString, _ := validToken.SignedString(signingKey)
+	invalidRoleTokenString, _ := invalidRoleToken.SignedString(signingKey)
 
 	invalidRoleStringToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss":  string(usecase.TokenIssuerSystem),
@@ -1631,7 +1621,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		"role": "123",
 	})
 	invalidRoleStringToken.Valid = true
-	invalidRoleStringTokenString, _ := validToken.SignedString(signingKey)
+	invalidRoleStringTokenString, _ := invalidRoleStringToken.SignedString(signingKey)
 
 	adminID := uuid.New()
 	validAdminToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -1642,7 +1632,29 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		"role": string(model.RolesAdministrator),
 	})
 	validAdminToken.Valid = true
-	validAdminTokenString, _ := validToken.SignedString(signingKey)
+	validAdminTokenString, _ := validAdminToken.SignedString(signingKey)
+
+	parentID := uuid.New()
+	validParentToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss":  string(usecase.TokenIssuerSystem),
+		"sub":  string(usecase.LoginToken),
+		"aud":  []string{parentID.String()},
+		"exp":  jwt.NewNumericDate(time.Now().Add(time.Hour * 1)).Unix(),
+		"role": string(model.RolesParent),
+	})
+	validParentToken.Valid = true
+	validParentTokenString, _ := validParentToken.SignedString(signingKey)
+
+	therapistID := uuid.New()
+	validTherapistToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"iss":  string(usecase.TokenIssuerSystem),
+		"sub":  string(usecase.LoginToken),
+		"aud":  []string{therapistID.String()},
+		"exp":  jwt.NewNumericDate(time.Now().Add(time.Hour * 1)).Unix(),
+		"role": string(model.RolesTherapist),
+	})
+	validTherapistToken.Valid = true
+	validTherapistTokenString, _ := validTherapistToken.SignedString(signingKey)
 
 	testCases := []struct {
 		name                 string
@@ -1774,56 +1786,45 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 			},
 		},
 		{
-			name: "allowing all unauthorized success for role user",
+			name: "ok - role is administrator",
 			input: usecase.AuthenticateAccessTokenInput{
-				Token: validTokenString,
+				Token: validAdminTokenString,
 			},
 			wantErr: false,
 			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
+				UserID:   adminID,
+				UserRole: model.RolesAdministrator,
+			},
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().ValidateJWT(validAdminTokenString, validateJWTOpts).Return(validAdminToken, nil).Once()
+			},
+		},
+		{
+			name: "ok - role is parent",
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validParentTokenString,
+			},
+			wantErr: false,
+			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
+				UserID:   parentID,
+				UserRole: model.RolesParent,
+			},
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().ValidateJWT(validParentTokenString, validateJWTOpts).Return(validParentToken, nil).Once()
+			},
+		},
+		{
+			name: "ok - role is therapist",
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validTherapistTokenString,
+			},
+			wantErr: false,
+			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
+				UserID:   therapistID,
 				UserRole: model.RolesTherapist,
-				UserID:   userID,
 			},
 			expectedFunctionCall: func() {
-				mockSharedCryptor.EXPECT().ValidateJWT(validTokenString, validateJWTOpts).Return(validToken, nil).Once()
-			},
-		},
-		{
-			name: "allowing all unauthorized success for role admin",
-			input: usecase.AuthenticateAccessTokenInput{
-				Token: validAdminTokenString,
-			},
-			wantErr: false,
-			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
-				UserID:   adminID,
-				UserRole: model.RolesAdministrator,
-			},
-			expectedFunctionCall: func() {
-				mockSharedCryptor.EXPECT().ValidateJWT(validAdminTokenString, validateJWTOpts).Return(validAdminToken, nil).Once()
-			},
-		},
-		{
-			name: "allowing admin only must failed for user",
-			input: usecase.AuthenticateAccessTokenInput{
-				Token: validTokenString,
-			},
-			wantErr:     true,
-			expectedErr: usecase.ErrForbidden,
-			expectedFunctionCall: func() {
-				mockSharedCryptor.EXPECT().ValidateJWT(validTokenString, validateJWTOpts).Return(validToken, nil).Once()
-			},
-		},
-		{
-			name: "allowing admin only must success for role admin",
-			input: usecase.AuthenticateAccessTokenInput{
-				Token: validAdminTokenString,
-			},
-			wantErr: false,
-			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
-				UserID:   adminID,
-				UserRole: model.RolesAdministrator,
-			},
-			expectedFunctionCall: func() {
-				mockSharedCryptor.EXPECT().ValidateJWT(validAdminTokenString, validateJWTOpts).Return(validAdminToken, nil).Once()
+				mockSharedCryptor.EXPECT().ValidateJWT(validTherapistTokenString, validateJWTOpts).Return(validTherapistToken, nil).Once()
 			},
 		},
 	}

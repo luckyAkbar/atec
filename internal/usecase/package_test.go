@@ -551,7 +551,12 @@ func TestPackageUsecase_Create(t *testing.T) {
 }
 
 func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
-	ctx := context.Background()
+	administrator := model.AuthUser{
+		ID:   uuid.New(),
+		Role: model.RolesAdministrator,
+	}
+
+	ctx := model.SetUserToCtx(context.Background(), administrator)
 
 	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 
@@ -581,6 +586,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 		name                 string
 		input                usecase.ChangeActiveStatusInput
 		wantErr              bool
+		ctx                  context.Context
 		expectedErr          error
 		expectedOutput       *usecase.ChangeActiveStatusOutput
 		expectedFunctionCall func()
@@ -589,6 +595,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 			name:        "missing package id",
 			input:       usecase.ChangeActiveStatusInput{ActiveStatus: statusDisabled},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrBadRequest,
 		},
 		{
@@ -598,6 +605,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusEnabled,
 			},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, assert.AnError).Once()
@@ -610,6 +618,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusEnabled,
 			},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrNotFound,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, usecase.ErrRepoNotFound).Once()
@@ -622,6 +631,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusEnabled,
 			},
 			wantErr: false,
+			ctx:     ctx,
 			expectedOutput: &usecase.ChangeActiveStatusOutput{
 				Message: "ok",
 			},
@@ -636,6 +646,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusDisabled,
 			},
 			wantErr: false,
+			ctx:     ctx,
 			expectedOutput: &usecase.ChangeActiveStatusOutput{
 				Message: "ok",
 			},
@@ -650,6 +661,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusDisabled,
 			},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrForbidden,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(lockedActivePackage, nil).Once()
@@ -662,6 +674,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusEnabled,
 			},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(inactivePackage, nil).Once()
@@ -677,6 +690,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				ActiveStatus: statusEnabled,
 			},
 			wantErr: false,
+			ctx:     ctx,
 			expectedOutput: &usecase.ChangeActiveStatusOutput{
 				Message: "ok",
 			},
@@ -695,7 +709,7 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 				tc.expectedFunctionCall()
 			}
 
-			res, err := uc.ChangeActiveStatus(ctx, tc.input)
+			res, err := uc.ChangeActiveStatus(tc.ctx, tc.input)
 
 			if !tc.wantErr {
 				require.NoError(t, err)
@@ -717,7 +731,12 @@ func TestPackageUsecase_ChangeActiveStatus(t *testing.T) {
 }
 
 func TestPackageUsecase_Update(t *testing.T) {
-	ctx := context.Background()
+	administrator := model.AuthUser{
+		ID:   uuid.New(),
+		Role: model.RolesAdministrator,
+	}
+
+	ctx := model.SetUserToCtx(context.Background(), administrator)
 
 	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 
@@ -743,19 +762,36 @@ func TestPackageUsecase_Update(t *testing.T) {
 		input                usecase.UpdatePackageInput
 		wantErr              bool
 		expectedErr          error
+		ctx                  context.Context
 		expectedOutput       *usecase.UpdatePackageOutput
 		expectedFunctionCall func()
 	}{
 		{
+			name:        "should only be able to use by administrator",
+			input:       usecase.UpdatePackageInput{},
+			wantErr:     true,
+			ctx:         context.Background(),
+			expectedErr: usecase.ErrUnauthorized,
+		},
+		{
+			name:        "should only be able to use by administrator - parents",
+			input:       usecase.UpdatePackageInput{},
+			wantErr:     true,
+			ctx:         model.SetUserToCtx(context.Background(), model.AuthUser{Role: model.RolesParent}),
+			expectedErr: usecase.ErrForbidden,
+		},
+		{
 			name:        "missing required field triggers validation error",
 			input:       usecase.UpdatePackageInput{},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrBadRequest,
 		},
 		{
 			name:        "repository failed to find package by id",
 			input:       input,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, assert.AnError).Once()
@@ -765,6 +801,7 @@ func TestPackageUsecase_Update(t *testing.T) {
 			name:        "package not found",
 			input:       input,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrNotFound,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, usecase.ErrRepoNotFound).Once()
@@ -774,6 +811,7 @@ func TestPackageUsecase_Update(t *testing.T) {
 			name:        "unable to update locked package",
 			input:       input,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrForbidden,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(lockedPackage, nil).Once()
@@ -783,6 +821,7 @@ func TestPackageUsecase_Update(t *testing.T) {
 			name:        "repository failed to perform update package",
 			input:       input,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(unlockedPackage, nil).Once()
@@ -796,6 +835,7 @@ func TestPackageUsecase_Update(t *testing.T) {
 			name:    "ok",
 			input:   input,
 			wantErr: false,
+			ctx:     ctx,
 			expectedOutput: &usecase.UpdatePackageOutput{
 				Message: "ok",
 			},
@@ -815,7 +855,7 @@ func TestPackageUsecase_Update(t *testing.T) {
 				tc.expectedFunctionCall()
 			}
 
-			res, err := uc.Update(ctx, tc.input)
+			res, err := uc.Update(tc.ctx, tc.input)
 
 			if !tc.wantErr {
 				require.NoError(t, err)
@@ -837,7 +877,12 @@ func TestPackageUsecase_Update(t *testing.T) {
 }
 
 func TestPackageUsecase_Delete(t *testing.T) {
-	ctx := context.Background()
+	administrator := model.AuthUser{
+		ID:   uuid.New(),
+		Role: model.RolesAdministrator,
+	}
+
+	ctx := model.SetUserToCtx(context.Background(), administrator)
 
 	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 
@@ -850,13 +895,29 @@ func TestPackageUsecase_Delete(t *testing.T) {
 		input                uuid.UUID
 		wantErr              bool
 		expectedErr          error
+		ctx                  context.Context
 		expectedOutput       error
 		expectedFunctionCall func()
 	}{
 		{
+			name:        "should only allow authorized user",
+			input:       packageID,
+			wantErr:     true,
+			ctx:         context.Background(),
+			expectedErr: usecase.ErrUnauthorized,
+		},
+		{
+			name:        "should only allow administrator",
+			input:       packageID,
+			wantErr:     true,
+			ctx:         model.SetUserToCtx(context.Background(), model.AuthUser{Role: model.RolesParent}),
+			expectedErr: usecase.ErrForbidden,
+		},
+		{
 			name:        "repository failed to delete package",
 			input:       packageID,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().Delete(ctx, packageID).Return(assert.AnError).Once()
@@ -866,6 +927,7 @@ func TestPackageUsecase_Delete(t *testing.T) {
 			name:           "ok",
 			input:          packageID,
 			wantErr:        false,
+			ctx:            ctx,
 			expectedOutput: nil,
 			expectedFunctionCall: func() {
 				mockPackageRepo.EXPECT().Delete(ctx, packageID).Return(nil).Once()
@@ -879,7 +941,7 @@ func TestPackageUsecase_Delete(t *testing.T) {
 				tc.expectedFunctionCall()
 			}
 
-			err := uc.Delete(ctx, tc.input)
+			err := uc.Delete(tc.ctx, tc.input)
 
 			if !tc.wantErr {
 				require.NoError(t, err)

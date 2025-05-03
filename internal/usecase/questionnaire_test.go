@@ -16,7 +16,7 @@ import (
 
 func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 	ctx := context.Background()
-	userID := uuid.New()
+	parentID := uuid.New()
 	childID := uuid.New()
 	packageID := uuid.New()
 	truth := true
@@ -516,41 +516,41 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 		Result: zeroedResultDetail,
 	}
 
-	resultZeroedSubmittedByUser := &model.Result{
+	resultZeroedSubmittedByParent := &model.Result{
 		ID:        uuid.New(),
 		Result:    zeroedResultDetail,
-		CreatedBy: userID,
+		CreatedBy: parentID,
 	}
 
-	user := model.AuthUser{
-		ID:   userID,
+	parent := model.AuthUser{
+		ID:   parentID,
+		Role: model.RolesParent,
+	}
+
+	therapist := model.AuthUser{
+		ID:   uuid.New(),
 		Role: model.RolesTherapist,
 	}
+	therapistCtx := model.SetUserToCtx(ctx, therapist)
 
-	admin := model.AuthUser{
-		ID:   uuid.New(),
-		Role: model.RolesAdministrator,
-	}
-	adminCtx := model.SetUserToCtx(ctx, admin)
-
-	resultZeroedSubmittedByAdmin := &model.Result{
+	resultZeroedSubmittedByTherapist := &model.Result{
 		ID:        uuid.New(),
 		Result:    zeroedResultDetail,
-		CreatedBy: admin.ID,
+		CreatedBy: therapist.ID,
 	}
 
 	child := &model.Child{
 		ID:           childID,
-		ParentUserID: userID,
+		ParentUserID: parentID,
 	}
 
-	userCtx := model.SetUserToCtx(ctx, user)
+	parentCtx := model.SetUserToCtx(ctx, parent)
 
-	randomUser := model.AuthUser{
+	randomParent := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
-	randomUserCtx := model.SetUserToCtx(ctx, randomUser)
+	randomParentCtx := model.SetUserToCtx(ctx, randomParent)
 
 	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 	mockResultRepo := mockUsecase.NewResultRepository(t)
@@ -706,27 +706,27 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 			},
 		},
 		{
-			name: "success submitting with no defined child id from a logged in user",
+			name: "success submitting with no defined child id from a parent",
 			input: usecase.SubmitQuestionnaireInput{
 				PackageID: packageID,
 				Answers:   validAnswersZeroed,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				Result:     zeroedResultDetail,
 				Indication: selectedLockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parent.ID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
+					CreatedBy: parentID,
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
 			},
 		},
 		{
@@ -735,24 +735,24 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				PackageID: packageID,
 				Answers:   validAnswersZeroed,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				Result:     zeroedResultDetail,
 				Indication: selectedUnlockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parentID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
+					CreatedBy: parentID,
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
 
-				ctxWithCancel := context.WithoutCancel(userCtx)
+				ctxWithCancel := context.WithoutCancel(parentCtx)
 				mockPackageRepo.EXPECT().Update(ctxWithCancel, packageID, usecase.RepoUpdatePackageInput{
 					LockStatus: &truth,
 				}).Return(&model.Package{}, nil).Once()
@@ -764,24 +764,24 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				PackageID: packageID,
 				Answers:   validAnswersZeroed,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				Result:     zeroedResultDetail,
 				Indication: selectedUnlockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parentID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
+					CreatedBy: parentID,
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
 
-				ctxWithCancel := context.WithoutCancel(userCtx)
+				ctxWithCancel := context.WithoutCancel(parentCtx)
 				mockPackageRepo.EXPECT().Update(ctxWithCancel, packageID, usecase.RepoUpdatePackageInput{
 					LockStatus: &truth,
 				}).Return(nil, assert.AnError).Once()
@@ -808,12 +808,12 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:         userCtx,
+			ctx:         parentCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(nil, assert.AnError).Once()
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(nil, assert.AnError).Once()
 			},
 		},
 		{
@@ -823,27 +823,27 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:         userCtx,
+			ctx:         parentCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrNotFound,
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(nil, usecase.ErrRepoNotFound).Once()
 			},
 		},
 		{
-			name: "other than parents / admin should not be able to submit to other child",
+			name: "other than parents / therapist should not be able to submit to other child",
 			input: usecase.SubmitQuestionnaireInput{
 				PackageID: packageID,
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:         randomUserCtx,
+			ctx:         randomParentCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrForbidden,
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(randomUserCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(randomUserCtx, childID).Return(child, nil).Once()
+				mockPackageRepo.EXPECT().FindByID(randomParentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(randomParentCtx, childID).Return(child, nil).Once()
 			},
 		},
 		{
@@ -853,55 +853,55 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				PackageID:  packageID,
 				Answers:    validAnswersZeroed,
 				Result:     zeroedResultDetail,
 				Indication: selectedLockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parentID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
+					CreatedBy: parentID,
 					ChildID:   childID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
 			},
 		},
 		{
-			name: "admin should be able to submit to any child",
+			name: "therapist should be able to submit to any child",
 			input: usecase.SubmitQuestionnaireInput{
 				PackageID: packageID,
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:     adminCtx,
+			ctx:     therapistCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByAdmin.ID,
+				ResultID:   resultZeroedSubmittedByTherapist.ID,
 				PackageID:  packageID,
 				Answers:    validAnswersZeroed,
 				Result:     zeroedResultDetail,
 				Indication: selectedLockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  admin.ID,
+				CreatedBy:  therapist.ID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(adminCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(adminCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Create(adminCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(therapistCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(therapistCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Create(therapistCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: admin.ID,
+					CreatedBy: therapist.ID,
 					ChildID:   childID,
-				}).Return(resultZeroedSubmittedByAdmin, nil).Once()
+				}).Return(resultZeroedSubmittedByTherapist, nil).Once()
 			},
 		},
 		{
@@ -911,17 +911,17 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:         userCtx,
+			ctx:         parentCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedLockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedLockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: user.ID,
+					CreatedBy: parent.ID,
 					ChildID:   childID,
 				}).Return(nil, assert.AnError).Once()
 			},
@@ -933,27 +933,27 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				PackageID:  packageID,
 				Answers:    validAnswersZeroed,
 				Result:     zeroedResultDetail,
 				Indication: selectedUnlockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parentID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
+					CreatedBy: parentID,
 					ChildID:   childID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
-				ctxWithoutCancel := context.WithoutCancel(userCtx)
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
+				ctxWithoutCancel := context.WithoutCancel(parentCtx)
 				mockPackageRepo.EXPECT().Update(ctxWithoutCancel, packageID, usecase.RepoUpdatePackageInput{
 					LockStatus: &truth,
 				}).Return(&model.Package{}, nil).Once()
@@ -966,27 +966,27 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 				Answers:   validAnswersZeroed,
 				ChildID:   childID,
 			},
-			ctx:     userCtx,
+			ctx:     parentCtx,
 			wantErr: false,
 			expectedOutput: &usecase.SubmitQuestionnaireOutput{
-				ResultID:   resultZeroedSubmittedByUser.ID,
+				ResultID:   resultZeroedSubmittedByParent.ID,
 				PackageID:  packageID,
 				Answers:    validAnswersZeroed,
 				Result:     zeroedResultDetail,
 				Indication: selectedUnlockedPackage.IndicationCategories.GetIndicationCategoryByScore(0),
-				CreatedBy:  userID,
+				CreatedBy:  parentID,
 			},
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().FindByID(userCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
-				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Create(userCtx, usecase.RepoCreateResultInput{
+				mockPackageRepo.EXPECT().FindByID(parentCtx, packageID).Return(selectedUnlockedPackage, nil).Once()
+				mockChildRepo.EXPECT().FindByID(parentCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Create(parentCtx, usecase.RepoCreateResultInput{
 					PackageID: packageID,
 					Answer:    validAnswersZeroed,
 					Result:    zeroedResultDetail,
-					CreatedBy: userID,
+					CreatedBy: parentID,
 					ChildID:   childID,
-				}).Return(resultZeroedSubmittedByUser, nil).Once()
-				ctxWithoutCancel := context.WithoutCancel(userCtx)
+				}).Return(resultZeroedSubmittedByParent, nil).Once()
+				ctxWithoutCancel := context.WithoutCancel(parentCtx)
 				mockPackageRepo.EXPECT().Update(ctxWithoutCancel, packageID, usecase.RepoUpdatePackageInput{
 					LockStatus: &truth,
 				}).Return(nil, assert.AnError).Once()
@@ -1032,21 +1032,21 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
 	userCtx := model.SetUserToCtx(ctx, user)
 
 	randomUser := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
 	randomUserCtx := model.SetUserToCtx(ctx, randomUser)
 
-	adminUser := model.AuthUser{
+	therapistUser := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesAdministrator,
+		Role: model.RolesTherapist,
 	}
-	adminCtx := model.SetUserToCtx(ctx, adminUser)
+	therapistCtx := model.SetUserToCtx(ctx, therapistUser)
 
 	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 	mockResultRepo := mockUsecase.NewResultRepository(t)
@@ -1158,7 +1158,7 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 			},
 		},
 		{
-			name: "result with owner can only be downloaded by the owner or the admin",
+			name: "result with owner can only be downloaded by the owner or the therapist",
 			input: usecase.DownloadQuestionnaireResultInput{
 				ResultID: resultID,
 			},
@@ -1170,7 +1170,7 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 			},
 		},
 		{
-			name: "result with owner should not be downloaded by other non admin user",
+			name: "result with owner should not be downloaded by other non therapist user",
 			input: usecase.DownloadQuestionnaireResultInput{
 				ResultID: resultID,
 			},
@@ -1194,15 +1194,15 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 			},
 		},
 		{
-			name: "admin should be able to download any result",
+			name: "therapist should be able to download any result",
 			input: usecase.DownloadQuestionnaireResultInput{
 				ResultID: resultID,
 			},
-			ctx:     adminCtx,
+			ctx:     therapistCtx,
 			wantErr: false,
 			expectedFunctionCall: func() {
-				mockResultRepo.EXPECT().FindByID(adminCtx, resultID).Return(resultWithOwner, nil).Once()
-				mockPackageRepo.EXPECT().FindByID(adminCtx, resultWithOwner.PackageID).Return(pack, nil).Once()
+				mockResultRepo.EXPECT().FindByID(therapistCtx, resultID).Return(resultWithOwner, nil).Once()
+				mockPackageRepo.EXPECT().FindByID(therapistCtx, resultWithOwner.PackageID).Return(pack, nil).Once()
 			},
 		},
 	}
@@ -1234,7 +1234,12 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 }
 
 func TestQuestionnaireUsecae_HandleSearchQuestionnaireResult(t *testing.T) {
-	ctx := context.Background()
+	therapist := model.AuthUser{
+		ID:   uuid.New(),
+		Role: model.RolesTherapist,
+	}
+
+	ctx := model.SetUserToCtx(context.Background(), therapist)
 
 	mockResultRepo := mockUsecase.NewResultRepository(t)
 
@@ -1255,14 +1260,37 @@ func TestQuestionnaireUsecae_HandleSearchQuestionnaireResult(t *testing.T) {
 		name                 string
 		input                usecase.SearchQuestionnaireResultInput
 		wantErr              bool
+		ctx                  context.Context
 		expectedErr          error
 		expectedOutputLen    int
 		expectedFunctionCall func()
 	}{
 		{
+			name:        "should only allow authorized request",
+			input:       usecase.SearchQuestionnaireResultInput{},
+			wantErr:     true,
+			ctx:         context.Background(),
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name:        "should only allow therapist - parent",
+			input:       usecase.SearchQuestionnaireResultInput{},
+			wantErr:     true,
+			ctx:         model.SetUserToCtx(context.Background(), model.AuthUser{Role: model.RolesParent}),
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name:        "should only allow therapist - administrator",
+			input:       usecase.SearchQuestionnaireResultInput{},
+			wantErr:     true,
+			ctx:         model.SetUserToCtx(context.Background(), model.AuthUser{Role: model.RolesAdministrator}),
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
 			name:        "limit is missing from input",
 			input:       usecase.SearchQuestionnaireResultInput{},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrBadRequest,
 		},
 		{
@@ -1272,12 +1300,14 @@ func TestQuestionnaireUsecae_HandleSearchQuestionnaireResult(t *testing.T) {
 				Offset: -1,
 			},
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrBadRequest,
 		},
 		{
 			name:        "repository returning unexpected error on search",
 			input:       validInput,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
 				mockResultRepo.EXPECT().Search(ctx, usecase.RepoSearchResultInput{
@@ -1294,6 +1324,7 @@ func TestQuestionnaireUsecae_HandleSearchQuestionnaireResult(t *testing.T) {
 			name:        "repository returning not found error on search",
 			input:       validInput,
 			wantErr:     true,
+			ctx:         ctx,
 			expectedErr: usecase.ErrNotFound,
 			expectedFunctionCall: func() {
 				mockResultRepo.EXPECT().Search(ctx, usecase.RepoSearchResultInput{
@@ -1310,6 +1341,7 @@ func TestQuestionnaireUsecae_HandleSearchQuestionnaireResult(t *testing.T) {
 			name:              "ok",
 			input:             validInput,
 			wantErr:           false,
+			ctx:               ctx,
 			expectedOutputLen: expectedResultLen,
 			expectedFunctionCall: func() {
 				mockResultRepo.EXPECT().Search(ctx, usecase.RepoSearchResultInput{
@@ -1355,7 +1387,7 @@ func TestQuestionnaireUsecase_HandleGetUserHistory(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
 
 	ctx := context.Background()
@@ -1394,7 +1426,7 @@ func TestQuestionnaireUsecase_HandleGetUserHistory(t *testing.T) {
 				Limit:  10,
 				Offset: -1,
 			},
-			ctx:         ctx,
+			ctx:         userCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrBadRequest,
 		},

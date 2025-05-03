@@ -715,23 +715,23 @@ func TestChildUseccase_HandleGetStatistic(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
 
-	adminID := uuid.New()
-	admin := model.AuthUser{
-		ID:   adminID,
-		Role: model.RolesAdministrator,
+	therapistID := uuid.New()
+	therapist := model.AuthUser{
+		ID:   therapistID,
+		Role: model.RolesTherapist,
 	}
 
 	nonParentID := uuid.New()
 	nonParent := model.AuthUser{
 		ID:   nonParentID,
-		Role: model.RolesTherapist,
+		Role: model.RolesParent,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
-	adminCtx := model.SetUserToCtx(ctx, admin)
+	therapistCtx := model.SetUserToCtx(ctx, therapist)
 	nonParentCtx := model.SetUserToCtx(ctx, nonParent)
 
 	mockChildRepo := mockUsecase.NewChildRepository(t)
@@ -826,12 +826,12 @@ func TestChildUseccase_HandleGetStatistic(t *testing.T) {
 			input: usecase.GetStatisticInput{
 				ChildID: childID,
 			},
-			ctx:         adminCtx,
+			ctx:         therapistCtx,
 			wantErr:     true,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
-				mockChildRepo.EXPECT().FindByID(adminCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Search(adminCtx, usecase.RepoSearchResultInput{
+				mockChildRepo.EXPECT().FindByID(therapistCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Search(therapistCtx, usecase.RepoSearchResultInput{
 					ChildID: childID,
 					Limit:   batchSize,
 					Offset:  0,
@@ -899,22 +899,22 @@ func TestChildUseccase_HandleGetStatistic(t *testing.T) {
 			input: usecase.GetStatisticInput{
 				ChildID: childID,
 			},
-			ctx:               adminCtx,
+			ctx:               therapistCtx,
 			wantErr:           false,
 			expectedOutputLen: 299,
 			expectedFunctionCall: func() {
-				mockChildRepo.EXPECT().FindByID(adminCtx, childID).Return(child, nil).Once()
-				mockResultRepo.EXPECT().Search(adminCtx, usecase.RepoSearchResultInput{
+				mockChildRepo.EXPECT().FindByID(therapistCtx, childID).Return(child, nil).Once()
+				mockResultRepo.EXPECT().Search(therapistCtx, usecase.RepoSearchResultInput{
 					ChildID: childID,
 					Limit:   batchSize,
 					Offset:  0,
 				}).Return(genResult(100), nil).Once()
-				mockResultRepo.EXPECT().Search(adminCtx, usecase.RepoSearchResultInput{
+				mockResultRepo.EXPECT().Search(therapistCtx, usecase.RepoSearchResultInput{
 					ChildID: childID,
 					Limit:   batchSize,
 					Offset:  100,
 				}).Return(genResult(100), nil).Once()
-				mockResultRepo.EXPECT().Search(adminCtx, usecase.RepoSearchResultInput{
+				mockResultRepo.EXPECT().Search(therapistCtx, usecase.RepoSearchResultInput{
 					ChildID: childID,
 					Limit:   batchSize,
 					Offset:  200,
