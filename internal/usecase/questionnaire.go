@@ -349,6 +349,21 @@ type SearchQuestionnaireResultOutput struct {
 func (u *QuestionnaireUsecase) HandleSearchQuestionnaireResult(
 	ctx context.Context, input SearchQuestionnaireResultInput,
 ) ([]SearchQuestionnaireResultOutput, error) {
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if requester.Role != model.RolesTherapist {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
 
 	if err := input.validate(); err != nil {
@@ -429,20 +444,20 @@ type GetUserHistoryOutput struct {
 // HandleGetUserHistory will return a list of questionnaire result made by the requester
 // or questionnaire submitted for the requester's children
 func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input GetUserHistoryInput) ([]GetUserHistoryOutput, error) {
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(ctx))
 
 	if err := input.validate(); err != nil {
 		return nil, UsecaseError{
 			ErrType: ErrBadRequest,
 			Message: err.Error(),
-		}
-	}
-
-	requester := model.GetUserFromCtx(ctx)
-	if requester == nil {
-		return nil, UsecaseError{
-			ErrType: ErrUnauthorized,
-			Message: "getting user history requires valid authorization",
 		}
 	}
 

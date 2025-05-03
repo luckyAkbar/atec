@@ -71,6 +71,13 @@ func (u *PackageUsecase) Create(ctx context.Context, input CreatePackageInput) (
 		}
 	}
 
+	if user.Role != model.RolesAdministrator {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("user", helper.Dump(user))
 
 	if err := input.Validate(); err != nil {
@@ -120,6 +127,21 @@ type ChangeActiveStatusOutput struct {
 
 // ChangeActiveStatus change package active status from its id. If the package is locked, will raise and forbidden error
 func (u *PackageUsecase) ChangeActiveStatus(ctx context.Context, input ChangeActiveStatusInput) (*ChangeActiveStatusOutput, error) {
+	user := model.GetUserFromCtx(ctx)
+	if user == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if user.Role != model.RolesAdministrator {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("input", helper.Dump(input))
 
 	if err := input.Validate(); err != nil {
@@ -202,6 +224,21 @@ type UpdatePackageOutput struct {
 
 // Update update a package based on its id. Only applicable if the package is not yet locked
 func (u *PackageUsecase) Update(ctx context.Context, input UpdatePackageInput) (*UpdatePackageOutput, error) {
+	user := model.GetUserFromCtx(ctx)
+	if user == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if user.Role != model.RolesAdministrator {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("id", input.PackageID)
 
 	if err := input.Validate(); err != nil {
@@ -257,6 +294,21 @@ func (u *PackageUsecase) Update(ctx context.Context, input UpdatePackageInput) (
 
 // Delete delete a package with its id by using soft delete technique
 func (u *PackageUsecase) Delete(ctx context.Context, id uuid.UUID) error {
+	user := model.GetUserFromCtx(ctx)
+	if user == nil {
+		return UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if user.Role != model.RolesAdministrator {
+		return UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	logger := logrus.WithContext(ctx).WithField("id", id.String())
 
 	if err := u.packageRepo.Delete(ctx, id); err != nil {
