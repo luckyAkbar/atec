@@ -2,7 +2,7 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; -- to be able to access uuid_generate_v4 function
 
-CREATE TYPE roles AS ENUM ('admin', 'user');
+CREATE TYPE roles AS ENUM ('administrator', 'therapist', 'parent');
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     username TEXT NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
-    roles roles NOT NULL DEFAULT 'user',
+    roles roles NOT NULL DEFAULT 'parent',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     deleted_at TIMESTAMPTZ DEFAULT NULL
