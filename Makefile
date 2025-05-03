@@ -36,6 +36,9 @@ install-modd:
 install-mockery:
 	go install github.com/vektra/mockery/v2@v2.52.2
 
+migrate:
+	go run main.go migrate
+
 .PHONY: mocks
 mocks:
 	mockery
