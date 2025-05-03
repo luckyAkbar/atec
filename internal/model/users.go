@@ -12,8 +12,9 @@ type Roles string
 
 // known roles
 const (
-	RolesAdmin Roles = "admin"
-	RoleUser   Roles = "user"
+	RolesAdministrator Roles = "administrator"
+	RolesParent        Roles = "parent"
+	RolesTherapist     Roles = "therapist"
 )
 
 // User represent users table on database

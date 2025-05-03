@@ -12,7 +12,7 @@ import (
 func TestSetUserToCtx(t *testing.T) {
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 
 	ctx := context.Background()
@@ -36,7 +36,7 @@ func TestSetUserToCtx(t *testing.T) {
 func TestGetUserFromCtx(t *testing.T) {
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 
 	ctx := context.Background()

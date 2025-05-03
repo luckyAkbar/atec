@@ -390,10 +390,10 @@ func (u *ChildUsecase) HandleGetStatistic(ctx context.Context, input GetStatisti
 		break
 	}
 
-	if child.ParentUserID != requester.ID && requester.Role != model.RolesAdmin {
+	if child.ParentUserID != requester.ID && requester.Role != model.RolesTherapist {
 		return nil, UsecaseError{
 			ErrType: ErrUnauthorized,
-			Message: "getting statistic for this child must be done either by parent or admin",
+			Message: "getting statistic for this child must be done either by parent or therapist",
 		}
 	}
 

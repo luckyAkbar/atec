@@ -249,7 +249,7 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		Password: hashedPassword,
 		Username: input.Username,
 		IsActive: false,
-		Roles:    model.RoleUser,
+		Roles:    model.RolesTherapist,
 	}
 
 	txCtrl := u.transactionControllerFactory.New()

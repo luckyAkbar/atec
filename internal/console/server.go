@@ -254,7 +254,7 @@ func initAdminAccount(userRepo *repository.UserRepository, sc *common.SharedCryp
 		Password: hashedPassword,
 		Username: adminUsername,
 		IsActive: true,
-		Roles:    model.RolesAdmin,
+		Roles:    model.RolesAdministrator,
 	})
 
 	if err != nil {
@@ -298,7 +298,7 @@ func initPackage(packageRepo *repository.PackageRepo, userRepo *repository.UserR
 	logger.Info("start to find admin account to be used as package creator")
 
 	admin, err := userRepo.Search(ctx, usecase.RepoSearchUserInput{
-		Role:   model.RolesAdmin,
+		Role:   model.RolesAdministrator,
 		Limit:  1,
 		Offset: 0,
 	})

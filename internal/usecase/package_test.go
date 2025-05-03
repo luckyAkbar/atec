@@ -447,7 +447,7 @@ func TestPackageUsecase_Create(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)

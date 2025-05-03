@@ -524,12 +524,12 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	admin := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 	adminCtx := model.SetUserToCtx(ctx, admin)
 
@@ -548,7 +548,7 @@ func TestQuestionnaireUsecase_HandleSubmitQuestionnaire(t *testing.T) {
 
 	randomUser := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 	randomUserCtx := model.SetUserToCtx(ctx, randomUser)
 
@@ -1032,19 +1032,19 @@ func TestQuestionnaireUsecase_HandleDownloadQuestionnaireResult(t *testing.T) {
 
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 	userCtx := model.SetUserToCtx(ctx, user)
 
 	randomUser := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 	randomUserCtx := model.SetUserToCtx(ctx, randomUser)
 
 	adminUser := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 	adminCtx := model.SetUserToCtx(ctx, adminUser)
 
@@ -1355,7 +1355,7 @@ func TestQuestionnaireUsecase_HandleGetUserHistory(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	ctx := context.Background()
