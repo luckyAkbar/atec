@@ -22,7 +22,7 @@ type PackageRepo struct {
 }
 
 // NewPackageRepo create new package repo instance
-func NewPackageRepo(db *gorm.DB, cacheKeeper *db.CacheKeeper) *PackageRepo {
+func NewPackageRepo(db *gorm.DB, cacheKeeper db.CacheKeeperIface) *PackageRepo {
 	return &PackageRepo{
 		db:          db,
 		cacheKeeper: cacheKeeper,

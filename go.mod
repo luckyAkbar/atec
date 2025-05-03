@@ -3,11 +3,13 @@ module github.com/luckyAkbar/atec
 go 1.23.6
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-redsync/redsync/v4 v4.13.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/jpillora/backoff v1.0.0
 	github.com/labstack/echo/v4 v4.13.3
@@ -25,6 +27,7 @@ require (
 	golang.org/x/crypto v0.33.0
 	golang.org/x/image v0.24.0
 	gopkg.in/guregu/null.v4 v4.0.0
+	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
 
@@ -108,5 +111,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.5.11 // indirect
 )
