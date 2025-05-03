@@ -54,27 +54,26 @@ func (s *service) initV1Routes() {
 	s.v1.POST("/auth/password", s.HandleResetPassword())
 	s.v1.GET("/auth/password", s.HandleRenderChangePasswordPage())
 
-	s.v1.POST("/atec/packages", s.HandleCreatePackage(), s.AuthMiddleware(false, true))
-	s.v1.PUT("/atec/packages/:package_id", s.HandleUpdatePackage(), s.AuthMiddleware(false, true))
-	s.v1.PATCH("/atec/packages/:package_id", s.HandleActivationPackage(), s.AuthMiddleware(false, true))
-	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage(), s.AuthMiddleware(false, true))
+	s.v1.POST("/atec/packages", s.HandleCreatePackage(), s.AuthMiddleware(false))
+	s.v1.PUT("/atec/packages/:package_id", s.HandleUpdatePackage(), s.AuthMiddleware(false))
+	s.v1.PATCH("/atec/packages/:package_id", s.HandleActivationPackage(), s.AuthMiddleware(false))
+	s.v1.DELETE("/atec/packages/:package_id", s.HandleDeletePackage(), s.AuthMiddleware(false))
 	s.v1.GET("/atec/packages/active", s.HandleSearchActivePackage())
 
-	s.v1.POST("/childern", s.HandleRegisterChildern(), s.AuthMiddleware(true, false))
-	s.v1.PUT("/childern/:child_id", s.HandleUpdateChildern(), s.AuthMiddleware(true, false))
-	s.v1.GET("/childern", s.HandleGetMyChildern(), s.AuthMiddleware(true, false))
-	s.v1.GET("/childern/search", s.HandleSearchChildern(), s.AuthMiddleware(false, true))
-	s.v1.GET("/childern/:child_id/stats", s.HandleGetChildStats(), s.AuthMiddleware(true, false))
+	s.v1.POST("/childern", s.HandleRegisterChildern(), s.AuthMiddleware(false))
+	s.v1.PUT("/childern/:child_id", s.HandleUpdateChildern(), s.AuthMiddleware(false))
+	s.v1.GET("/childern", s.HandleGetMyChildern(), s.AuthMiddleware(false))
+	s.v1.GET("/childern/search", s.HandleSearchChildern(), s.AuthMiddleware(false))
+	s.v1.GET("/childern/:child_id/stats", s.HandleGetChildStats(), s.AuthMiddleware(false))
 
 	s.v1.GET("/atec/questionnaires", s.HandleGetATECQuestionaire())
-	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire(), s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false))
+	s.v1.POST("/atec/questionnaires", s.HandleSubmitQuestionnaire(), s.AuthMiddleware(true))
 	s.v1.GET(
 		"/atec/questionnaires/results/:result_id",
-		s.HandleDownloadQuestionnaireResult(),
-		s.allowUnauthorizedAccess(), s.AuthMiddleware(true, false),
+		s.HandleDownloadQuestionnaireResult(), s.AuthMiddleware(true),
 	)
-	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults(), s.AuthMiddleware(false, true))
-	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults(), s.AuthMiddleware(true, false))
+	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults(), s.AuthMiddleware(false))
+	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults(), s.AuthMiddleware(false))
 
 	s.v1.GET("/swagger/*", echoSwagger.WrapHandler)
 }
