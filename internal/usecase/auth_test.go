@@ -1608,7 +1608,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		"sub":  string(usecase.LoginToken),
 		"aud":  []string{userID.String()},
 		"exp":  jwt.NewNumericDate(time.Now().Add(time.Hour * 1)).Unix(),
-		"role": string(model.RoleUser),
+		"role": string(model.RolesTherapist),
 	})
 	validToken.Valid = true
 	validTokenString, _ := validToken.SignedString(signingKey)
@@ -1639,22 +1639,22 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		"sub":  string(usecase.LoginToken),
 		"aud":  []string{adminID.String()},
 		"exp":  jwt.NewNumericDate(time.Now().Add(time.Hour * 1)).Unix(),
-		"role": string(model.RolesAdmin),
+		"role": string(model.RolesAdministrator),
 	})
 	validAdminToken.Valid = true
 	validAdminTokenString, _ := validToken.SignedString(signingKey)
 
 	testCases := []struct {
 		name                 string
-		input                usecase.AllowAccessInput
+		input                usecase.AuthenticateAccessTokenInput
 		wantErr              bool
 		expectedErr          error
-		expectedOutput       *usecase.AllowAccessOutput
+		expectedOutput       *usecase.AuthenticateAccessTokenOutput
 		expectedFunctionCall func()
 	}{
 		{
 			name: "expired jwt token",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: sampleVerificationToken,
 			},
 			wantErr:     true,
@@ -1665,7 +1665,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "jwt token is not Valid",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: sampleVerificationToken,
 			},
 			wantErr:     true,
@@ -1676,7 +1676,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "invalid claims",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: invalidClaimsTokenString,
 			},
 			wantErr:     true,
@@ -1687,7 +1687,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "unknown issuer",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: unknownIssuerTokenString,
 			},
 			wantErr:     true,
@@ -1698,7 +1698,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "unknown subject",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: unknownTokenSubjectString,
 			},
 			wantErr:     true,
@@ -1709,7 +1709,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "no subject token",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: noAudienceTokenString,
 			},
 			wantErr:     true,
@@ -1720,7 +1720,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "more than one aud",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: moreThanOneAudienceTokenString,
 			},
 			wantErr:     true,
@@ -1731,7 +1731,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "invalid uuid token",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: invalidUUIDAudTokenString,
 			},
 			wantErr:     true,
@@ -1742,7 +1742,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "undefined role in the token claims",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: invalidUUIDAudTokenString,
 			},
 			wantErr:     true,
@@ -1753,7 +1753,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "role was not string",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: invalidRoleStringTokenString,
 			},
 			wantErr:     true,
@@ -1764,7 +1764,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "role was not string",
-			input: usecase.AllowAccessInput{
+			input: usecase.AuthenticateAccessTokenInput{
 				Token: invalidRoleTokenString,
 			},
 			wantErr:     true,
@@ -1775,13 +1775,12 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "allowing all unauthorized success for role user",
-			input: usecase.AllowAccessInput{
-				Token:              validTokenString,
-				AllowAllAuthorized: true,
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validTokenString,
 			},
 			wantErr: false,
-			expectedOutput: &usecase.AllowAccessOutput{
-				UserRole: model.RoleUser,
+			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
+				UserRole: model.RolesTherapist,
 				UserID:   userID,
 			},
 			expectedFunctionCall: func() {
@@ -1790,14 +1789,13 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "allowing all unauthorized success for role admin",
-			input: usecase.AllowAccessInput{
-				Token:              validAdminTokenString,
-				AllowAllAuthorized: true,
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validAdminTokenString,
 			},
 			wantErr: false,
-			expectedOutput: &usecase.AllowAccessOutput{
+			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
 				UserID:   adminID,
-				UserRole: model.RolesAdmin,
+				UserRole: model.RolesAdministrator,
 			},
 			expectedFunctionCall: func() {
 				mockSharedCryptor.EXPECT().ValidateJWT(validAdminTokenString, validateJWTOpts).Return(validAdminToken, nil).Once()
@@ -1805,10 +1803,8 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "allowing admin only must failed for user",
-			input: usecase.AllowAccessInput{
-				Token:              validTokenString,
-				AllowAllAuthorized: false,
-				AllowAdminOnly:     true,
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validTokenString,
 			},
 			wantErr:     true,
 			expectedErr: usecase.ErrForbidden,
@@ -1818,15 +1814,13 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 		},
 		{
 			name: "allowing admin only must success for role admin",
-			input: usecase.AllowAccessInput{
-				Token:              validAdminTokenString,
-				AllowAllAuthorized: false,
-				AllowAdminOnly:     true,
+			input: usecase.AuthenticateAccessTokenInput{
+				Token: validAdminTokenString,
 			},
 			wantErr: false,
-			expectedOutput: &usecase.AllowAccessOutput{
+			expectedOutput: &usecase.AuthenticateAccessTokenOutput{
 				UserID:   adminID,
-				UserRole: model.RolesAdmin,
+				UserRole: model.RolesAdministrator,
 			},
 			expectedFunctionCall: func() {
 				mockSharedCryptor.EXPECT().ValidateJWT(validAdminTokenString, validateJWTOpts).Return(validAdminToken, nil).Once()
@@ -1840,7 +1834,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 				tc.expectedFunctionCall()
 			}
 
-			res, err := uc.AllowAccess(ctx, tc.input)
+			res, err := uc.AuthenticateAccessToken(ctx, tc.input)
 
 			if !tc.wantErr {
 				require.NoError(t, err)
