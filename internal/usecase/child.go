@@ -279,6 +279,21 @@ type SearchChildOutput struct {
 
 // Search allow requester to full search registered child data based on multiple search params
 func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]SearchChildOutput, error) {
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if requester.Role != model.RolesTherapist {
+		return nil, UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "insufficient permission to access this feature",
+		}
+	}
+
 	if err := input.validate(); err != nil {
 		return nil, UsecaseError{
 			ErrType: ErrBadRequest,
