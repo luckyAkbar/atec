@@ -114,7 +114,7 @@ func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input use
 func (r *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error) {
 	user := &model.User{}
 
-	err := r.db.WithContext(ctx).First(user, "roles = ?", model.RolesAdmin).Error
+	err := r.db.WithContext(ctx).First(user, "roles = ?", model.RolesAdministrator).Error
 	switch err {
 	default:
 		return false, err

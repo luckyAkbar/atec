@@ -255,10 +255,10 @@ func (u *QuestionnaireUsecase) HandleSubmitQuestionnaire(ctx context.Context, in
 		break
 	}
 
-	if requester.Role != model.RolesAdmin && requester.ID != child.ParentUserID {
+	if requester.Role != model.RolesTherapist && requester.ID != child.ParentUserID {
 		return nil, UsecaseError{
 			ErrType: ErrForbidden,
-			Message: "filling questionnaire for a child must be done by either the parents or admin",
+			Message: "filling questionnaire for a child must be done by either the parents or therapist",
 		}
 	}
 
@@ -545,7 +545,7 @@ func (u *QuestionnaireUsecase) HandleDownloadQuestionnaireResult(
 			}
 		}
 
-		if requester.Role != model.RolesAdmin && requester.ID != result.CreatedBy {
+		if requester.Role != model.RolesTherapist && requester.ID != result.CreatedBy {
 			return nil, UsecaseError{
 				ErrType: ErrUnauthorized,
 				Message: "only owner and admin can access this result",

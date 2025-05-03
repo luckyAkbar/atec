@@ -144,7 +144,7 @@ func TestChildUsecase_Register(t *testing.T) {
 
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
@@ -255,7 +255,7 @@ func TestChildUsecase_Update(t *testing.T) {
 
 	user := model.AuthUser{
 		ID:   uuid.New(),
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
@@ -418,7 +418,7 @@ func TestAuthUsecase_GetRegisteredChildren(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
@@ -563,7 +563,7 @@ func TestChildUsecase_Search(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
@@ -715,19 +715,19 @@ func TestChildUseccase_HandleGetStatistic(t *testing.T) {
 	userID := uuid.New()
 	user := model.AuthUser{
 		ID:   userID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	adminID := uuid.New()
 	admin := model.AuthUser{
 		ID:   adminID,
-		Role: model.RolesAdmin,
+		Role: model.RolesAdministrator,
 	}
 
 	nonParentID := uuid.New()
 	nonParent := model.AuthUser{
 		ID:   nonParentID,
-		Role: model.RoleUser,
+		Role: model.RolesTherapist,
 	}
 
 	userCtx := model.SetUserToCtx(ctx, user)
