@@ -34,7 +34,7 @@ type AuthUsecaseIface interface {
 	HandleLogin(ctx context.Context, input LoginInput) (*LoginOutput, error)
 	HandleInitesetPassword(ctx context.Context, input InitResetPasswordInput) (*InitResetPasswordOutput, error)
 	HandleResetPassword(ctx context.Context, input ResetPasswordInput) (*ResetPasswordOutput, error)
-	AllowAccess(ctx context.Context, input AllowAccessInput) (*AllowAccessOutput, error)
+	AuthenticateAccessToken(ctx context.Context, input AuthenticateAccessTokenInput) (*AuthenticateAccessTokenOutput, error)
 	HandleResendSignupVerification(ctx context.Context, input ResendSignupVerificationInput) (*ResendSignupVerificationOutput, error)
 }
 
@@ -728,23 +728,21 @@ func (u *AuthUsecase) HandleResetPassword(ctx context.Context, input ResetPasswo
 	}, nil
 }
 
-// AllowAccessInput input
-type AllowAccessInput struct {
-	Token              string
-	AllowAllAuthorized bool
-	AllowAdminOnly     bool
+// AuthenticateAccessTokenInput input
+type AuthenticateAccessTokenInput struct {
+	Token string
 }
 
-// AllowAccessOutput output
-type AllowAccessOutput struct {
+// AuthenticateAccessTokenOutput output
+type AuthenticateAccessTokenOutput struct {
 	UserID   uuid.UUID
 	UserRole model.Roles
 }
 
-// AllowAccess will perform validation and checking for supplied jwt token.
+// AuthenticateAccessToken will perform validation and checking for supplied jwt token.
 // Based on the supplied params, you can determine whether to allow the request or not based on the
 // returned value. If the error is not nil, safe to assume that you should not let the request pass.
-func (u *AuthUsecase) AllowAccess(_ context.Context, input AllowAccessInput) (*AllowAccessOutput, error) {
+func (u *AuthUsecase) AuthenticateAccessToken(_ context.Context, input AuthenticateAccessTokenInput) (*AuthenticateAccessTokenOutput, error) {
 	jwtToken, _, err := u.parseJWTToken(input.Token, parseJWTTokenInput{
 		expectedIssuer:      TokenIssuerSystem,
 		expectedSubject:     LoginToken,
@@ -793,28 +791,15 @@ func (u *AuthUsecase) AllowAccess(_ context.Context, input AllowAccessInput) (*A
 			ErrType: ErrUnauthorized,
 			Message: "invalid role on auth token",
 		}
-	case string(model.RoleUser):
-		userRole = model.RoleUser
-	case string(model.RolesAdmin):
-		userRole = model.RolesAdmin
+	case string(model.RolesTherapist):
+		userRole = model.RolesTherapist
+	case string(model.RolesAdministrator):
+		userRole = model.RolesAdministrator
+	case string(model.RolesParent):
+		userRole = model.RolesParent
 	}
 
-	// early return if not specified for admin only
-	if input.AllowAllAuthorized {
-		return &AllowAccessOutput{
-			UserID:   userID,
-			UserRole: userRole,
-		}, nil
-	}
-
-	if input.AllowAdminOnly && userRole != model.RolesAdmin {
-		return nil, UsecaseError{
-			ErrType: ErrForbidden,
-			Message: "access denied due to invalid required access role",
-		}
-	}
-
-	return &AllowAccessOutput{
+	return &AuthenticateAccessTokenOutput{
 		UserID:   userID,
 		UserRole: userRole,
 	}, nil

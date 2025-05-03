@@ -9,16 +9,16 @@ import (
 	"github.com/luckyAkbar/atec/internal/usecase"
 )
 
-func (s *service) AuthMiddleware(allowAllAuthorized, allowAdminOnly bool) echo.MiddlewareFunc {
-	if !allowAdminOnly && !allowAllAuthorized {
-		panic("invalid configuration for auth middleware. one of the params must be true")
-	}
-
+// AuthMiddleware will perform authentication check based on the user access token from Authorization header.
+// If the token is valid, it will set the user information in the context and call the next handler.
+// If the token is invalid or missing, it will return an error response when allowUnauthorized is false.
+// Otherwise, it will call the next handler without authentication check.
+func (s *service) AuthMiddleware(allowUnauthorized bool) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			token := getAccessToken(c.Request())
 			if token == "" {
-				if c.Get(allowUnauthorizedKey) != nil {
+				if allowUnauthorized {
 					return next(c)
 				}
 
@@ -29,10 +29,8 @@ func (s *service) AuthMiddleware(allowAllAuthorized, allowAdminOnly bool) echo.M
 				})
 			}
 
-			output, err := s.authUsecase.AllowAccess(c.Request().Context(), usecase.AllowAccessInput{
-				Token:              token,
-				AllowAllAuthorized: allowAllAuthorized,
-				AllowAdminOnly:     allowAdminOnly,
+			output, err := s.authUsecase.AuthenticateAccessToken(c.Request().Context(), usecase.AuthenticateAccessTokenInput{
+				Token: token,
 			})
 
 			if err != nil {
@@ -62,16 +60,4 @@ func getAccessToken(req *http.Request) string {
 	}
 
 	return strings.TrimSpace(authHeaders[0])
-}
-
-var allowUnauthorizedKey = "allowUnauthorized"
-
-func (s *service) allowUnauthorizedAccess() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set(allowUnauthorizedKey, true)
-
-			return next(c)
-		}
-	}
 }
