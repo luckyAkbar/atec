@@ -22,28 +22,28 @@ func (_m *AuthUsecaseIface) EXPECT() *AuthUsecaseIface_Expecter {
 	return &AuthUsecaseIface_Expecter{mock: &_m.Mock}
 }
 
-// AllowAccess provides a mock function with given fields: ctx, input
-func (_m *AuthUsecaseIface) AllowAccess(ctx context.Context, input usecase.AllowAccessInput) (*usecase.AllowAccessOutput, error) {
+// AuthenticateAccessToken provides a mock function with given fields: ctx, input
+func (_m *AuthUsecaseIface) AuthenticateAccessToken(ctx context.Context, input usecase.AuthenticateAccessTokenInput) (*usecase.AuthenticateAccessTokenOutput, error) {
 	ret := _m.Called(ctx, input)
 
 	if len(ret) == 0 {
-		panic("no return value specified for AllowAccess")
+		panic("no return value specified for AuthenticateAccessToken")
 	}
 
-	var r0 *usecase.AllowAccessOutput
+	var r0 *usecase.AuthenticateAccessTokenOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.AllowAccessInput) (*usecase.AllowAccessOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.AuthenticateAccessTokenInput) (*usecase.AuthenticateAccessTokenOutput, error)); ok {
 		return rf(ctx, input)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, usecase.AllowAccessInput) *usecase.AllowAccessOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.AuthenticateAccessTokenInput) *usecase.AuthenticateAccessTokenOutput); ok {
 		r0 = rf(ctx, input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*usecase.AllowAccessOutput)
+			r0 = ret.Get(0).(*usecase.AuthenticateAccessTokenOutput)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, usecase.AllowAccessInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, usecase.AuthenticateAccessTokenInput) error); ok {
 		r1 = rf(ctx, input)
 	} else {
 		r1 = ret.Error(1)
@@ -52,31 +52,31 @@ func (_m *AuthUsecaseIface) AllowAccess(ctx context.Context, input usecase.Allow
 	return r0, r1
 }
 
-// AuthUsecaseIface_AllowAccess_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AllowAccess'
-type AuthUsecaseIface_AllowAccess_Call struct {
+// AuthUsecaseIface_AuthenticateAccessToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AuthenticateAccessToken'
+type AuthUsecaseIface_AuthenticateAccessToken_Call struct {
 	*mock.Call
 }
 
-// AllowAccess is a helper method to define mock.On call
+// AuthenticateAccessToken is a helper method to define mock.On call
 //   - ctx context.Context
-//   - input usecase.AllowAccessInput
-func (_e *AuthUsecaseIface_Expecter) AllowAccess(ctx interface{}, input interface{}) *AuthUsecaseIface_AllowAccess_Call {
-	return &AuthUsecaseIface_AllowAccess_Call{Call: _e.mock.On("AllowAccess", ctx, input)}
+//   - input usecase.AuthenticateAccessTokenInput
+func (_e *AuthUsecaseIface_Expecter) AuthenticateAccessToken(ctx interface{}, input interface{}) *AuthUsecaseIface_AuthenticateAccessToken_Call {
+	return &AuthUsecaseIface_AuthenticateAccessToken_Call{Call: _e.mock.On("AuthenticateAccessToken", ctx, input)}
 }
 
-func (_c *AuthUsecaseIface_AllowAccess_Call) Run(run func(ctx context.Context, input usecase.AllowAccessInput)) *AuthUsecaseIface_AllowAccess_Call {
+func (_c *AuthUsecaseIface_AuthenticateAccessToken_Call) Run(run func(ctx context.Context, input usecase.AuthenticateAccessTokenInput)) *AuthUsecaseIface_AuthenticateAccessToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(usecase.AllowAccessInput))
+		run(args[0].(context.Context), args[1].(usecase.AuthenticateAccessTokenInput))
 	})
 	return _c
 }
 
-func (_c *AuthUsecaseIface_AllowAccess_Call) Return(_a0 *usecase.AllowAccessOutput, _a1 error) *AuthUsecaseIface_AllowAccess_Call {
+func (_c *AuthUsecaseIface_AuthenticateAccessToken_Call) Return(_a0 *usecase.AuthenticateAccessTokenOutput, _a1 error) *AuthUsecaseIface_AuthenticateAccessToken_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *AuthUsecaseIface_AllowAccess_Call) RunAndReturn(run func(context.Context, usecase.AllowAccessInput) (*usecase.AllowAccessOutput, error)) *AuthUsecaseIface_AllowAccess_Call {
+func (_c *AuthUsecaseIface_AuthenticateAccessToken_Call) RunAndReturn(run func(context.Context, usecase.AuthenticateAccessTokenInput) (*usecase.AuthenticateAccessTokenOutput, error)) *AuthUsecaseIface_AuthenticateAccessToken_Call {
 	_c.Call.Return(run)
 	return _c
 }
