@@ -13,7 +13,7 @@ import (
 // @Tags			Childern
 // @Accept			json
 // @Produce		json
-// @Security		UserLevelAuth
+// @Security		ParentLevelAuth
 // @Param			Authorization			header		string												true	"JWT Token"
 // @Param			register_child_input	body		RegisterChildInput									true	"child details"
 // @Success		200						{object}	StandardSuccessResponse{data=RegisterChildOutput}	"Successful response"
@@ -65,7 +65,7 @@ func (s *service) HandleRegisterChildern() echo.HandlerFunc {
 // @Tags			Childern
 // @Accept			json
 // @Produce		json
-// @Security		UserLevelAuth
+// @Security		ParentLevelAuth
 // @Param			Authorization		header		string												true	"JWT Token"
 //
 // @Param			child_id			path		string												true	"Child ID to be updated (UUID v4)"
@@ -127,7 +127,7 @@ func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 // @Tags			Childern
 // @Accept			json
 // @Produce		json
-// @Security		UserLevelAuth
+// @Security		ParentLevelAuth
 // @Param			Authorization	header		string												true	"JWT Token"
 // @Param			limit			query		int													true	"limit searching param"
 // @Param			offset			query		int													true	"offset searching param"
@@ -182,7 +182,7 @@ func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 // @Tags			Childern
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		TherapistLevelAuth
 // @Param			Authorization		header		string												true	"JWT Token"
 // @Param			search_child_input	query		SearchChildrenInput									true	"search parameters"
 // @Success		200					{object}	StandardSuccessResponse{data=SearchChildernOutput}	"Successful response"
@@ -239,7 +239,7 @@ func (s *service) HandleSearchChildern() echo.HandlerFunc {
 // @Tags			Childern
 // @Accept			json
 // @Produce		json
-// @Security		UserLevelAuth
+// @Security		ParentLevelAuth
 // @Param			Authorization	header		string														true	"JWT Token"
 // @Param			child_id		path		string														true	"Child ID (UUID v4)"
 // @Success		200				{object}	StandardSuccessResponse{data=[]usecase.StatisticComponent}	"Successful response"

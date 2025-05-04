@@ -19,7 +19,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Create new ATEC questionaire package",
@@ -139,7 +139,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Update existing ATEC questionnarie package",
@@ -214,7 +214,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Delete ATEC questionnaire package",
@@ -265,7 +265,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Update existing ATEC questionnarie package activation status",
@@ -459,7 +459,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "TherapistLevelAuth": []
                     }
                 ],
                 "description": "Search through all the submitted ATEC questionnaires to the systems",
@@ -553,7 +553,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Get all questionnaires result submitted by the requester account",
@@ -1054,7 +1054,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Get all childern registered under this account",
@@ -1130,7 +1130,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Register a new child",
@@ -1200,7 +1200,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "TherapistLevelAuth": []
                     }
                 ],
                 "description": "Search childern data",
@@ -1289,7 +1289,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Update child data",
@@ -1366,7 +1366,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "The returned data will be JSON but contains sufficient data to be drawn as graph on frontend",
@@ -1895,7 +1895,6 @@ const docTemplate = `{
             }
         },
         "rest.StandardErrorResponse": {
-            "description": "base model for any failed / error API response",
             "type": "object",
             "properties": {
                 "error_code": {
@@ -1913,7 +1912,6 @@ const docTemplate = `{
             }
         },
         "rest.StandardSuccessResponse": {
-            "description": "base model for any successful API response",
             "type": "object",
             "properties": {
                 "data": {},
@@ -2051,14 +2049,20 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "AdminLevelAuth": {
-            "description": "Bearer Token authentication for secure endpoints accessible only by Admin level user",
+        "AdministratorLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by administrator level user",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
         },
-        "UserLevelAuth": {
+        "ParentLevelAuth": {
             "description": "Bearer Token authentication for secure endpoints accessible only by registered user with auth token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "TherapistLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by therapist level user",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -2073,7 +2077,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "ATEC API Docs",
-	Description:      "base model for any failed / error API response",
+	Description:      "this is the ATEC method implemented using API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

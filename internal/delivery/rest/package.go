@@ -12,7 +12,7 @@ import (
 // @Tags			ATEC Package
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		AdministratorLevelAuth
 // @Param			Authorization			header		string												true	"JWT Token"
 // @Param			create_package_input	body		CreatePackageInput									true	"ATEC questionnarie package details"
 // @Success		200						{object}	StandardSuccessResponse{data=CreatePackageOutput}	"Successful response"
@@ -263,7 +263,7 @@ func (s *service) HandleCreatePackage() echo.HandlerFunc {
 // @Tags			ATEC Package
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		AdministratorLevelAuth
 // @Param			Authorization			header		string												true	"JWT Token"
 // @Param			package_id				path		string												true	"package id (UUID v4)"
 // @Param			update_package_input	body		UpdatePackageInput									true	"ATEC questionnarie package details"
@@ -307,7 +307,7 @@ func (s *service) HandleUpdatePackage() echo.HandlerFunc {
 // @Tags			ATEC Package
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		AdministratorLevelAuth
 // @Param			Authorization				header		string													true	"JWT Token"
 //
 // @Param			package_id					path		string													true	"package ID to be activated/deactivated (UUID v4)"
@@ -351,7 +351,7 @@ func (s *service) HandleActivationPackage() echo.HandlerFunc {
 // @Tags			ATEC Package
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		AdministratorLevelAuth
 // @Param			Authorization	header	string	true	"JWT Token"
 //
 // @Param			package_id		path	string	true	"package ID to be deleted (UUID v4)"
