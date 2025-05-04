@@ -102,7 +102,7 @@ func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 // @Tags			Questionnaire
 // @Accept			json
 // @Produce		json
-// @Security		AdminLevelAuth
+// @Security		TherapistLevelAuth
 // @Param			Authorization					header		string															true	"JWT token to prove that you're admin"
 // @Param			search_questionnaire_results	query		SearchQUestionnaireResultsInput									true	"param to search"
 // @Success		200								{object}	StandardSuccessResponse{data=SearchQUestionnaireResultsOutput}	"success response"
@@ -161,7 +161,7 @@ func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 // @Tags			Questionnaire
 // @Accept			json
 // @Produce		json
-// @Security		UserLevelAuth
+// @Security		ParentLevelAuth
 // @Param			Authorization					header		string															true	"JWT token from auth process"
 // @Param			get_my_questionnaire_results	query		GetMyQUestionnaireResultsInput									true	"param to search"
 // @Success		200								{object}	StandardSuccessResponse{data=SearchQUestionnaireResultsOutput}	"success response"

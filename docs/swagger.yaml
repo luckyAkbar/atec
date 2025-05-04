@@ -310,7 +310,6 @@ definitions:
         type: string
     type: object
   rest.StandardErrorResponse:
-    description: base model for any failed / error API response
     properties:
       error_code:
         example: missing required fields on input
@@ -323,7 +322,6 @@ definitions:
         type: integer
     type: object
   rest.StandardSuccessResponse:
-    description: base model for any successful API response
     properties:
       data: {}
       message:
@@ -416,7 +414,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: base model for any failed / error API response
+  description: this is the ATEC method implemented using API
   title: ATEC API Docs
   version: "1.0"
 paths:
@@ -458,7 +456,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - AdministratorLevelAuth: []
       summary: Create new ATEC questionaire package
       tags:
       - ATEC Package
@@ -492,7 +490,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - AdministratorLevelAuth: []
       summary: Delete ATEC questionnaire package
       tags:
       - ATEC Package
@@ -538,7 +536,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - AdministratorLevelAuth: []
       summary: Update package activation status
       tags:
       - ATEC Package
@@ -584,7 +582,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - AdministratorLevelAuth: []
       summary: Update existing ATEC questionnarie package
       tags:
       - ATEC Package
@@ -746,7 +744,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - TherapistLevelAuth: []
       summary: Search questionnaire result
       tags:
       - Questionnaire
@@ -821,7 +819,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - UserLevelAuth: []
+      - ParentLevelAuth: []
       summary: Get my quesionnaires results
       tags:
       - Questionnaire
@@ -1117,7 +1115,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - UserLevelAuth: []
+      - ParentLevelAuth: []
       summary: Get all childern registered under this account
       tags:
       - Childern
@@ -1158,7 +1156,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - UserLevelAuth: []
+      - ParentLevelAuth: []
       summary: Register a new child
       tags:
       - Childern
@@ -1205,7 +1203,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - UserLevelAuth: []
+      - ParentLevelAuth: []
       summary: Update child data
       tags:
       - Childern
@@ -1249,7 +1247,7 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - UserLevelAuth: []
+      - ParentLevelAuth: []
       summary: Get child ATEC score history
       tags:
       - Childern
@@ -1303,20 +1301,26 @@ paths:
           schema:
             $ref: '#/definitions/rest.StandardErrorResponse'
       security:
-      - AdminLevelAuth: []
+      - TherapistLevelAuth: []
       summary: Search childern data
       tags:
       - Childern
 securityDefinitions:
-  AdminLevelAuth:
+  AdministratorLevelAuth:
     description: Bearer Token authentication for secure endpoints accessible only
-      by Admin level user
+      by administrator level user
     in: header
     name: Authorization
     type: apiKey
-  UserLevelAuth:
+  ParentLevelAuth:
     description: Bearer Token authentication for secure endpoints accessible only
       by registered user with auth token
+    in: header
+    name: Authorization
+    type: apiKey
+  TherapistLevelAuth:
+    description: Bearer Token authentication for secure endpoints accessible only
+      by therapist level user
     in: header
     name: Authorization
     type: apiKey

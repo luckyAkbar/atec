@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "base model for any failed / error API response",
+        "description": "this is the ATEC method implemented using API",
         "title": "ATEC API Docs",
         "contact": {},
         "version": "1.0"
@@ -11,7 +11,7 @@
             "post": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Create new ATEC questionaire package",
@@ -131,7 +131,7 @@
             "put": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Update existing ATEC questionnarie package",
@@ -206,7 +206,7 @@
             "delete": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Delete ATEC questionnaire package",
@@ -257,7 +257,7 @@
             "patch": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "AdministratorLevelAuth": []
                     }
                 ],
                 "description": "Update existing ATEC questionnarie package activation status",
@@ -451,7 +451,7 @@
             "get": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "TherapistLevelAuth": []
                     }
                 ],
                 "description": "Search through all the submitted ATEC questionnaires to the systems",
@@ -545,7 +545,7 @@
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Get all questionnaires result submitted by the requester account",
@@ -1046,7 +1046,7 @@
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Get all childern registered under this account",
@@ -1122,7 +1122,7 @@
             "post": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Register a new child",
@@ -1192,7 +1192,7 @@
             "get": {
                 "security": [
                     {
-                        "AdminLevelAuth": []
+                        "TherapistLevelAuth": []
                     }
                 ],
                 "description": "Search childern data",
@@ -1281,7 +1281,7 @@
             "put": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "Update child data",
@@ -1358,7 +1358,7 @@
             "get": {
                 "security": [
                     {
-                        "UserLevelAuth": []
+                        "ParentLevelAuth": []
                     }
                 ],
                 "description": "The returned data will be JSON but contains sufficient data to be drawn as graph on frontend",
@@ -1887,7 +1887,6 @@
             }
         },
         "rest.StandardErrorResponse": {
-            "description": "base model for any failed / error API response",
             "type": "object",
             "properties": {
                 "error_code": {
@@ -1905,7 +1904,6 @@
             }
         },
         "rest.StandardSuccessResponse": {
-            "description": "base model for any successful API response",
             "type": "object",
             "properties": {
                 "data": {},
@@ -2043,14 +2041,20 @@
         }
     },
     "securityDefinitions": {
-        "AdminLevelAuth": {
-            "description": "Bearer Token authentication for secure endpoints accessible only by Admin level user",
+        "AdministratorLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by administrator level user",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
         },
-        "UserLevelAuth": {
+        "ParentLevelAuth": {
             "description": "Bearer Token authentication for secure endpoints accessible only by registered user with auth token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "TherapistLevelAuth": {
+            "description": "Bearer Token authentication for secure endpoints accessible only by therapist level user",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

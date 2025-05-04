@@ -11,13 +11,18 @@ import (
 // @title						ATEC API Docs
 // @version					1.0
 // @description				this is the ATEC method implemented using API
-// @securityDefinitions.apikey	AdminLevelAuth
-// @description				Bearer Token authentication for secure endpoints accessible only by Admin level user
+// @securityDefinitions.apikey	AdministratorLevelAuth
+// @description				Bearer Token authentication for secure endpoints accessible only by administrator level user
 // @in							header
 // @name						Authorization
 //
-// @securityDefinitions.apikey	UserLevelAuth
+// @securityDefinitions.apikey	ParentLevelAuth
 // @description				Bearer Token authentication for secure endpoints accessible only by registered user with auth token
+// @in							header
+// @name						Authorization
+
+// @securityDefinitions.apikey	TherapistLevelAuth
+// @description				Bearer Token authentication for secure endpoints accessible only by therapist level user
 // @in							header
 // @name						Authorization
 type service struct {
@@ -78,18 +83,14 @@ func (s *service) initV1Routes() {
 	s.v1.GET("/swagger/*", echoSwagger.WrapHandler)
 }
 
-// StandardSuccessResponse model info
-//
-//	@Description	base model for any successful API response
+// StandardSuccessResponse base model for any successful API response
 type StandardSuccessResponse struct {
 	StatusCode int    `json:"status_code" example:"200"`
 	Message    string `json:"message" example:"success"`
 	Data       any    `json:"data"`
 }
 
-// StandardErrorResponse model info
-//
-//	@Description	base model for any failed / error API response
+// StandardErrorResponse base model for any failed / error API response
 type StandardErrorResponse struct {
 	StatusCode   int    `json:"status_code" example:"400"`
 	ErrorMessage string `json:"error_message" example:"Bad Request"`
