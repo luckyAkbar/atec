@@ -311,6 +311,31 @@ func (u *PackageUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 
 	logger := logrus.WithContext(ctx).WithField("id", id.String())
 
+	pack, err := u.packageRepo.FindByID(ctx, id)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find package to be deleted")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case ErrRepoNotFound:
+		return UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	if pack.IsLocked {
+		return UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "package is already locked",
+		}
+	}
+
 	if err := u.packageRepo.Delete(ctx, id); err != nil {
 		logger.WithError(err).Error("failed to delete package to database")
 
