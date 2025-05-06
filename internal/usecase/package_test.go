@@ -889,6 +889,14 @@ func TestPackageUsecase_Delete(t *testing.T) {
 	uc := usecase.NewPackageUsecase(mockPackageRepo)
 
 	packageID := uuid.New()
+	lockedPackage := &model.Package{
+		ID:       packageID,
+		IsLocked: true,
+	}
+	unlockedPackage := &model.Package{
+		ID:       packageID,
+		IsLocked: false,
+	}
 
 	testCases := []struct {
 		name                 string
@@ -914,13 +922,33 @@ func TestPackageUsecase_Delete(t *testing.T) {
 			expectedErr: usecase.ErrForbidden,
 		},
 		{
-			name:        "repository failed to delete package",
+			name:        "repository failed to find the package to be deleted",
 			input:       packageID,
 			wantErr:     true,
 			ctx:         ctx,
 			expectedErr: usecase.ErrInternal,
 			expectedFunctionCall: func() {
-				mockPackageRepo.EXPECT().Delete(ctx, packageID).Return(assert.AnError).Once()
+				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, assert.AnError).Once()
+			},
+		},
+		{
+			name:        "no such package found",
+			input:       packageID,
+			wantErr:     true,
+			ctx:         ctx,
+			expectedErr: usecase.ErrNotFound,
+			expectedFunctionCall: func() {
+				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(nil, usecase.ErrRepoNotFound).Once()
+			},
+		},
+		{
+			name:        "forbid deleting locked package",
+			input:       packageID,
+			wantErr:     true,
+			ctx:         ctx,
+			expectedErr: usecase.ErrForbidden,
+			expectedFunctionCall: func() {
+				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(lockedPackage, nil).Once()
 			},
 		},
 		{
@@ -930,6 +958,7 @@ func TestPackageUsecase_Delete(t *testing.T) {
 			ctx:            ctx,
 			expectedOutput: nil,
 			expectedFunctionCall: func() {
+				mockPackageRepo.EXPECT().FindByID(ctx, packageID).Return(unlockedPackage, nil).Once()
 				mockPackageRepo.EXPECT().Delete(ctx, packageID).Return(nil).Once()
 			},
 		},
