@@ -7,13 +7,16 @@ import (
 	"github.com/luckyAkbar/atec/internal/usecase"
 )
 
-func usecaseErrorToRESTResponse(c echo.Context, err error) error {
+const DefaultUknownErrorMessage = "server received unexpected error"
+const DefaultInternalErrorMessage = "server unable to produce appropriate response"
+
+func UsecaseErrorToRESTResponse(c echo.Context, err error) error {
 	switch e := err.(type) {
 	default:
 		return c.JSON(http.StatusInternalServerError, StandardErrorResponse{
 			StatusCode:   http.StatusInternalServerError,
 			ErrorCode:    http.StatusText(http.StatusInternalServerError),
-			ErrorMessage: "server received unexpected error",
+			ErrorMessage: DefaultUknownErrorMessage,
 		})
 	case usecase.UsecaseError:
 		switch e.ErrType {
@@ -21,7 +24,7 @@ func usecaseErrorToRESTResponse(c echo.Context, err error) error {
 			return c.JSON(http.StatusInternalServerError, StandardErrorResponse{
 				StatusCode:   http.StatusInternalServerError,
 				ErrorCode:    http.StatusText(http.StatusInternalServerError),
-				ErrorMessage: "server unable to produce appropriate response",
+				ErrorMessage: DefaultInternalErrorMessage,
 			})
 		case usecase.ErrInternal:
 			return c.JSON(http.StatusInternalServerError, StandardErrorResponse{
