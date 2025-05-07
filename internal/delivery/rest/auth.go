@@ -19,7 +19,7 @@ import (
 // @Success		200	{object}	StandardSuccessResponse{data=SignupOutput}	"Successful response"
 // @Failure		400	{object}	StandardErrorResponse						"Bad request / validation error"
 // @Router			/v1/auth/signup [post]
-func (s *service) HandleSignUp() echo.HandlerFunc {
+func (s *Service) HandleSignUp() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &SignupInput{}
 		if err := c.Bind(&input); err != nil {
@@ -62,7 +62,7 @@ func (s *service) HandleSignUp() echo.HandlerFunc {
 // @Failure		429 {object}	StandardErrorResponse									"Too many requests"
 // @Failure		500	{object}	StandardErrorResponse									"Internal Error"
 // @Router			/v1/auth/signup/resend [post]
-func (s *service) HandleResendSignupVerification() echo.HandlerFunc {
+func (s *Service) HandleResendSignupVerification() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &ResendVerificationInput{}
 		if err := c.Bind(input); err != nil {
@@ -103,7 +103,7 @@ func (s *service) HandleResendSignupVerification() echo.HandlerFunc {
 // @Failure		400	{object}	StandardErrorResponse								"Bad request / validation error"
 // @Failure		401	{object}	StandardErrorResponse								"invalid or expired verification token. details will be given in the error message"
 // @Router			/v1/auth/verify [get]
-func (s *service) HandleVerifyAccount() echo.HandlerFunc {
+func (s *Service) HandleVerifyAccount() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &VerifyAccountInput{}
 		if err := c.Bind(input); err != nil {
@@ -137,7 +137,7 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 // @Failure		401			{object}	StandardErrorResponse						"Authentication Failed"
 // @Failure		500			{object}	StandardErrorResponse						"Internal Error"
 // @Router			/v1/auth/login [post]
-func (s *service) HandleLogin() echo.HandlerFunc {
+func (s *Service) HandleLogin() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &LoginInput{}
 		if err := c.Bind(input); err != nil {
@@ -179,7 +179,7 @@ func (s *service) HandleLogin() echo.HandlerFunc {
 // @Failure		400							{object}	StandardErrorResponse									"Bad request"	"validation error"
 // @Failure		500							{object}	StandardErrorResponse									"Internal Error"
 // @Router			/v1/auth/password [patch]
-func (s *service) HandleInitResetPassword() echo.HandlerFunc {
+func (s *Service) HandleInitResetPassword() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &InitResetPasswordInput{}
 		if err := c.Bind(input); err != nil {
@@ -219,7 +219,7 @@ func (s *service) HandleInitResetPassword() echo.HandlerFunc {
 // @Failure		400						{object}	StandardErrorResponse								"Bad request"	"validation error"
 // @Failure		500						{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/auth/password [post]
-func (s *service) HandleResetPassword() echo.HandlerFunc {
+func (s *Service) HandleResetPassword() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &ResetPasswordInput{}
 		if err := c.Bind(input); err != nil {
@@ -259,7 +259,7 @@ func (s *service) HandleResetPassword() echo.HandlerFunc {
 // @Failure		400	{object}	StandardErrorResponse	"Bad request"	"validation error"
 // @Failure		500	{object}	StandardErrorResponse	"Internal Error"
 // @Router			/v1/auth/password [get]
-func (s *service) HandleRenderChangePasswordPage() echo.HandlerFunc {
+func (s *Service) HandleRenderChangePasswordPage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		changePasswordTokenb := c.QueryParam(model.ChangePasswordTokenQuery)
 		if changePasswordTokenb == "" {

@@ -13,7 +13,7 @@ import (
 // If the token is valid, it will set the user information in the context and call the next handler.
 // If the token is invalid or missing, it will return an error response when allowUnauthorized is false.
 // Otherwise, it will call the next handler without authentication check.
-func (s *service) AuthMiddleware(allowUnauthorized bool) echo.MiddlewareFunc {
+func (s *Service) AuthMiddleware(allowUnauthorized bool) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			token := getAccessToken(c.Request())

@@ -22,7 +22,7 @@ import (
 // @Failure		400							{object}	StandardErrorResponse									"Bad request"
 // @Failure		500							{object}	StandardErrorResponse									"Internal Error"
 // @Router			/v1/atec/questionnaires [post]
-func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
+func (s *Service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &SubmitQuestionnaireInput{}
 		if err := c.Bind(input); err != nil {
@@ -71,7 +71,7 @@ func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 // @Failure		400				{object}	StandardErrorResponse	"Bad request"
 // @Failure		500				{object}	StandardErrorResponse	"Internal Error"
 // @Router			/v1/atec/questionnaires/results/{result_id} [get]
-func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
+func (s *Service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &DownloadQuestionnaireResultInput{}
 		if err := c.Bind(input); err != nil {
@@ -109,7 +109,7 @@ func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 // @Failure		400								{object}	StandardErrorResponse											"Bad request"
 // @Failure		500								{object}	StandardErrorResponse											"Internal Error"
 // @Router			/v1/atec/questionnaires/results [get]
-func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
+func (s *Service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &SearchQUestionnaireResultsInput{}
 		if err := c.Bind(input); err != nil {
@@ -168,7 +168,7 @@ func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 // @Failure		400								{object}	StandardErrorResponse											"Bad request"
 // @Failure		500								{object}	StandardErrorResponse											"Internal Error"
 // @Router			/v1/atec/questionnaires/results/my [get]
-func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
+func (s *Service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &GetMyQUestionnaireResultsInput{}
 		if err := c.Bind(input); err != nil {
@@ -221,7 +221,7 @@ func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 // @Failure		400			{object}	StandardErrorResponse										"Bad request"
 // @Failure		500			{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/atec/questionnaires [get]
-func (s *service) HandleGetATECQuestionaire() echo.HandlerFunc {
+func (s *Service) HandleGetATECQuestionaire() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &GetATECQuestionnaireInput{}
 		if err := c.Bind(input); err != nil {

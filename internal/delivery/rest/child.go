@@ -20,7 +20,7 @@ import (
 // @Failure		400						{object}	StandardErrorResponse								"Bad request"
 // @Failure		500						{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern [post]
-func (s *service) HandleRegisterChildern() echo.HandlerFunc {
+func (s *Service) HandleRegisterChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &RegisterChildInput{}
 		if err := c.Bind(input); err != nil {
@@ -75,7 +75,7 @@ func (s *service) HandleRegisterChildern() echo.HandlerFunc {
 // @Failure		400					{object}	StandardErrorResponse								"Bad request"
 // @Failure		500					{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern/{child_id} [put]
-func (s *service) HandleUpdateChildern() echo.HandlerFunc {
+func (s *Service) HandleUpdateChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &UpdateChildernInput{}
 		if err := c.Bind(input); err != nil {
@@ -135,7 +135,7 @@ func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 // @Failure		400				{object}	StandardErrorResponse								"Bad request"
 // @Failure		500				{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern [get]
-func (s *service) HandleGetMyChildern() echo.HandlerFunc {
+func (s *Service) HandleGetMyChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &GetMyChildrenInput{}
 		if err := c.Bind(input); err != nil {
@@ -189,7 +189,7 @@ func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 // @Failure		400					{object}	StandardErrorResponse								"Bad request"
 // @Failure		500					{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/childern/search [get]
-func (s *service) HandleSearchChildern() echo.HandlerFunc {
+func (s *Service) HandleSearchChildern() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &SearchChildrenInput{}
 		if err := c.Bind(input); err != nil {
@@ -246,7 +246,7 @@ func (s *service) HandleSearchChildern() echo.HandlerFunc {
 // @Failure		400				{object}	StandardErrorResponse										"Bad request"
 // @Failure		500				{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/childern/{child_id}/stats [get]
-func (s *service) HandleGetChildStats() echo.HandlerFunc {
+func (s *Service) HandleGetChildStats() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &GetChildStatInput{}
 		if err := c.Bind(input); err != nil {
