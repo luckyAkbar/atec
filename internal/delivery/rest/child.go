@@ -47,7 +47,7 @@ func (s *service) HandleRegisterChildern() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -109,7 +109,7 @@ func (s *service) HandleUpdateChildern() echo.HandlerFunc {
 		output, err := s.childUsecase.Update(c.Request().Context(), ucUpdateChildInput)
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -152,7 +152,7 @@ func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		output := []GetMyChildernOutput{}
@@ -209,7 +209,7 @@ func (s *service) HandleSearchChildern() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		output := []SearchChildernOutput{}
@@ -262,7 +262,7 @@ func (s *service) HandleGetChildStats() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{

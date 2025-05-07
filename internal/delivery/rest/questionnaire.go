@@ -40,7 +40,7 @@ func (s *service) HandleSubmitQuestionnaire() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -87,7 +87,7 @@ func (s *service) HandleDownloadQuestionnaireResult() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		c.Response().Header().Set("Content-Type", output.ContentType)
@@ -130,7 +130,7 @@ func (s *service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		result := []SearchQUestionnaireResultsOutput{}
@@ -185,7 +185,7 @@ func (s *service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		result := []SearchQUestionnaireResultsOutput{}
@@ -237,7 +237,7 @@ func (s *service) HandleGetATECQuestionaire() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
