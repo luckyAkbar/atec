@@ -37,7 +37,7 @@ func (s *service) HandleSignUp() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -78,7 +78,7 @@ func (s *service) HandleResendSignupVerification() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -119,7 +119,7 @@ func (s *service) HandleVerifyAccount() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.HTML(http.StatusOK, accountVerifiedWebpage())
@@ -154,7 +154,7 @@ func (s *service) HandleLogin() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -195,7 +195,7 @@ func (s *service) HandleInitResetPassword() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -236,7 +236,7 @@ func (s *service) HandleResetPassword() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{

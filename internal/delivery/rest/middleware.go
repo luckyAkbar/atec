@@ -34,7 +34,7 @@ func (s *service) AuthMiddleware(allowUnauthorized bool) echo.MiddlewareFunc {
 			})
 
 			if err != nil {
-				return usecaseErrorToRESTResponse(c, err)
+				return UsecaseErrorToRESTResponse(c, err)
 			}
 
 			authUser := model.AuthUser{

@@ -245,7 +245,7 @@ func (s *service) HandleCreatePackage() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -289,7 +289,7 @@ func (s *service) HandleUpdatePackage() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -333,7 +333,7 @@ func (s *service) HandleActivationPackage() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.JSON(http.StatusOK, StandardSuccessResponse{
@@ -372,7 +372,7 @@ func (s *service) HandleDeletePackage() echo.HandlerFunc {
 
 		err := s.packageUsecase.Delete(c.Request().Context(), input.PackageID)
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -392,7 +392,7 @@ func (s *service) HandleSearchActivePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		packages, err := s.packageUsecase.FindActiveQuestionnaires(c.Request().Context())
 		if err != nil {
-			return usecaseErrorToRESTResponse(c, err)
+			return UsecaseErrorToRESTResponse(c, err)
 		}
 
 		output := []SearchActivePackageOutput{}
