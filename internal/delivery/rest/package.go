@@ -226,7 +226,7 @@ import (
 //	}
 //
 //nolint:lll
-func (s *service) HandleCreatePackage() echo.HandlerFunc {
+func (s *Service) HandleCreatePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &CreatePackageInput{}
 		if err := c.Bind(input); err != nil {
@@ -271,7 +271,7 @@ func (s *service) HandleCreatePackage() echo.HandlerFunc {
 // @Failure		400						{object}	StandardErrorResponse								"Bad request"
 // @Failure		500						{object}	StandardErrorResponse								"Internal Error"
 // @Router			/v1/atec/packages/{package_id} [put]
-func (s *service) HandleUpdatePackage() echo.HandlerFunc {
+func (s *Service) HandleUpdatePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &UpdatePackageInput{}
 		if err := c.Bind(input); err != nil {
@@ -316,7 +316,7 @@ func (s *service) HandleUpdatePackage() echo.HandlerFunc {
 // @Failure		400							{object}	StandardErrorResponse									"Bad request"
 // @Failure		500							{object}	StandardErrorResponse									"Internal Error"
 // @Router			/v1/atec/packages/{package_id} [patch]
-func (s *service) HandleActivationPackage() echo.HandlerFunc {
+func (s *Service) HandleActivationPackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &ActivationPackageInput{}
 		if err := c.Bind(input); err != nil {
@@ -359,7 +359,7 @@ func (s *service) HandleActivationPackage() echo.HandlerFunc {
 // @Failure		400				{object}	StandardErrorResponse	"Bad request"
 // @Failure		500				{object}	StandardErrorResponse	"Internal Error"
 // @Router			/v1/atec/packages/{package_id} [delete]
-func (s *service) HandleDeletePackage() echo.HandlerFunc {
+func (s *Service) HandleDeletePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		input := &DeletePackageInput{}
 		if err := c.Bind(input); err != nil {
@@ -388,7 +388,7 @@ func (s *service) HandleDeletePackage() echo.HandlerFunc {
 // @Failure		400	{object}	StandardErrorResponse										"Bad request"
 // @Failure		500	{object}	StandardErrorResponse										"Internal Error"
 // @Router			/v1/atec/packages/active [get]
-func (s *service) HandleSearchActivePackage() echo.HandlerFunc {
+func (s *Service) HandleSearchActivePackage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		packages, err := s.packageUsecase.FindActiveQuestionnaires(c.Request().Context())
 		if err != nil {

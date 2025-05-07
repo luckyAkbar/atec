@@ -1,4 +1,4 @@
-package rest
+package rest_test
 
 import (
 	"net/http"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/luckyAkbar/atec/internal/delivery/rest"
 	"github.com/luckyAkbar/atec/internal/usecase"
 	usecase_mock "github.com/luckyAkbar/atec/mocks/internal_/usecase"
 	"github.com/stretchr/testify/assert"
@@ -18,10 +19,7 @@ func TestAuthService_HandleSignUp(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := &service{
-		v1:          group,
-		authUsecase: mockAuthUsecase,
-	}
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
 
 	testCases := []struct {
 		name   string

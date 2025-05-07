@@ -25,7 +25,7 @@ import (
 // @description				Bearer Token authentication for secure endpoints accessible only by therapist level user
 // @in							header
 // @name						Authorization
-type service struct {
+type Service struct {
 	v1                   *echo.Group
 	authUsecase          usecase.AuthUsecaseIface
 	packageUsecase       usecase.PackageUsecaseIface
@@ -33,13 +33,13 @@ type service struct {
 	questionnaireUsecase usecase.QuestionnaireUsecaseIface
 }
 
-// NewService init rest service
+// NewService init rest Service
 func NewService(
 	v1 *echo.Group, authUsecase usecase.AuthUsecaseIface,
 	packageUsecase *usecase.PackageUsecase, childUsecase *usecase.ChildUsecase,
 	questionnaireUsecase *usecase.QuestionnaireUsecase,
-) {
-	s := &service{
+) *Service {
+	s := &Service{
 		v1:                   v1,
 		authUsecase:          authUsecase,
 		packageUsecase:       packageUsecase,
@@ -48,9 +48,11 @@ func NewService(
 	}
 
 	s.initV1Routes()
+
+	return s
 }
 
-func (s *service) initV1Routes() {
+func (s *Service) initV1Routes() {
 	s.v1.POST("/auth/signup", s.HandleSignUp())
 	s.v1.POST("/auth/signup/resend", s.HandleResendSignupVerification())
 	s.v1.GET("/auth/verify", s.HandleVerifyAccount())

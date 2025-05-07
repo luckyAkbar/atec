@@ -89,6 +89,11 @@ issues:
         - lll
         - maintidx
         - containedctx
+    # exclude function documentation checks in rest handler
+    - path: ^internal/delivery/rest/   # Regex pattern for folder path
+      linters:
+        - revive
+        - stylecheck
 
 # Timeout for linters to run
 timeout: 5m
