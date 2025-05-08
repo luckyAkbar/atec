@@ -21,7 +21,7 @@ func UsecaseErrorUCAdapter(repoErr error) error {
 	case ErrNotFound:
 		return usecase.ErrRepoNotFound
 	case ErrTimeout:
-		return usecase.ErrRepoNotFound
+		return usecase.ErrRepoTimeout
 	case nil:
 		return nil
 	}
