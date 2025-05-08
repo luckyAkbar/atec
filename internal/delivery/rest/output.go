@@ -91,13 +91,14 @@ type UpdateChildernOutput struct {
 
 // GetMyChildernOutput output
 type GetMyChildernOutput struct {
-	ID           uuid.UUID `json:"id"`
-	ParentUserID uuid.UUID `json:"parent_user_id"`
-	DateOfBirth  time.Time `json:"date_of_birth"`
-	Gender       bool      `json:"gender"`
-	Name         string    `json:"name"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID             uuid.UUID `json:"id"`
+	ParentUserID   uuid.UUID `json:"parent_user_id"`
+	ParentUserName string    `json:"parent_user_name"`
+	DateOfBirth    time.Time `json:"date_of_birth"`
+	Gender         bool      `json:"gender"`
+	Name           string    `json:"name"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 // CreatePackageOutput output

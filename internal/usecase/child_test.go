@@ -151,7 +151,7 @@ func TestChildUsecase_Register(t *testing.T) {
 
 	mockChildRepo := mockUsecase.NewChildRepository(t)
 
-	uc := usecase.NewChildUsecase(mockChildRepo, nil)
+	uc := usecase.NewChildUsecase(mockChildRepo, nil, nil)
 
 	childID := uuid.New()
 	dateOfBirth := time.Now()
@@ -262,7 +262,7 @@ func TestChildUsecase_Update(t *testing.T) {
 
 	mockChildRepo := mockUsecase.NewChildRepository(t)
 
-	uc := usecase.NewChildUsecase(mockChildRepo, nil)
+	uc := usecase.NewChildUsecase(mockChildRepo, nil, nil)
 
 	childID := uuid.New()
 	dateOfBirth := time.Now()
@@ -424,8 +424,9 @@ func TestAuthUsecase_GetRegisteredChildren(t *testing.T) {
 	userCtx := model.SetUserToCtx(ctx, user)
 
 	mockChildRepo := mockUsecase.NewChildRepository(t)
+	mockUserRepo := mockUsecase.NewUserRepository(t)
 
-	uc := usecase.NewChildUsecase(mockChildRepo, nil)
+	uc := usecase.NewChildUsecase(mockChildRepo, nil, mockUserRepo)
 
 	children := []model.Child{
 		{
@@ -512,6 +513,44 @@ func TestAuthUsecase_GetRegisteredChildren(t *testing.T) {
 			},
 		},
 		{
+			name: "repository failed to find user by id",
+			input: usecase.GetRegisteredChildrenInput{
+				Limit:  20,
+				Offset: 1,
+			},
+			ctx:               userCtx,
+			wantErr:           true,
+			expectedErr:       usecase.ErrInternal,
+			expectedOutputLen: 1,
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().Search(userCtx, usecase.RepoSearchChildInput{
+					ParentUserID: &userID,
+					Limit:        20,
+					Offset:       1,
+				}).Return(children, nil).Once()
+				mockUserRepo.EXPECT().FindByID(userCtx, userID).Return(nil, assert.AnError).Once()
+			},
+		},
+		{
+			name: "somehow the parent data not found",
+			input: usecase.GetRegisteredChildrenInput{
+				Limit:  20,
+				Offset: 1,
+			},
+			ctx:               userCtx,
+			wantErr:           true,
+			expectedErr:       usecase.ErrNotFound,
+			expectedOutputLen: 1,
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().Search(userCtx, usecase.RepoSearchChildInput{
+					ParentUserID: &userID,
+					Limit:        20,
+					Offset:       1,
+				}).Return(children, nil).Once()
+				mockUserRepo.EXPECT().FindByID(userCtx, userID).Return(nil, usecase.ErrRepoNotFound).Once()
+			},
+		},
+		{
 			name: "ok",
 			input: usecase.GetRegisteredChildrenInput{
 				Limit:  20,
@@ -526,6 +565,7 @@ func TestAuthUsecase_GetRegisteredChildren(t *testing.T) {
 					Limit:        20,
 					Offset:       1,
 				}).Return(children, nil).Once()
+				mockUserRepo.EXPECT().FindByID(userCtx, userID).Return(&model.User{ID: userID}, nil).Once()
 			},
 		},
 	}
@@ -570,7 +610,7 @@ func TestChildUsecase_Search(t *testing.T) {
 
 	mockChildRepo := mockUsecase.NewChildRepository(t)
 
-	uc := usecase.NewChildUsecase(mockChildRepo, nil)
+	uc := usecase.NewChildUsecase(mockChildRepo, nil, nil)
 
 	parentUserID := uuid.New()
 	name := "Jane Doe"
@@ -737,7 +777,7 @@ func TestChildUseccase_HandleGetStatistic(t *testing.T) {
 	mockChildRepo := mockUsecase.NewChildRepository(t)
 	mockResultRepo := mockUsecase.NewResultRepository(t)
 
-	uc := usecase.NewChildUsecase(mockChildRepo, mockResultRepo)
+	uc := usecase.NewChildUsecase(mockChildRepo, mockResultRepo, nil)
 
 	childID := uuid.New()
 	child := &model.Child{
