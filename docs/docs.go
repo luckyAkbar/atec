@@ -1651,6 +1651,9 @@ const docTemplate = `{
                 "parent_user_id": {
                     "type": "string"
                 },
+                "parent_user_name": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 }

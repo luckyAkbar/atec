@@ -15,6 +15,7 @@ import (
 // ChildUsecase child usecase
 type ChildUsecase struct {
 	childRepo  ChildRepository
+	userRepo   UserRepository
 	resultRepo ResultRepository
 }
 
@@ -28,10 +29,11 @@ type ChildUsecaseIface interface {
 }
 
 // NewChildUsecase create new ChildUsecase instance
-func NewChildUsecase(childRepo ChildRepository, resultRepo ResultRepository) *ChildUsecase {
+func NewChildUsecase(childRepo ChildRepository, resultRepo ResultRepository, userRepo UserRepository) *ChildUsecase {
 	return &ChildUsecase{
 		childRepo:  childRepo,
 		resultRepo: resultRepo,
+		userRepo:   userRepo,
 	}
 }
 
@@ -184,14 +186,15 @@ func (grci GetRegisteredChildrenInput) validate() error {
 
 // GetRegisteredChildrenOutput output
 type GetRegisteredChildrenOutput struct {
-	ID           uuid.UUID
-	ParentUserID uuid.UUID
-	DateOfBirth  time.Time
-	Gender       bool
-	Name         string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    sql.NullTime
+	ID             uuid.UUID
+	ParentUserID   uuid.UUID
+	ParentUsername string
+	DateOfBirth    time.Time
+	Gender         bool
+	Name           string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      sql.NullTime
 }
 
 // GetRegisteredChildren get registered children by the requester account
@@ -234,18 +237,37 @@ func (u *ChildUsecase) GetRegisteredChildren(ctx context.Context, input GetRegis
 		break
 	}
 
+	parent, err := u.userRepo.FindByID(ctx, requester.ID)
+	switch err {
+	default:
+		logrus.WithContext(ctx).WithField("input", helper.Dump(input)).Error("failed to find parent data")
+
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case ErrRepoNotFound:
+		return nil, UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
 	output := []GetRegisteredChildrenOutput{}
 
 	for _, child := range children {
 		output = append(output, GetRegisteredChildrenOutput{
-			ID:           child.ID,
-			ParentUserID: child.ParentUserID,
-			DateOfBirth:  child.DateOfBirth,
-			Gender:       child.Gender,
-			Name:         child.Name,
-			CreatedAt:    child.CreatedAt,
-			UpdatedAt:    child.UpdatedAt,
-			DeletedAt:    sql.NullTime(child.DeletedAt),
+			ID:             child.ID,
+			ParentUserID:   child.ParentUserID,
+			ParentUsername: parent.Username,
+			DateOfBirth:    child.DateOfBirth,
+			Gender:         child.Gender,
+			Name:           child.Name,
+			CreatedAt:      child.CreatedAt,
+			UpdatedAt:      child.UpdatedAt,
+			DeletedAt:      sql.NullTime(child.DeletedAt),
 		})
 	}
 

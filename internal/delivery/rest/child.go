@@ -159,13 +159,14 @@ func (s *service) HandleGetMyChildern() echo.HandlerFunc {
 
 		for _, child := range children {
 			output = append(output, GetMyChildernOutput{
-				ID:           child.ID,
-				ParentUserID: child.ParentUserID,
-				DateOfBirth:  child.DateOfBirth,
-				Gender:       child.Gender,
-				Name:         child.Name,
-				CreatedAt:    child.CreatedAt,
-				UpdatedAt:    child.UpdatedAt,
+				ID:             child.ID,
+				ParentUserID:   child.ParentUserID,
+				ParentUserName: child.ParentUsername,
+				DateOfBirth:    child.DateOfBirth,
+				Gender:         child.Gender,
+				Name:           child.Name,
+				CreatedAt:      child.CreatedAt,
+				UpdatedAt:      child.UpdatedAt,
 			})
 		}
 
