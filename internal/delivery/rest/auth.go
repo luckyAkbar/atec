@@ -261,8 +261,8 @@ func (s *Service) HandleResetPassword() echo.HandlerFunc {
 // @Router			/v1/auth/password [get]
 func (s *Service) HandleRenderChangePasswordPage() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		changePasswordTokenb := c.QueryParam(model.ChangePasswordTokenQuery)
-		if changePasswordTokenb == "" {
+		changePasswordToken := c.QueryParam(model.ChangePasswordTokenQuery)
+		if changePasswordToken == "" {
 			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
 				StatusCode:   http.StatusBadRequest,
 				ErrorMessage: "missing required query parameter",
@@ -270,7 +270,7 @@ func (s *Service) HandleRenderChangePasswordPage() echo.HandlerFunc {
 			})
 		}
 
-		return c.HTML(http.StatusOK, changePasswordWebpage(changePasswordTokenb))
+		return c.HTML(http.StatusOK, changePasswordWebpage(changePasswordToken))
 	}
 }
 
