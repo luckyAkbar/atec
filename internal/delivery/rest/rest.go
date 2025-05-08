@@ -36,8 +36,8 @@ type Service struct {
 // NewService init rest Service
 func NewService(
 	v1 *echo.Group, authUsecase usecase.AuthUsecaseIface,
-	packageUsecase *usecase.PackageUsecase, childUsecase usecase.ChildUsecaseIface,
-	questionnaireUsecase *usecase.QuestionnaireUsecase,
+	packageUsecase usecase.PackageUsecaseIface, childUsecase usecase.ChildUsecaseIface,
+	questionnaireUsecase usecase.QuestionnaireUsecaseIface,
 ) *Service {
 	s := &Service{
 		v1:                   v1,
