@@ -421,17 +421,18 @@ func (r *PackageRepo) findAndSetAllActivePackagesToCache(ctx context.Context) ([
 		Limit:    limit,
 	})
 
-	if err != nil {
+	switch err {
+	default:
 		return nil, err
-	}
-
-	if len(packages) == 0 {
+	case ErrNotFound:
 		err := r.cacheKeeper.SetNil(ctx, string(AllActivePackageCacheKey))
 		if err != nil {
 			logrus.WithError(err).Warn("failed to set nil cache for all active packages")
 		}
 
 		return nil, ErrNotFound
+	case nil:
+		break
 	}
 
 	if err := r.cacheKeeper.SetJSON(ctx, string(AllActivePackageCacheKey), packages, config.CacheExpiryDuration().AllActivePackage); err != nil {
