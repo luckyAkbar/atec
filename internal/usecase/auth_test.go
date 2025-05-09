@@ -478,7 +478,7 @@ func TestAuthUsecase_HandleSignup(t *testing.T) {
 		Password: sampleHashedPassword,
 		Username: sampleValidUsername,
 		IsActive: false,
-		Roles:    model.RolesTherapist,
+		Roles:    model.RolesParent,
 	}
 
 	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, mockTxCtrlFactory, mockMailer, mockRateLimiter)
