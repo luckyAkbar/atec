@@ -6,5 +6,6 @@
     "window.autoDetectColorScheme": true,
     "workbench.colorTheme": "Night Owl (No Italics)",
     "workbench.preferredLightColorTheme": "Night Owl Light (No Italics)",
-    "go.lintTool": "golangci-lint"
+    "go.lintTool": "golangci-lint",
+    "workbench.preferredDarkColorTheme": "Night Owl",
 }
