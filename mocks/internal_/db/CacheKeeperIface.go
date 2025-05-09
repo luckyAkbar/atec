@@ -5,9 +5,9 @@ package db
 import (
 	context "context"
 
-	mock "github.com/stretchr/testify/mock"
+	common "github.com/luckyAkbar/atec/internal/common"
 
-	redsync "github.com/go-redsync/redsync/v4"
+	mock "github.com/stretchr/testify/mock"
 
 	time "time"
 )
@@ -26,23 +26,23 @@ func (_m *CacheKeeperIface) EXPECT() *CacheKeeperIface_Expecter {
 }
 
 // AcquireLock provides a mock function with given fields: key
-func (_m *CacheKeeperIface) AcquireLock(key string) (*redsync.Mutex, error) {
+func (_m *CacheKeeperIface) AcquireLock(key string) (*common.RedsyncMutexWrapper, error) {
 	ret := _m.Called(key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AcquireLock")
 	}
 
-	var r0 *redsync.Mutex
+	var r0 *common.RedsyncMutexWrapper
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*redsync.Mutex, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*common.RedsyncMutexWrapper, error)); ok {
 		return rf(key)
 	}
-	if rf, ok := ret.Get(0).(func(string) *redsync.Mutex); ok {
+	if rf, ok := ret.Get(0).(func(string) *common.RedsyncMutexWrapper); ok {
 		r0 = rf(key)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*redsync.Mutex)
+			r0 = ret.Get(0).(*common.RedsyncMutexWrapper)
 		}
 	}
 
@@ -73,12 +73,12 @@ func (_c *CacheKeeperIface_AcquireLock_Call) Run(run func(key string)) *CacheKee
 	return _c
 }
 
-func (_c *CacheKeeperIface_AcquireLock_Call) Return(_a0 *redsync.Mutex, _a1 error) *CacheKeeperIface_AcquireLock_Call {
+func (_c *CacheKeeperIface_AcquireLock_Call) Return(_a0 *common.RedsyncMutexWrapper, _a1 error) *CacheKeeperIface_AcquireLock_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *CacheKeeperIface_AcquireLock_Call) RunAndReturn(run func(string) (*redsync.Mutex, error)) *CacheKeeperIface_AcquireLock_Call {
+func (_c *CacheKeeperIface_AcquireLock_Call) RunAndReturn(run func(string) (*common.RedsyncMutexWrapper, error)) *CacheKeeperIface_AcquireLock_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -188,7 +188,7 @@ func (_c *CacheKeeperIface_Get_Call) RunAndReturn(run func(context.Context, stri
 }
 
 // GetOrLock provides a mock function with given fields: ctx, key
-func (_m *CacheKeeperIface) GetOrLock(ctx context.Context, key string) (string, *redsync.Mutex, error) {
+func (_m *CacheKeeperIface) GetOrLock(ctx context.Context, key string) (string, *common.RedsyncMutexWrapper, error) {
 	ret := _m.Called(ctx, key)
 
 	if len(ret) == 0 {
@@ -196,9 +196,9 @@ func (_m *CacheKeeperIface) GetOrLock(ctx context.Context, key string) (string, 
 	}
 
 	var r0 string
-	var r1 *redsync.Mutex
+	var r1 *common.RedsyncMutexWrapper
 	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (string, *redsync.Mutex, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (string, *common.RedsyncMutexWrapper, error)); ok {
 		return rf(ctx, key)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) string); ok {
@@ -207,11 +207,11 @@ func (_m *CacheKeeperIface) GetOrLock(ctx context.Context, key string) (string, 
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) *redsync.Mutex); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string) *common.RedsyncMutexWrapper); ok {
 		r1 = rf(ctx, key)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*redsync.Mutex)
+			r1 = ret.Get(1).(*common.RedsyncMutexWrapper)
 		}
 	}
 
@@ -243,12 +243,12 @@ func (_c *CacheKeeperIface_GetOrLock_Call) Run(run func(ctx context.Context, key
 	return _c
 }
 
-func (_c *CacheKeeperIface_GetOrLock_Call) Return(_a0 string, _a1 *redsync.Mutex, _a2 error) *CacheKeeperIface_GetOrLock_Call {
+func (_c *CacheKeeperIface_GetOrLock_Call) Return(_a0 string, _a1 *common.RedsyncMutexWrapper, _a2 error) *CacheKeeperIface_GetOrLock_Call {
 	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *CacheKeeperIface_GetOrLock_Call) RunAndReturn(run func(context.Context, string) (string, *redsync.Mutex, error)) *CacheKeeperIface_GetOrLock_Call {
+func (_c *CacheKeeperIface_GetOrLock_Call) RunAndReturn(run func(context.Context, string) (string, *common.RedsyncMutexWrapper, error)) *CacheKeeperIface_GetOrLock_Call {
 	_c.Call.Return(run)
 	return _c
 }
