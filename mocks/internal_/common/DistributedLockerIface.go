@@ -5,7 +5,8 @@ package common
 import (
 	context "context"
 
-	redsync "github.com/go-redsync/redsync/v4"
+	common "github.com/luckyAkbar/atec/internal/common"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -23,23 +24,23 @@ func (_m *DistributedLockerIface) EXPECT() *DistributedLockerIface_Expecter {
 }
 
 // GetLock provides a mock function with given fields: key
-func (_m *DistributedLockerIface) GetLock(key string) (*redsync.Mutex, error) {
+func (_m *DistributedLockerIface) GetLock(key string) (*common.RedsyncMutexWrapper, error) {
 	ret := _m.Called(key)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetLock")
 	}
 
-	var r0 *redsync.Mutex
+	var r0 *common.RedsyncMutexWrapper
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*redsync.Mutex, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*common.RedsyncMutexWrapper, error)); ok {
 		return rf(key)
 	}
-	if rf, ok := ret.Get(0).(func(string) *redsync.Mutex); ok {
+	if rf, ok := ret.Get(0).(func(string) *common.RedsyncMutexWrapper); ok {
 		r0 = rf(key)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*redsync.Mutex)
+			r0 = ret.Get(0).(*common.RedsyncMutexWrapper)
 		}
 	}
 
@@ -70,12 +71,12 @@ func (_c *DistributedLockerIface_GetLock_Call) Run(run func(key string)) *Distri
 	return _c
 }
 
-func (_c *DistributedLockerIface_GetLock_Call) Return(_a0 *redsync.Mutex, _a1 error) *DistributedLockerIface_GetLock_Call {
+func (_c *DistributedLockerIface_GetLock_Call) Return(_a0 *common.RedsyncMutexWrapper, _a1 error) *DistributedLockerIface_GetLock_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *DistributedLockerIface_GetLock_Call) RunAndReturn(run func(string) (*redsync.Mutex, error)) *DistributedLockerIface_GetLock_Call {
+func (_c *DistributedLockerIface_GetLock_Call) RunAndReturn(run func(string) (*common.RedsyncMutexWrapper, error)) *DistributedLockerIface_GetLock_Call {
 	_c.Call.Return(run)
 	return _c
 }

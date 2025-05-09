@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	redsync "github.com/go-redsync/redsync/v4"
 	"github.com/jpillora/backoff"
 	"github.com/luckyAkbar/atec/internal/common"
 	redis "github.com/redis/go-redis/v9"
@@ -67,8 +66,8 @@ type CacheKeeperIface interface {
 	Set(ctx context.Context, key string, value string, expiration time.Duration) error
 	SetNil(ctx context.Context, key string, expiration ...time.Duration) error
 	SetJSON(ctx context.Context, key string, value any, expiration time.Duration) error
-	GetOrLock(ctx context.Context, key string) (string, *redsync.Mutex, error)
-	AcquireLock(key string) (*redsync.Mutex, error)
+	GetOrLock(ctx context.Context, key string) (string, *common.RedsyncMutexWrapper, error)
+	AcquireLock(key string) (*common.RedsyncMutexWrapper, error)
 	Del(ctx context.Context, key string) error
 }
 
@@ -139,7 +138,7 @@ func (ck *CacheKeeper) SetNil(ctx context.Context, key string, expiration ...tim
 }
 
 // GetOrLock get a key from cache, if not found, try to lock it and return the mutex
-func (ck *CacheKeeper) GetOrLock(ctx context.Context, key string) (string, *redsync.Mutex, error) {
+func (ck *CacheKeeper) GetOrLock(ctx context.Context, key string) (string, *common.RedsyncMutexWrapper, error) {
 	cacheValue, err := ck.Get(ctx, key)
 	switch err {
 	default:
@@ -201,7 +200,7 @@ func (ck *CacheKeeper) GetOrLock(ctx context.Context, key string) (string, *reds
 }
 
 // AcquireLock acquire a lock for a given key
-func (ck *CacheKeeper) AcquireLock(key string) (*redsync.Mutex, error) {
+func (ck *CacheKeeper) AcquireLock(key string) (*common.RedsyncMutexWrapper, error) {
 	return ck.distributedLock.GetLock(key)
 }
 
