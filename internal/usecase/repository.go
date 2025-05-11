@@ -93,6 +93,7 @@ type ChildRepository interface {
 	Update(ctx context.Context, id uuid.UUID, input RepoUpdateChildInput) (*model.Child, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Child, error)
 	Search(ctx context.Context, input RepoSearchChildInput) ([]model.Child, error)
+	DeleteAllUserChildren(ctx context.Context, input RepoDeleteAllUserChildrenInput, txController ...any) error
 }
 
 // RepoRegisterChildInput input
@@ -141,6 +142,7 @@ type UserRepository interface {
 	Update(ctx context.Context, userID uuid.UUID, input RepoUpdateUserInput) (*model.User, error)
 	Search(ctx context.Context, input RepoSearchUserInput) ([]model.User, error)
 	IsAdminAccountExists(ctx context.Context) (bool, error)
+	DeleteByID(ctx context.Context, input RepoDeleteUserByIDInput, txController ...any) error
 }
 
 // RepoCreateResultInput create result input
@@ -175,6 +177,7 @@ type ResultRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*model.Result, error)
 	Search(ctx context.Context, input RepoSearchResultInput) ([]model.Result, error)
 	FindAllUserHistory(ctx context.Context, input RepoFindAllUserHistoryInput) ([]model.Result, error)
+	DeleteAllUserResults(ctx context.Context, input RepoDeleteAllUserResultsInput, txController ...any) error
 }
 
 // RepoCreatePackageInput input
@@ -199,6 +202,24 @@ type RepoUpdatePackageInput struct {
 type RepoSearchPackageInput struct {
 	IsActive *bool
 	Limit    int
+}
+
+// RepoDeleteAllUserResultsInput input
+type RepoDeleteAllUserResultsInput struct {
+	UserID     uuid.UUID
+	HardDelete bool
+}
+
+// RepoDeleteAllUserChildrenInput input
+type RepoDeleteAllUserChildrenInput struct {
+	UserID     uuid.UUID
+	HardDelete bool
+}
+
+// RepoDeleteUserByIDInput input
+type RepoDeleteUserByIDInput struct {
+	UserID     uuid.UUID
+	HardDelete bool
 }
 
 // PackageRepo interface for PackageRepo

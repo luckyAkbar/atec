@@ -110,6 +110,50 @@ func TestChildRepositoryUCAdapter(t *testing.T) {
 		_, err := adapter.Update(ctx, childID, usecase.RepoUpdateChildInput{})
 		assert.NoError(t, err)
 	})
+
+	t.Run("DeleteAllUserChildren", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"children\"").
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteAllUserChildren(ctx, usecase.RepoDeleteAllUserChildrenInput{
+			UserID:     userID,
+			HardDelete: true,
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("DeleteAllUserChildren with custom tx", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"children\"").
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteAllUserChildren(ctx, usecase.RepoDeleteAllUserChildrenInput{
+			UserID:     userID,
+			HardDelete: true,
+		}, kit.DB)
+		assert.NoError(t, err)
+	})
+
+	t.Run("DeleteAllUserChildren with invalid tx", func(t *testing.T) {
+		err := adapter.DeleteAllUserChildren(ctx, usecase.RepoDeleteAllUserChildrenInput{
+			UserID:     uuid.New(),
+			HardDelete: true,
+		}, 1)
+		assert.Error(t, err)
+	})
 }
 
 func TestPackageRepositoryUCAdapter(t *testing.T) {
@@ -268,6 +312,50 @@ func TestResultRepositoryUCAdapter(t *testing.T) {
 		_, err := adapter.Search(ctx, usecase.RepoSearchResultInput{})
 		require.Error(t, err)
 	})
+
+	t.Run("DeleteAllUserResults", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"results\"").
+			WithArgs(userID, userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteAllUserResults(ctx, usecase.RepoDeleteAllUserResultsInput{
+			UserID:     userID,
+			HardDelete: true,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("DeleteAllUserResults with custom tx", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"results\"").
+			WithArgs(userID, userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteAllUserResults(ctx, usecase.RepoDeleteAllUserResultsInput{
+			UserID:     userID,
+			HardDelete: true,
+		}, kit.DB)
+		require.NoError(t, err)
+	})
+
+	t.Run("DeleteAllUserResults with invalid tx", func(t *testing.T) {
+		err := adapter.DeleteAllUserResults(ctx, usecase.RepoDeleteAllUserResultsInput{
+			UserID:     uuid.New(),
+			HardDelete: true,
+		}, 1)
+		assert.Error(t, err)
+	})
 }
 
 func TestUserRepositoryUCAdapter(t *testing.T) {
@@ -374,5 +462,48 @@ func TestUserRepositoryUCAdapter(t *testing.T) {
 			IsActive: &isActive,
 		})
 		assert.NoError(t, err)
+	})
+
+	t.Run("DeleteByID - ok", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"users\"").
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteByID(ctx, usecase.RepoDeleteUserByIDInput{
+			UserID:     userID,
+			HardDelete: true,
+		})
+		assert.NoError(t, err)
+	})
+
+	t.Run("DeleteByID with custom tx", func(t *testing.T) {
+		userID := uuid.New()
+
+		dbMock.ExpectBegin()
+
+		dbMock.ExpectExec("^DELETE FROM \"users\"").
+			WithArgs(userID).
+			WillReturnResult(sqlmock.NewResult(0, 1))
+
+		dbMock.ExpectCommit()
+
+		err := adapter.DeleteByID(ctx, usecase.RepoDeleteUserByIDInput{
+			UserID:     userID,
+			HardDelete: true,
+		}, kit.DB)
+		assert.NoError(t, err)
+	})
+
+	t.Run("DeleteByID with invalid tx", func(t *testing.T) {
+		err := adapter.DeleteByID(ctx, usecase.RepoDeleteUserByIDInput{
+			UserID: uuid.New(),
+		}, 1)
+		assert.Error(t, err)
 	})
 }

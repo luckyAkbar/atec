@@ -659,3 +659,102 @@ func TestAuthService_HandleRenderChangePasswordPage(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthService_HandleDeleteAccount(t *testing.T) {
+	e := echo.New()
+	group := e.Group("")
+
+	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+
+	testCases := []struct {
+		name   string
+		reqCtx func() (*httptest.ResponseRecorder, echo.Context)
+		expect func(rec *httptest.ResponseRecorder)
+		mockFn func(ectx echo.Context)
+	}{
+		{
+			name: "validation error - invalid input body",
+			reqCtx: func() (*httptest.ResponseRecorder, echo.Context) {
+				req := httptest.NewRequest(http.MethodDelete, "/auth/account", strings.NewReader(`{
+					"email": "",
+					"password": "password12345",
+				}`))
+				req.Header.Set("Content-Type", "application/json")
+
+				rec := httptest.NewRecorder()
+				ectx := e.NewContext(req, rec)
+
+				return rec, ectx
+			},
+			expect: func(rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusBadRequest, rec.Code)
+				assert.Equal(t, "application/json", rec.Header().Get(echo.HeaderContentType))
+			},
+		},
+		{
+			name: "usecase returning error",
+			reqCtx: func() (*httptest.ResponseRecorder, echo.Context) {
+				req := httptest.NewRequest(http.MethodDelete, "/auth/account", strings.NewReader(`{
+					"email": "valid@email.test",
+					"password": "password12345"
+				}`))
+				req.Header.Set("Content-Type", "application/json")
+
+				rec := httptest.NewRecorder()
+				ectx := e.NewContext(req, rec)
+
+				return rec, ectx
+			},
+			expect: func(rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusInternalServerError, rec.Code)
+				assert.Equal(t, "application/json", rec.Header().Get(echo.HeaderContentType))
+			},
+			mockFn: func(ectx echo.Context) {
+				mockAuthUsecase.EXPECT().HandleDeleteUserData(ectx.Request().Context(), usecase.DeleteUserDataInput{
+					Email:    "valid@email.test",
+					Password: "password12345",
+				}).Return(usecase.UsecaseError{
+					ErrType: usecase.ErrInternal,
+				}).Once()
+			},
+		},
+		{
+			name: "success",
+			reqCtx: func() (*httptest.ResponseRecorder, echo.Context) {
+				req := httptest.NewRequest(http.MethodDelete, "/auth/account", strings.NewReader(`{
+					"email": "valid@email.test",
+					"password": "password12345"
+				}`))
+				req.Header.Set("Content-Type", "application/json")
+
+				rec := httptest.NewRecorder()
+				ectx := e.NewContext(req, rec)
+
+				return rec, ectx
+			},
+			expect: func(rec *httptest.ResponseRecorder) {
+				assert.Equal(t, http.StatusNoContent, rec.Code)
+			},
+			mockFn: func(ectx echo.Context) {
+				mockAuthUsecase.EXPECT().HandleDeleteUserData(ectx.Request().Context(), usecase.DeleteUserDataInput{
+					Email:    "valid@email.test",
+					Password: "password12345",
+				}).Return(nil).Once()
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec, ectx := tc.reqCtx()
+
+			if tc.mockFn != nil {
+				tc.mockFn(ectx)
+			}
+
+			err := service.HandleDeleteAccount()(ectx)
+			require.NoError(t, err)
+			tc.expect(rec)
+		})
+	}
+}

@@ -115,7 +115,15 @@ func serverFn(cmd *cobra.Command, _ []string) {
 	childRepoUCAdapter := repository.NewChildRepositoryUCAdapter(childRepo)
 	resultRepoUCAdapter := repository.NewResultRepositoryUCAdapter(resultRepo)
 
-	authUsecase := usecase.NewAuthUsecase(sharedCryptor, userRepoUCAdapter, transactionControllerFactory, mailer, rateLimiter)
+	authUsecase := usecase.NewAuthUsecase(
+		sharedCryptor,
+		userRepoUCAdapter,
+		resultRepoUCAdapter,
+		childRepoUCAdapter,
+		transactionControllerFactory,
+		mailer,
+		rateLimiter,
+	)
 	packageUsecase := usecase.NewPackageUsecase(packageRepoUCAdapter)
 	childUsecase := usecase.NewChildUsecase(childRepoUCAdapter, resultRepoUCAdapter, userRepoUCAdapter)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepoUCAdapter, childRepoUCAdapter, resultRepoUCAdapter, font)

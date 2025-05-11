@@ -265,7 +265,7 @@ func TestAuthUsecase_HandleLogin(t *testing.T) {
 	ctx := context.Background()
 	mockUserRepo := mockUsecase.NewUserRepository(t)
 	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil, nil, nil)
 	validSampleEmail := "valid@sample.email"
 	validSamplePassword := "validPass!!"
 	sampleEncryptedEmail := "encryptedEmail"
@@ -481,7 +481,7 @@ func TestAuthUsecase_HandleSignup(t *testing.T) {
 		Roles:    model.RolesParent,
 	}
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, mockTxCtrlFactory, mockMailer, mockRateLimiter)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, mockTxCtrlFactory, mockMailer, mockRateLimiter)
 
 	testCases := []struct {
 		name                 string
@@ -777,7 +777,7 @@ func TestAuthUsecase_HandleAccountVerification(t *testing.T) {
 	mockUserRepo := mockUsecase.NewUserRepository(t)
 	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil, nil, nil)
 
 	validateJWTOpts := common.ValidateJWTOpts{
 		Issuer:  string(usecase.TokenIssuerSystem),
@@ -1065,7 +1065,7 @@ func TestAuthUsecase_HandleInitesetPassword(t *testing.T) {
 	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
 	mockMailer := mockCommon.NewMailerIface(t)
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, mockMailer, nil)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil, mockMailer, nil)
 
 	validEmail := "valid@email.sample"
 	encryptedEmail := "sampleEncryptedEmail"
@@ -1226,7 +1226,7 @@ func TestAuthUsecase_HandleResetPassword(t *testing.T) {
 	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
 	mockMailer := mockCommon.NewMailerIface(t)
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, mockMailer, nil)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil, mockMailer, nil)
 
 	sampleValidPass := "123ValidPass"
 	hashedPw := "hashedpw"
@@ -1547,7 +1547,7 @@ func TestAuthUsecase_AllowAccess(t *testing.T) {
 
 	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, nil, nil, nil, nil)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, nil, nil, nil, nil, nil, nil)
 
 	sampleVerificationToken := "sampleToken"
 	validateJWTOpts := common.ValidateJWTOpts{
@@ -1864,7 +1864,7 @@ func TestAuthUSecase_HandleResendSignupVerification(t *testing.T) {
 	mockMailer := mockCommon.NewMailerIface(t)
 	mockRateLimiter := mockUsecase.NewRateLimiter(t)
 
-	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, mockMailer, mockRateLimiter)
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, nil, mockMailer, mockRateLimiter)
 
 	userEmail := "email@sample.com"
 	encryptedUserEmail := "encryptedUserEmail"
@@ -2040,6 +2040,357 @@ func TestAuthUSecase_HandleResendSignupVerification(t *testing.T) {
 			if !tc.wantErr {
 				require.NoError(t, err)
 				assert.Equal(t, tc.expectedOutput, res)
+
+				return
+			}
+
+			require.Error(t, err)
+
+			switch e := err.(type) {
+			default:
+				t.Errorf("expecting usecase error but got %T", err)
+			case usecase.UsecaseError:
+				assert.Equal(t, tc.expectedErr, e.ErrType)
+			}
+		})
+	}
+}
+
+func TestAuthUsecase_HandleDeleteUserData(t *testing.T) {
+	ctx := context.Background()
+
+	mockSharedCryptor := mockCommon.NewSharedCryptorIface(t)
+	mockUserRepo := mockUsecase.NewUserRepository(t)
+	mockResultRepo := mockUsecase.NewResultRepository(t)
+	mockChildRepo := mockUsecase.NewChildRepository(t)
+	mockTxCtrlFactory := mockUsecase.NewTransactionControllerFactory(t)
+	mockMailer := mockCommon.NewMailerIface(t)
+	mockRateLimiter := mockUsecase.NewRateLimiter(t)
+
+	user := model.AuthUser{
+		ID:   uuid.New(),
+		Role: model.RolesParent,
+	}
+	userEmail := "email@sample.com"
+	encryptedUserEmail := "encryptedUserEmail"
+
+	userCtx := model.SetUserToCtx(ctx, user)
+
+	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, mockResultRepo, mockChildRepo, mockTxCtrlFactory, mockMailer, mockRateLimiter)
+
+	testCases := []struct {
+		name                 string
+		input                usecase.DeleteUserDataInput
+		ctx                  context.Context
+		wantErr              bool
+		expectedErr          error
+		expectedFunctionCall func()
+	}{
+		{
+			name: "unauthorized",
+			ctx:  context.Background(),
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrUnauthorized,
+		},
+		{
+			name: "user is not parent",
+			ctx:  model.SetUserToCtx(ctx, model.AuthUser{ID: user.ID, Role: model.RolesTherapist}),
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrUnauthorized,
+		},
+		{
+			name: "email is required",
+			input: usecase.DeleteUserDataInput{
+				Email: "",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "email is invalid format",
+			input: usecase.DeleteUserDataInput{
+				Email: "invalid@format",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "password is required",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "password must be at least 8 characters",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "short",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "failed to encrypt email",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return("", assert.AnError).Once()
+			},
+		},
+		{
+			name: "failed to find user by email",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(nil, assert.AnError).Once()
+			},
+		},
+		{
+			name: "user not found",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrNotFound,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+			},
+		},
+		{
+			name: "user trying to delete other user's account",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrForbidden,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(&model.User{ID: uuid.New()}, nil).Once()
+			},
+		},
+		{
+			name: "user account is not active",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(&model.User{ID: user.ID, IsActive: false}, nil).Once()
+			},
+		},
+		{
+			name: "failed to compare user password",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrUnauthorized,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(
+					&model.User{
+						ID:       user.ID,
+						IsActive: true,
+					}, nil,
+				).Once()
+				mockSharedCryptor.EXPECT().CompareHash(mock.Anything, []byte("password")).Return(assert.AnError).Once()
+			},
+		},
+		{
+			name: "failed to delete user's results",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(
+					&model.User{
+						ID:       user.ID,
+						IsActive: true,
+					}, nil,
+				).Once()
+				mockSharedCryptor.EXPECT().CompareHash(mock.Anything, []byte("password")).Return(nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockResultRepo.EXPECT().DeleteAllUserResults(userCtx, usecase.RepoDeleteAllUserResultsInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(assert.AnError).Once()
+				underlyingTransaction.EXPECT().Rollback().Return(assert.AnError).Once()
+			},
+		},
+		{
+			name: "failed to delete user's children",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(
+					&model.User{
+						ID:       user.ID,
+						IsActive: true,
+					}, nil,
+				).Once()
+				mockSharedCryptor.EXPECT().CompareHash(mock.Anything, []byte("password")).Return(nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockResultRepo.EXPECT().DeleteAllUserResults(userCtx, usecase.RepoDeleteAllUserResultsInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				mockChildRepo.EXPECT().DeleteAllUserChildren(userCtx, usecase.RepoDeleteAllUserChildrenInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(assert.AnError).Once()
+				underlyingTransaction.EXPECT().Rollback().Return(nil).Once()
+			},
+		},
+		{
+			name: "failed to delete user data",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx:         userCtx,
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(
+					&model.User{
+						ID:       user.ID,
+						IsActive: true,
+					}, nil,
+				).Once()
+				mockSharedCryptor.EXPECT().CompareHash(mock.Anything, []byte("password")).Return(nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockResultRepo.EXPECT().DeleteAllUserResults(userCtx, usecase.RepoDeleteAllUserResultsInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				mockChildRepo.EXPECT().DeleteAllUserChildren(userCtx, usecase.RepoDeleteAllUserChildrenInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				mockUserRepo.EXPECT().DeleteByID(userCtx, usecase.RepoDeleteUserByIDInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(assert.AnError).Once()
+				underlyingTransaction.EXPECT().Rollback().Return(assert.AnError).Once()
+			},
+		},
+		{
+			name: "ok",
+			input: usecase.DeleteUserDataInput{
+				Email:    userEmail,
+				Password: "password",
+			},
+			ctx: userCtx,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(userEmail).Return(encryptedUserEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(userCtx, encryptedUserEmail).Return(
+					&model.User{
+						ID:       user.ID,
+						IsActive: true,
+					}, nil,
+				).Once()
+				mockSharedCryptor.EXPECT().CompareHash(mock.Anything, []byte("password")).Return(nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockResultRepo.EXPECT().DeleteAllUserResults(userCtx, usecase.RepoDeleteAllUserResultsInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				mockChildRepo.EXPECT().DeleteAllUserChildren(userCtx, usecase.RepoDeleteAllUserChildrenInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				mockUserRepo.EXPECT().DeleteByID(userCtx, usecase.RepoDeleteUserByIDInput{
+					UserID:     user.ID,
+					HardDelete: true,
+				}, mock.Anything).Return(nil).Once()
+				underlyingTransaction.EXPECT().Commit().Return(nil).Once()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedFunctionCall != nil {
+				tc.expectedFunctionCall()
+			}
+
+			err := uc.HandleDeleteUserData(tc.ctx, tc.input)
+
+			if !tc.wantErr {
+				require.NoError(t, err)
 
 				return
 			}

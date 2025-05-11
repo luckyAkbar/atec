@@ -157,3 +157,22 @@ func (r *UserRepository) Search(ctx context.Context, input usecase.RepoSearchUse
 
 	return users, nil
 }
+
+// DeleteByID delete a user by its id
+func (r *UserRepository) DeleteByID(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...*gorm.DB) error {
+	tx := r.db
+	if len(txController) > 0 {
+		tx = txController[0]
+	}
+
+	if input.HardDelete {
+		tx = tx.Unscoped()
+	}
+
+	err := tx.WithContext(ctx).Where("id = ?", input.UserID).Delete(&model.User{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

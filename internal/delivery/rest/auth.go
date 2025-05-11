@@ -59,7 +59,7 @@ func (s *Service) HandleSignUp() echo.HandlerFunc {
 // @Produce		json
 // @Success		200	{object}	StandardSuccessResponse{data=ResendVerificationOutput}	"Successful response"
 // @Failure		400	{object}	StandardErrorResponse									"Bad request / validation error"
-// @Failure		429 {object}	StandardErrorResponse									"Too many requests"
+// @Failure		429	{object}	StandardErrorResponse									"Too many requests"
 // @Failure		500	{object}	StandardErrorResponse									"Internal Error"
 // @Router			/v1/auth/signup/resend [post]
 func (s *Service) HandleResendSignupVerification() echo.HandlerFunc {
@@ -271,6 +271,43 @@ func (s *Service) HandleRenderChangePasswordPage() echo.HandlerFunc {
 		}
 
 		return c.HTML(http.StatusOK, changePasswordWebpage(changePasswordToken))
+	}
+}
+
+// @Summary		Delete user's account
+// @Description	Delete all user's related data from the system
+// @Tags			Authentication
+// @Accept			application/json
+// @Security		ParentLevelAuth
+// @Param			Authorization			header	string				true	"JWT Token"
+// @Param			change_password_input	body	DeleteAccountInput	true	"the email of the account which password will be reset"
+//
+// @Produce		json
+// @Success		204	{object}	StandardSuccessResponse	"Successful response"
+// @Failure		400	{object}	StandardErrorResponse	"Bad request"	"validation error"
+// @Failure		500	{object}	StandardErrorResponse	"Internal Error"
+// @Router			/v1/auth/accounts [delete]
+func (s *Service) HandleDeleteAccount() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		input := &DeleteAccountInput{}
+		if err := c.Bind(input); err != nil {
+			return c.JSON(http.StatusBadRequest, StandardErrorResponse{
+				StatusCode:   http.StatusBadRequest,
+				ErrorMessage: "failed to parse input",
+				ErrorCode:    http.StatusText(http.StatusBadRequest),
+			})
+		}
+
+		err := s.authUsecase.HandleDeleteUserData(c.Request().Context(), usecase.DeleteUserDataInput{
+			Email:    input.Email,
+			Password: input.Password,
+		})
+
+		if err != nil {
+			return UsecaseErrorToRESTResponse(c, err)
+		}
+
+		return c.NoContent(http.StatusNoContent)
 	}
 }
 

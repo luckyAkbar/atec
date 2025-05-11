@@ -148,3 +148,9 @@ type GetChildStatInput struct {
 type ResendVerificationInput struct {
 	Email string `json:"email" validate:"required,email"`
 }
+
+// DeleteAccountInput input
+type DeleteAccountInput struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+}

@@ -22,6 +22,8 @@ import (
 type AuthUsecase struct {
 	sharedCryptor                common.SharedCryptorIface
 	userRepo                     UserRepository
+	resultRepo                   ResultRepository
+	childRepo                    ChildRepository
 	transactionControllerFactory TransactionControllerFactory
 	mailer                       common.MailerIface
 	rateLimiter                  RateLimiter
@@ -36,12 +38,15 @@ type AuthUsecaseIface interface {
 	HandleResetPassword(ctx context.Context, input ResetPasswordInput) (*ResetPasswordOutput, error)
 	AuthenticateAccessToken(ctx context.Context, input AuthenticateAccessTokenInput) (*AuthenticateAccessTokenOutput, error)
 	HandleResendSignupVerification(ctx context.Context, input ResendSignupVerificationInput) (*ResendSignupVerificationOutput, error)
+	HandleDeleteUserData(ctx context.Context, input DeleteUserDataInput) error
 }
 
 // NewAuthUsecase create new instance for AuthUsecase
 func NewAuthUsecase(
 	sharedCryptor common.SharedCryptorIface,
 	userRepo UserRepository,
+	resultRepo ResultRepository,
+	childRepo ChildRepository,
 	transactionControllerFactory TransactionControllerFactory,
 	mailer common.MailerIface,
 	rateLimiter RateLimiter,
@@ -49,6 +54,8 @@ func NewAuthUsecase(
 	return &AuthUsecase{
 		sharedCryptor:                sharedCryptor,
 		userRepo:                     userRepo,
+		resultRepo:                   resultRepo,
+		childRepo:                    childRepo,
 		transactionControllerFactory: transactionControllerFactory,
 		mailer:                       mailer,
 		rateLimiter:                  rateLimiter,
@@ -931,6 +938,109 @@ func (u *AuthUsecase) HandleResendSignupVerification(ctx context.Context, input 
 	}, nil
 }
 
+// DeleteUserDataInput input
+type DeleteUserDataInput struct {
+	Email    string `validate:"required,email"`
+	Password string `validate:"required,min=8"`
+}
+
+func (udi DeleteUserDataInput) validate() error {
+	return common.Validator.Struct(udi)
+}
+
+// HandleDeleteUserData will handle the deletion of user's generated data
+func (u *AuthUsecase) HandleDeleteUserData(ctx context.Context, input DeleteUserDataInput) error {
+	user := model.GetUserFromCtx(ctx)
+	if user == nil {
+		return UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if user.Role != model.RolesParent {
+		return UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if err := input.validate(); err != nil {
+		return UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"user-id": user.ID,
+		"func":    "AuthUsecase.HandleDeleteUserData",
+	})
+
+	emailEnc, err := u.sharedCryptor.Encrypt(input.Email)
+	if err != nil {
+		logger.WithError(err).Error("failed to encrypt email")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	userAccount, err := u.userRepo.FindByEmail(ctx, emailEnc)
+	switch err {
+	default:
+		logger.WithError(err).Error("failed to find user by email")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	case ErrRepoNotFound:
+		return UsecaseError{
+			ErrType: ErrNotFound,
+			Message: ErrNotFound.Error(),
+		}
+	case nil:
+		break
+	}
+
+	// to prevent user from deleting other user's account
+	if user.ID != userAccount.ID {
+		return UsecaseError{
+			ErrType: ErrForbidden,
+			Message: "this action is not allowed",
+		}
+	}
+
+	if !userAccount.IsActive {
+		return UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: "this account has not been activated",
+		}
+	}
+
+	pwDecoded, err := base64.StdEncoding.DecodeString(userAccount.Password)
+	if err != nil {
+		logger.WithError(err).Error("failed to decode base 64 string")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	err = u.sharedCryptor.CompareHash(pwDecoded, []byte(input.Password))
+	if err != nil {
+		return UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: "invalid password",
+		}
+	}
+
+	return u.purgeAllUserData(ctx, user.ID, true)
+}
+
 type parseJWTTokenInput struct {
 	expectedIssuer      JWTTokenIssuer
 	expectedSubject     JWTTokenType
@@ -1015,6 +1125,81 @@ func (u *AuthUsecase) parseJWTToken(token string, input parseJWTTokenInput) (*jw
 	}
 
 	return jwtToken, claims, nil
+}
+
+func (u *AuthUsecase) purgeAllUserData(ctx context.Context, userID uuid.UUID, hardDelete bool) error {
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"user-id": userID,
+		"func":    "AuthUsecase.purgeAllUserData",
+	})
+
+	txCtrl := u.transactionControllerFactory.New()
+	tx := txCtrl.Begin()
+
+	err := u.resultRepo.DeleteAllUserResults(ctx, RepoDeleteAllUserResultsInput{
+		UserID:     userID,
+		HardDelete: hardDelete,
+	}, tx)
+
+	if err != nil {
+		logger.WithError(err).Error("failed to delete user's results")
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	err = u.childRepo.DeleteAllUserChildren(ctx, RepoDeleteAllUserChildrenInput{
+		UserID:     userID,
+		HardDelete: hardDelete,
+	}, tx)
+
+	if err != nil {
+		logger.WithError(err).Error("failed to delete user's children")
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	err = u.userRepo.DeleteByID(ctx, RepoDeleteUserByIDInput{
+		UserID:     userID,
+		HardDelete: hardDelete,
+	}, tx)
+
+	if err != nil {
+		logger.WithError(err).Error("failed to delete user")
+
+		if err := txCtrl.Rollback(); err != nil {
+			logger.WithError(err).Error("failed to rollback transaction")
+		}
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	if err := txCtrl.Commit(); err != nil {
+		logger.WithError(err).Error("failed to commit transaction")
+
+		return UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return nil
 }
 
 //nolint:lll
