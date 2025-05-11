@@ -667,6 +667,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/auth/accounts": {
+            "delete": {
+                "security": [
+                    {
+                        "ParentLevelAuth": []
+                    }
+                ],
+                "description": "Delete all user's related data from the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Delete user's account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the email of the account which password will be reset",
+                        "name": "change_password_input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rest.DeleteAccountInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request\"\t\"validation error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.StandardErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/login": {
             "post": {
                 "description": "Use this endpoint to login with your username and password",
@@ -1613,6 +1671,22 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "rest.DeleteAccountInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
                 }
             }
         },

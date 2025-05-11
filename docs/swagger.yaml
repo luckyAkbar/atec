@@ -125,6 +125,17 @@ definitions:
       id:
         type: string
     type: object
+  rest.DeleteAccountInput:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
   rest.GetATECQuestionnaireOutput:
     properties:
       id:
@@ -825,6 +836,43 @@ paths:
       summary: Get my quesionnaires results
       tags:
       - Questionnaire
+  /v1/auth/accounts:
+    delete:
+      consumes:
+      - application/json
+      description: Delete all user's related data from the system
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: the email of the account which password will be reset
+        in: body
+        name: change_password_input
+        required: true
+        schema:
+          $ref: '#/definitions/rest.DeleteAccountInput'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successful response
+          schema:
+            $ref: '#/definitions/rest.StandardSuccessResponse'
+        "400":
+          description: "Bad request\"\t\"validation error"
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - ParentLevelAuth: []
+      summary: Delete user's account
+      tags:
+      - Authentication
   /v1/auth/login:
     post:
       consumes:

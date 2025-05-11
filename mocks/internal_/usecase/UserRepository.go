@@ -96,6 +96,64 @@ func (_c *UserRepository_Create_Call) RunAndReturn(run func(context.Context, use
 	return _c
 }
 
+// DeleteByID provides a mock function with given fields: ctx, input, txController
+func (_m *UserRepository) DeleteByID(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...any) error {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, input)
+	_ca = append(_ca, txController...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteByID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.RepoDeleteUserByIDInput, ...any) error); ok {
+		r0 = rf(ctx, input, txController...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UserRepository_DeleteByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteByID'
+type UserRepository_DeleteByID_Call struct {
+	*mock.Call
+}
+
+// DeleteByID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.RepoDeleteUserByIDInput
+//   - txController ...any
+func (_e *UserRepository_Expecter) DeleteByID(ctx interface{}, input interface{}, txController ...interface{}) *UserRepository_DeleteByID_Call {
+	return &UserRepository_DeleteByID_Call{Call: _e.mock.On("DeleteByID",
+		append([]interface{}{ctx, input}, txController...)...)}
+}
+
+func (_c *UserRepository_DeleteByID_Call) Run(run func(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...any)) *UserRepository_DeleteByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]any, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(any)
+			}
+		}
+		run(args[0].(context.Context), args[1].(usecase.RepoDeleteUserByIDInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *UserRepository_DeleteByID_Call) Return(_a0 error) *UserRepository_DeleteByID_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *UserRepository_DeleteByID_Call) RunAndReturn(run func(context.Context, usecase.RepoDeleteUserByIDInput, ...any) error) *UserRepository_DeleteByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByEmail provides a mock function with given fields: ctx, email
 func (_m *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	ret := _m.Called(ctx, email)
