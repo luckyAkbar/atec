@@ -85,6 +85,64 @@ func (_c *ResultRepository_Create_Call) RunAndReturn(run func(context.Context, u
 	return _c
 }
 
+// DeleteAllUserResults provides a mock function with given fields: ctx, input, txController
+func (_m *ResultRepository) DeleteAllUserResults(ctx context.Context, input usecase.RepoDeleteAllUserResultsInput, txController ...any) error {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, input)
+	_ca = append(_ca, txController...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteAllUserResults")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.RepoDeleteAllUserResultsInput, ...any) error); ok {
+		r0 = rf(ctx, input, txController...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ResultRepository_DeleteAllUserResults_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteAllUserResults'
+type ResultRepository_DeleteAllUserResults_Call struct {
+	*mock.Call
+}
+
+// DeleteAllUserResults is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.RepoDeleteAllUserResultsInput
+//   - txController ...any
+func (_e *ResultRepository_Expecter) DeleteAllUserResults(ctx interface{}, input interface{}, txController ...interface{}) *ResultRepository_DeleteAllUserResults_Call {
+	return &ResultRepository_DeleteAllUserResults_Call{Call: _e.mock.On("DeleteAllUserResults",
+		append([]interface{}{ctx, input}, txController...)...)}
+}
+
+func (_c *ResultRepository_DeleteAllUserResults_Call) Run(run func(ctx context.Context, input usecase.RepoDeleteAllUserResultsInput, txController ...any)) *ResultRepository_DeleteAllUserResults_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]any, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(any)
+			}
+		}
+		run(args[0].(context.Context), args[1].(usecase.RepoDeleteAllUserResultsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ResultRepository_DeleteAllUserResults_Call) Return(_a0 error) *ResultRepository_DeleteAllUserResults_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ResultRepository_DeleteAllUserResults_Call) RunAndReturn(run func(context.Context, usecase.RepoDeleteAllUserResultsInput, ...any) error) *ResultRepository_DeleteAllUserResults_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindAllUserHistory provides a mock function with given fields: ctx, input
 func (_m *ResultRepository) FindAllUserHistory(ctx context.Context, input usecase.RepoFindAllUserHistoryInput) ([]model.Result, error) {
 	ret := _m.Called(ctx, input)

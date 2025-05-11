@@ -140,6 +140,53 @@ func (_c *AuthUsecaseIface_HandleAccountVerification_Call) RunAndReturn(run func
 	return _c
 }
 
+// HandleDeleteUserData provides a mock function with given fields: ctx, input
+func (_m *AuthUsecaseIface) HandleDeleteUserData(ctx context.Context, input usecase.DeleteUserDataInput) error {
+	ret := _m.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HandleDeleteUserData")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.DeleteUserDataInput) error); ok {
+		r0 = rf(ctx, input)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// AuthUsecaseIface_HandleDeleteUserData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HandleDeleteUserData'
+type AuthUsecaseIface_HandleDeleteUserData_Call struct {
+	*mock.Call
+}
+
+// HandleDeleteUserData is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.DeleteUserDataInput
+func (_e *AuthUsecaseIface_Expecter) HandleDeleteUserData(ctx interface{}, input interface{}) *AuthUsecaseIface_HandleDeleteUserData_Call {
+	return &AuthUsecaseIface_HandleDeleteUserData_Call{Call: _e.mock.On("HandleDeleteUserData", ctx, input)}
+}
+
+func (_c *AuthUsecaseIface_HandleDeleteUserData_Call) Run(run func(ctx context.Context, input usecase.DeleteUserDataInput)) *AuthUsecaseIface_HandleDeleteUserData_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(usecase.DeleteUserDataInput))
+	})
+	return _c
+}
+
+func (_c *AuthUsecaseIface_HandleDeleteUserData_Call) Return(_a0 error) *AuthUsecaseIface_HandleDeleteUserData_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *AuthUsecaseIface_HandleDeleteUserData_Call) RunAndReturn(run func(context.Context, usecase.DeleteUserDataInput) error) *AuthUsecaseIface_HandleDeleteUserData_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // HandleInitesetPassword provides a mock function with given fields: ctx, input
 func (_m *AuthUsecaseIface) HandleInitesetPassword(ctx context.Context, input usecase.InitResetPasswordInput) (*usecase.InitResetPasswordOutput, error) {
 	ret := _m.Called(ctx, input)

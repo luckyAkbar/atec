@@ -85,6 +85,64 @@ func (_c *ChildRepository_Create_Call) RunAndReturn(run func(context.Context, us
 	return _c
 }
 
+// DeleteAllUserChildren provides a mock function with given fields: ctx, input, txController
+func (_m *ChildRepository) DeleteAllUserChildren(ctx context.Context, input usecase.RepoDeleteAllUserChildrenInput, txController ...any) error {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, input)
+	_ca = append(_ca, txController...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteAllUserChildren")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.RepoDeleteAllUserChildrenInput, ...any) error); ok {
+		r0 = rf(ctx, input, txController...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ChildRepository_DeleteAllUserChildren_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteAllUserChildren'
+type ChildRepository_DeleteAllUserChildren_Call struct {
+	*mock.Call
+}
+
+// DeleteAllUserChildren is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.RepoDeleteAllUserChildrenInput
+//   - txController ...any
+func (_e *ChildRepository_Expecter) DeleteAllUserChildren(ctx interface{}, input interface{}, txController ...interface{}) *ChildRepository_DeleteAllUserChildren_Call {
+	return &ChildRepository_DeleteAllUserChildren_Call{Call: _e.mock.On("DeleteAllUserChildren",
+		append([]interface{}{ctx, input}, txController...)...)}
+}
+
+func (_c *ChildRepository_DeleteAllUserChildren_Call) Run(run func(ctx context.Context, input usecase.RepoDeleteAllUserChildrenInput, txController ...any)) *ChildRepository_DeleteAllUserChildren_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]any, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(any)
+			}
+		}
+		run(args[0].(context.Context), args[1].(usecase.RepoDeleteAllUserChildrenInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ChildRepository_DeleteAllUserChildren_Call) Return(_a0 error) *ChildRepository_DeleteAllUserChildren_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ChildRepository_DeleteAllUserChildren_Call) RunAndReturn(run func(context.Context, usecase.RepoDeleteAllUserChildrenInput, ...any) error) *ChildRepository_DeleteAllUserChildren_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindByID provides a mock function with given fields: ctx, id
 func (_m *ChildRepository) FindByID(ctx context.Context, id uuid.UUID) (*model.Child, error) {
 	ret := _m.Called(ctx, id)
