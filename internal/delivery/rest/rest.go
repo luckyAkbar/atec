@@ -60,6 +60,7 @@ func (s *Service) initV1Routes() {
 	s.v1.PATCH("/auth/password", s.HandleInitResetPassword())
 	s.v1.POST("/auth/password", s.HandleResetPassword())
 	s.v1.GET("/auth/password", s.HandleRenderChangePasswordPage())
+	s.v1.DELETE("/auth/accounts", s.HandleDeleteAccount(), s.AuthMiddleware(false))
 
 	s.v1.POST("/atec/packages", s.HandleCreatePackage(), s.AuthMiddleware(false))
 	s.v1.PUT("/atec/packages/:package_id", s.HandleUpdatePackage(), s.AuthMiddleware(false))

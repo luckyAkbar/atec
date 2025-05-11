@@ -121,3 +121,28 @@ func (r *ResultRepository) FindAllUserHistory(ctx context.Context, input usecase
 
 	return results, nil
 }
+
+// DeleteAllUserResults delete all results made by the userID or submitted for child of the userID
+func (r *ResultRepository) DeleteAllUserResults(ctx context.Context, input usecase.RepoDeleteAllUserResultsInput, txController ...*gorm.DB) error {
+	tx := r.db
+	if len(txController) > 0 {
+		tx = txController[0]
+	}
+
+	if input.HardDelete {
+		tx = tx.Unscoped()
+	}
+
+	err := tx.WithContext(ctx).Where("created_by = ?", input.UserID).
+		Or(
+			"child_id IN (?)",
+			r.db.Model(&model.Child{}).
+				Select("id").Where("parent_user_id = ?", input.UserID),
+		).Delete(&model.Result{}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

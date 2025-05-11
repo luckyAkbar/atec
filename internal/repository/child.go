@@ -131,3 +131,22 @@ func (r *ChildRepository) Search(ctx context.Context, input usecase.RepoSearchCh
 
 	return children, nil
 }
+
+// DeleteAllUserChildren delete all children of the userID
+func (r *ChildRepository) DeleteAllUserChildren(ctx context.Context, input usecase.RepoDeleteAllUserChildrenInput, txController ...*gorm.DB) error {
+	tx := r.db
+	if len(txController) > 0 {
+		tx = txController[0]
+	}
+
+	if input.HardDelete {
+		tx = tx.Unscoped()
+	}
+
+	err := tx.WithContext(ctx).Where("parent_user_id = ?", input.UserID).Delete(&model.Child{}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

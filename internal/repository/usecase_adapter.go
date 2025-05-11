@@ -67,6 +67,23 @@ func (r *ChildRepositoryUCAdapter) Update(ctx context.Context, id uuid.UUID, inp
 	return res, UsecaseErrorUCAdapter(err)
 }
 
+// DeleteAllUserChildren call the repository's DeleteAllUserChildren method and convert the error to usecase error
+func (r *ChildRepositoryUCAdapter) DeleteAllUserChildren(
+	ctx context.Context,
+	input usecase.RepoDeleteAllUserChildrenInput,
+	txController ...any,
+) error {
+	if len(txController) == 0 {
+		return r.repo.DeleteAllUserChildren(ctx, input)
+	}
+
+	if tx, ok := txController[0].(*gorm.DB); ok {
+		return r.repo.DeleteAllUserChildren(ctx, input, tx)
+	}
+
+	return fmt.Errorf("%w: invalid transaction controller, expecting typeof gorm transaction", usecase.ErrRepoInternal)
+}
+
 // PackageRepositoryUCAdapter package repository usecase adapter
 type PackageRepositoryUCAdapter struct {
 	repo *PackageRepo
@@ -190,6 +207,23 @@ func (r *ResultRepositoryUCAdapter) Search(ctx context.Context, input usecase.Re
 	return res, UsecaseErrorUCAdapter(err)
 }
 
+// DeleteAllUserResults call the repository's DeleteAllUserResults method and convert the error to usecase error
+func (r *ResultRepositoryUCAdapter) DeleteAllUserResults(
+	ctx context.Context,
+	input usecase.RepoDeleteAllUserResultsInput,
+	txController ...any,
+) error {
+	if len(txController) == 0 {
+		return r.repo.DeleteAllUserResults(ctx, input)
+	}
+
+	if tx, ok := txController[0].(*gorm.DB); ok {
+		return r.repo.DeleteAllUserResults(ctx, input, tx)
+	}
+
+	return fmt.Errorf("%w: invalid transaction controller, expecting typeof gorm transaction", usecase.ErrRepoInternal)
+}
+
 // UserRepositoryUCAdapter user repository usecase adapter
 type UserRepositoryUCAdapter struct {
 	repo *UserRepository
@@ -252,4 +286,17 @@ func (r *UserRepositoryUCAdapter) Update(ctx context.Context, userID uuid.UUID, 
 	res, err := r.repo.Update(ctx, userID, input)
 
 	return res, UsecaseErrorUCAdapter(err)
+}
+
+// DeleteByID call the repository's DeleteByID method and convert the error to usecase error
+func (r *UserRepositoryUCAdapter) DeleteByID(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...any) error {
+	if len(txController) == 0 {
+		return r.repo.DeleteByID(ctx, input)
+	}
+
+	if tx, ok := txController[0].(*gorm.DB); ok {
+		return r.repo.DeleteByID(ctx, input, tx)
+	}
+
+	return fmt.Errorf("%w: invalid transaction controller, expecting typeof gorm transaction", usecase.ErrRepoInternal)
 }

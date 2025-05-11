@@ -464,3 +464,81 @@ func TestChildRepository_Search(t *testing.T) {
 		})
 	}
 }
+
+func TestChildRepository_DeleteAllUserChildren(t *testing.T) {
+	ctx := context.Background()
+	kit, closer := InitializeRepoTestKit(t)
+
+	defer closer()
+
+	dbMock := kit.DBmock
+	repo := repository.NewChildRepository(kit.DB)
+
+	userID := uuid.New()
+
+	testCases := []struct {
+		name                 string
+		input                usecase.RepoDeleteAllUserChildrenInput
+		wantErr              bool
+		expectedErr          error
+		expectedFunctionCall func()
+	}{
+		{
+			name: "success",
+			input: usecase.RepoDeleteAllUserChildrenInput{
+				UserID:     userID,
+				HardDelete: true,
+			},
+			wantErr: false,
+			expectedFunctionCall: func() {
+				dbMock.ExpectBegin()
+
+				dbMock.ExpectExec("^DELETE FROM \"children\"").
+					WithArgs(userID).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+
+				dbMock.ExpectCommit()
+			},
+		},
+		{
+			name: "error - hard delete",
+			input: usecase.RepoDeleteAllUserChildrenInput{
+				UserID:     userID,
+				HardDelete: true,
+			},
+			wantErr:     true,
+			expectedErr: assert.AnError,
+			expectedFunctionCall: func() {
+				dbMock.ExpectBegin()
+
+				dbMock.ExpectExec("^DELETE FROM \"children\"").
+					WithArgs(userID).
+					WillReturnError(assert.AnError)
+
+				dbMock.ExpectRollback()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedFunctionCall != nil {
+				tc.expectedFunctionCall()
+			}
+
+			err := repo.DeleteAllUserChildren(ctx, tc.input, kit.DB)
+
+			if tc.wantErr {
+				require.Error(t, err)
+
+				if tc.expectedErr != nil {
+					assert.Equal(t, tc.expectedErr, err)
+				}
+
+				return
+			}
+
+			require.NoError(t, err)
+		})
+	}
+}
