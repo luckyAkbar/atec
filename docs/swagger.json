@@ -1708,6 +1708,9 @@
                 "gender": {
                     "type": "boolean"
                 },
+                "guardian_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1797,6 +1800,9 @@
                     "type": "boolean",
                     "example": true
                 },
+                "guardian_name": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 }
@@ -1884,6 +1890,9 @@
                 },
                 "gender": {
                     "type": "boolean"
+                },
+                "guardian_name": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -2045,6 +2054,9 @@
                 "gender": {
                     "type": "boolean",
                     "example": true
+                },
+                "guardian_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

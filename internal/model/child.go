@@ -2,6 +2,7 @@
 package model
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +16,7 @@ type Child struct {
 	DateOfBirth  time.Time
 	Gender       bool
 	Name         string
+	GuardianName sql.NullString
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt

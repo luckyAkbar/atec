@@ -30,6 +30,7 @@ func (r *ChildRepository) Create(ctx context.Context, input usecase.RepoCreateCh
 		DateOfBirth:  input.DateOfBirth,
 		Gender:       input.Gender,
 		Name:         input.Name,
+		GuardianName: input.GuardianName,
 	}
 
 	err := r.db.WithContext(ctx).Create(child).Error
@@ -54,6 +55,14 @@ func updateChildInputToUpdateFields(uci usecase.RepoUpdateChildInput) map[string
 
 	if uci.Name != nil {
 		fields["name"] = *uci.Name
+	}
+
+	if uci.GuardianName != nil {
+		if uci.GuardianName.Valid {
+			fields["guardian_name"] = uci.GuardianName.String
+		} else {
+			fields["guardian_name"] = gorm.Expr("NULL")
+		}
 	}
 
 	return fields

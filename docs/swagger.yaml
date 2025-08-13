@@ -153,6 +153,8 @@ definitions:
         type: string
       gender:
         type: boolean
+      guardian_name:
+        type: string
       id:
         type: string
       name:
@@ -209,6 +211,8 @@ definitions:
       gender:
         example: true
         type: boolean
+      guardian_name:
+        type: string
       name:
         type: string
     required:
@@ -269,6 +273,8 @@ definitions:
         type: string
       gender:
         type: boolean
+      guardian_name:
+        type: string
       id:
         type: string
       name:
@@ -376,6 +382,8 @@ definitions:
       gender:
         example: true
         type: boolean
+      guardian_name:
+        type: string
       name:
         type: string
     required:

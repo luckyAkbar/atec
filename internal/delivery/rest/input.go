@@ -1,6 +1,9 @@
 package rest
 
 import (
+	"database/sql"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
 )
@@ -59,17 +62,37 @@ type LoginInput struct {
 
 // RegisterChildInput input
 type RegisterChildInput struct {
-	Name        string `json:"name" validate:"required"`
-	DateOfBirth string `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
-	Gender      bool   `json:"gender" example:"true"`
+	Name         string  `json:"name" validate:"required"`
+	DateOfBirth  string  `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
+	Gender       bool    `json:"gender" example:"true"`
+	GuardianName *string `json:"guardian_name"`
 }
 
 // UpdateChildernInput input
 type UpdateChildernInput struct {
-	ChildID     uuid.UUID `json:"-" param:"child_id"`
-	Name        *string   `json:"name" validate:"required"`
-	DateOfBirth string    `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
-	Gender      *bool     `json:"gender" example:"true"`
+	ChildID      uuid.UUID `json:"-" param:"child_id"`
+	Name         *string   `json:"name" validate:"required"`
+	DateOfBirth  string    `json:"date_of_birth" validate:"required" example:"2001-11-29 (YYYY-MM-DD)"`
+	Gender       *bool     `json:"gender" example:"true"`
+	GuardianName *string   `json:"guardian_name"`
+}
+
+// getGuardianName converts the optional guardian name to a sql.NullString pointer for usecase
+func (i *UpdateChildernInput) getGuardianName() *sql.NullString {
+	if i.GuardianName == nil {
+		return nil
+	}
+
+	trimmed := strings.TrimSpace(*i.GuardianName)
+	if trimmed == "" {
+		v := sql.NullString{}
+
+		return &v
+	}
+
+	v := sql.NullString{String: trimmed, Valid: true}
+
+	return &v
 }
 
 // CreatePackageInput input

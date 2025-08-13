@@ -6,6 +6,8 @@ import (
 
 	"errors"
 
+	"database/sql"
+
 	"github.com/google/uuid"
 	"github.com/luckyAkbar/atec/internal/model"
 )
@@ -76,6 +78,7 @@ type RepoCreateChildInput struct {
 	DateOfBirth  time.Time
 	Gender       bool
 	Name         string
+	GuardianName sql.NullString
 }
 
 // RepoSearchChildInput input to search child data. everything marked as pointer to a datatype means it is optional
@@ -105,9 +108,10 @@ type RepoRegisterChildInput struct {
 
 // RepoUpdateChildInput input
 type RepoUpdateChildInput struct {
-	DateOfBirth *time.Time
-	Gender      *bool
-	Name        *string
+	DateOfBirth  *time.Time
+	Gender       *bool
+	Name         *string
+	GuardianName *sql.NullString
 }
 
 // RepoUpdateUserInput options to update user record
