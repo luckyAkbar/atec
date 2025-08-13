@@ -19,7 +19,7 @@ jobs:
         run: go mod download
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v2
         with:
           version: v1.60.3
           args: >-
