@@ -23,10 +23,6 @@ jobs:
         with:
           version: v1.62.2
           args: >-
-            --disable-all
-            --enable=goimports
-            --enable=unconvert
-            --enable=unparam
             --print-issued-lines=false
             --exclude-use-default=false
             --concurrency=4
