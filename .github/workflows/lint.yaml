@@ -21,7 +21,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.60.3
+          version: v1.62.2
           args: >-
             --print-issued-lines=false
             --exclude-use-default=false
