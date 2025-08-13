@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/luckyAkbar/atec/internal/usecase"
+	null "gopkg.in/guregu/null.v4"
 )
 
 // @Summary		Register a new child
@@ -41,9 +42,10 @@ func (s *Service) HandleRegisterChildern() echo.HandlerFunc {
 		}
 
 		output, err := s.childUsecase.Register(c.Request().Context(), usecase.RegisterChildInput{
-			DateOfBirth: dateOfBirth,
-			Gender:      input.Gender,
-			Name:        input.Name,
+			DateOfBirth:  dateOfBirth,
+			Gender:       input.Gender,
+			Name:         input.Name,
+			GuardianName: input.GuardianName,
 		})
 
 		if err != nil {
@@ -86,12 +88,8 @@ func (s *Service) HandleUpdateChildern() echo.HandlerFunc {
 			})
 		}
 
-		ucUpdateChildInput := usecase.UpdateChildInput{
-			ChildID:     input.ChildID,
-			DateOfBirth: nil,
-			Gender:      input.Gender,
-			Name:        input.Name,
-		}
+		ucUpdateChildInput := usecase.UpdateChildInput{ChildID: input.ChildID, DateOfBirth: nil, Gender: input.Gender, Name: input.Name}
+		ucUpdateChildInput.GuardianName = input.getGuardianName()
 
 		if input.DateOfBirth != "" {
 			dateOfBirth, err := time.Parse("2006-01-02", input.DateOfBirth)
@@ -165,6 +163,7 @@ func (s *Service) HandleGetMyChildern() echo.HandlerFunc {
 				DateOfBirth:    child.DateOfBirth,
 				Gender:         child.Gender,
 				Name:           child.Name,
+				GuardianName:   null.NewString(child.GuardianName.String, child.GuardianName.Valid),
 				CreatedAt:      child.CreatedAt,
 				UpdatedAt:      child.UpdatedAt,
 			})
@@ -222,6 +221,7 @@ func (s *Service) HandleSearchChildern() echo.HandlerFunc {
 				DateOfBirth:  child.DateOfBirth,
 				Gender:       child.Gender,
 				Name:         child.Name,
+				GuardianName: null.NewString(child.GuardianName.String, child.GuardianName.Valid),
 				CreatedAt:    child.CreatedAt,
 				UpdatedAt:    child.UpdatedAt,
 			})

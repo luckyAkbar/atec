@@ -2,6 +2,7 @@ package usecase_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -221,6 +222,55 @@ func TestChildUsecase_Register(t *testing.T) {
 				}).Return(&model.Child{ID: childID}, nil).Once()
 			},
 		},
+		{
+			name: "ok with guardian name omitted (null)",
+			input: usecase.RegisterChildInput{
+				DateOfBirth: dateOfBirth,
+				Gender:      gender,
+				Name:        name,
+			},
+			ctx:     userCtx,
+			wantErr: false,
+			expectedOutput: &usecase.RegisterChildOutput{
+				ID: childID,
+			},
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().Create(userCtx, usecase.RepoCreateChildInput{
+					DateOfBirth:  dateOfBirth,
+					ParentUserID: user.ID,
+					Gender:       gender,
+					Name:         name,
+					GuardianName: sql.NullString{},
+				}).Return(&model.Child{ID: childID}, nil).Once()
+			},
+		},
+		{
+			name: "ok with guardian name provided",
+			input: usecase.RegisterChildInput{
+				DateOfBirth: dateOfBirth,
+				Gender:      gender,
+				Name:        name,
+				GuardianName: func() *string {
+					s := "Guardian"
+
+					return &s
+				}(),
+			},
+			ctx:     userCtx,
+			wantErr: false,
+			expectedOutput: &usecase.RegisterChildOutput{
+				ID: childID,
+			},
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().Create(userCtx, usecase.RepoCreateChildInput{
+					DateOfBirth:  dateOfBirth,
+					ParentUserID: user.ID,
+					Gender:       gender,
+					Name:         name,
+					GuardianName: sql.NullString{String: "Guardian", Valid: true},
+				}).Return(&model.Child{ID: childID}, nil).Once()
+			},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -380,6 +430,58 @@ func TestChildUsecase_Update(t *testing.T) {
 					DateOfBirth: &dateOfBirth,
 					Gender:      &gender,
 					Name:        &name,
+				}).Return(child, nil).Once()
+			},
+		},
+		{
+			name: "ok - only update guardian name to null",
+			input: usecase.UpdateChildInput{
+				ChildID: childID,
+				GuardianName: func() *sql.NullString {
+					v := sql.NullString{}
+
+					return &v
+				}(),
+			},
+			ctx:     userCtx,
+			wantErr: false,
+			expectedOutput: &usecase.UpdateChildOutput{
+				Message: "ok",
+			},
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
+				mockChildRepo.EXPECT().Update(userCtx, childID, usecase.RepoUpdateChildInput{
+					GuardianName: func() *sql.NullString {
+						v := sql.NullString{}
+
+						return &v
+					}(),
+				}).Return(child, nil).Once()
+			},
+		},
+		{
+			name: "ok - update guardian name with value",
+			input: usecase.UpdateChildInput{
+				ChildID: childID,
+				GuardianName: func() *sql.NullString {
+					v := sql.NullString{String: "Guardian", Valid: true}
+
+					return &v
+				}(),
+			},
+			ctx:     userCtx,
+			wantErr: false,
+			expectedOutput: &usecase.UpdateChildOutput{
+				Message: "ok",
+			},
+			expectedFunctionCall: func() {
+				mockChildRepo.EXPECT().FindByID(userCtx, childID).Return(child, nil).Once()
+				mockChildRepo.EXPECT().Update(userCtx, childID, usecase.RepoUpdateChildInput{
+					GuardianName: func() *sql.NullString {
+						v := sql.NullString{String: "Guardian", Valid: true}
+
+						return &v
+					}(),
 				}).Return(child, nil).Once()
 			},
 		},

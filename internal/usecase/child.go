@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,14 +40,29 @@ func NewChildUsecase(childRepo ChildRepository, resultRepo ResultRepository, use
 
 // RegisterChildInput input
 type RegisterChildInput struct {
-	DateOfBirth time.Time `validate:"required"`
-	Gender      bool
-	Name        string `validate:"required"`
+	DateOfBirth  time.Time `validate:"required"`
+	Gender       bool
+	Name         string `validate:"required"`
+	GuardianName *string
 }
 
 // Validate validate RegisterChildInput
 func (rci RegisterChildInput) Validate() error {
 	return common.Validator.Struct(rci)
+}
+
+// getGuardianName converts optional input GuardianName to sql.NullString safely
+func (rci RegisterChildInput) getGuardianName() sql.NullString {
+	if rci.GuardianName == nil {
+		return sql.NullString{}
+	}
+
+	trimmed := strings.TrimSpace(*rci.GuardianName)
+	if trimmed == "" {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{String: trimmed, Valid: true}
 }
 
 // RegisterChildOutput output
@@ -78,6 +94,7 @@ func (u *ChildUsecase) Register(ctx context.Context, input RegisterChildInput) (
 		DateOfBirth:  input.DateOfBirth,
 		Gender:       input.Gender,
 		Name:         input.Name,
+		GuardianName: input.getGuardianName(),
 	})
 
 	if err != nil {
@@ -96,10 +113,11 @@ func (u *ChildUsecase) Register(ctx context.Context, input RegisterChildInput) (
 
 // UpdateChildInput input
 type UpdateChildInput struct {
-	ChildID     uuid.UUID `validate:"required"`
-	DateOfBirth *time.Time
-	Gender      *bool
-	Name        *string
+	ChildID      uuid.UUID `validate:"required"`
+	DateOfBirth  *time.Time
+	Gender       *bool
+	Name         *string
+	GuardianName *sql.NullString
 }
 
 // Validate validate UpdateChildInput
@@ -157,9 +175,10 @@ func (u *ChildUsecase) Update(ctx context.Context, input UpdateChildInput) (*Upd
 	}
 
 	_, err = u.childRepo.Update(ctx, child.ID, RepoUpdateChildInput{
-		DateOfBirth: input.DateOfBirth,
-		Gender:      input.Gender,
-		Name:        input.Name,
+		DateOfBirth:  input.DateOfBirth,
+		Gender:       input.Gender,
+		Name:         input.Name,
+		GuardianName: input.GuardianName,
 	})
 
 	if err != nil {
@@ -192,6 +211,7 @@ type GetRegisteredChildrenOutput struct {
 	DateOfBirth    time.Time
 	Gender         bool
 	Name           string
+	GuardianName   sql.NullString
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      sql.NullTime
@@ -265,6 +285,7 @@ func (u *ChildUsecase) GetRegisteredChildren(ctx context.Context, input GetRegis
 			DateOfBirth:    child.DateOfBirth,
 			Gender:         child.Gender,
 			Name:           child.Name,
+			GuardianName:   child.GuardianName,
 			CreatedAt:      child.CreatedAt,
 			UpdatedAt:      child.UpdatedAt,
 			DeletedAt:      sql.NullTime(child.DeletedAt),
@@ -294,6 +315,7 @@ type SearchChildOutput struct {
 	DateOfBirth  time.Time
 	Gender       bool
 	Name         string
+	GuardianName sql.NullString
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    sql.NullTime
@@ -357,6 +379,7 @@ func (u *ChildUsecase) Search(ctx context.Context, input SearchChildInput) ([]Se
 			DateOfBirth:  child.DateOfBirth,
 			Gender:       child.Gender,
 			Name:         child.Name,
+			GuardianName: child.GuardianName,
 			CreatedAt:    child.CreatedAt,
 			UpdatedAt:    child.UpdatedAt,
 			DeletedAt:    sql.NullTime(child.DeletedAt),

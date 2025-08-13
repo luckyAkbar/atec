@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"regexp"
@@ -43,19 +44,47 @@ func TestChildRepository_Create(t *testing.T) {
 		expectedOutput       *model.Child
 	}{
 		{
-			name: "success",
+			name: "success - without guardian name (NULL)",
 			input: usecase.RepoCreateChildInput{
 				ParentUserID: parentUserID,
 				DateOfBirth:  dateOfBirth,
 				Gender:       gender,
 				Name:         name,
+				GuardianName: sql.NullString{},
 			},
 			wantErr: false,
 			expectedFunctionCall: func() {
 				dbMock.ExpectBegin()
 
 				dbMock.ExpectQuery("^INSERT INTO \"children\"").
-					WithArgs(parentUserID, dateOfBirth, gender, name, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(parentUserID, dateOfBirth, gender, name, nil, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(dbGeneratedUUID))
+
+				dbMock.ExpectCommit()
+			},
+			expectedOutput: &model.Child{
+				ID:           dbGeneratedUUID,
+				ParentUserID: parentUserID,
+				DateOfBirth:  dateOfBirth,
+				Gender:       gender,
+				Name:         name,
+			},
+		},
+		{
+			name: "success - with guardian name",
+			input: usecase.RepoCreateChildInput{
+				ParentUserID: parentUserID,
+				DateOfBirth:  dateOfBirth,
+				Gender:       gender,
+				Name:         name,
+				GuardianName: sql.NullString{String: "Guardian", Valid: true},
+			},
+			wantErr: false,
+			expectedFunctionCall: func() {
+				dbMock.ExpectBegin()
+
+				dbMock.ExpectQuery("^INSERT INTO \"children\"").
+					WithArgs(parentUserID, dateOfBirth, gender, name, "Guardian", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(dbGeneratedUUID))
 
 				dbMock.ExpectCommit()
@@ -81,7 +110,7 @@ func TestChildRepository_Create(t *testing.T) {
 				dbMock.ExpectBegin()
 
 				dbMock.ExpectQuery("^INSERT INTO \"children\"").
-					WithArgs(parentUserID, dateOfBirth, gender, name, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(parentUserID, dateOfBirth, gender, name, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(assert.AnError)
 
 				dbMock.ExpectRollback()

@@ -1716,6 +1716,9 @@ const docTemplate = `{
                 "gender": {
                     "type": "boolean"
                 },
+                "guardian_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1805,6 +1808,9 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": true
                 },
+                "guardian_name": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 }
@@ -1892,6 +1898,9 @@ const docTemplate = `{
                 },
                 "gender": {
                     "type": "boolean"
+                },
+                "guardian_name": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "string"
@@ -2053,6 +2062,9 @@ const docTemplate = `{
                 "gender": {
                     "type": "boolean",
                     "example": true
+                },
+                "guardian_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
