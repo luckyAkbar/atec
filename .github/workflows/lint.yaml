@@ -17,9 +17,3 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.62.2
-          args: >-
-            --print-issued-lines=false
-            --exclude-use-default=false
-            --concurrency=4
-            --timeout=5m
-            --modules-download-mode=mod
