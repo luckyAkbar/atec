@@ -31,9 +31,11 @@ func (s *Service) HandleSignUp() echo.HandlerFunc {
 		}
 
 		output, err := s.authUsecase.HandleSignup(c.Request().Context(), usecase.SignupInput{
-			Email:    input.Email,
-			Password: input.Password,
-			Username: input.Username,
+			Email:       input.Email,
+			Password:    input.Password,
+			Username:    input.Username,
+			PhoneNumber: input.PhoneNumber,
+			Address:     input.Address,
 		})
 
 		if err != nil {

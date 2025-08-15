@@ -1491,7 +1491,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/me": {
+        "/v1/users/me": {
             "get": {
                 "security": [
                     {
@@ -1889,7 +1889,13 @@ const docTemplate = `{
         "rest.GetMyProfileOutput": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -1897,6 +1903,9 @@ const docTemplate = `{
                 },
                 "is_active": {
                     "type": "boolean"
+                },
+                "phone_number": {
+                    "type": "string"
                 },
                 "roles": {
                     "$ref": "#/definitions/model.Roles"
@@ -2152,6 +2161,10 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Jl. Example No. 123, Jakarta"
+                },
                 "email": {
                     "type": "string",
                     "example": "string@string.com"
@@ -2160,6 +2173,10 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 8,
                     "example": "password123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+628123456789"
                 },
                 "username": {
                     "type": "string",

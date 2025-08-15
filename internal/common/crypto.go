@@ -31,6 +31,7 @@ type SharedCryptor struct {
 // SharedCryptorIface interface for SharedCryptor. Provided to ease the mocking process later
 type SharedCryptorIface interface {
 	Encrypt(plainText string) (string, error)
+	Decrypt(cipherText string) (string, error)
 	Hash(data []byte) (string, error)
 	CreateJWT(claims jwt.Claims) (string, error)
 	ValidateJWT(token string, opts ValidateJWTOpts) (*jwt.Token, error)

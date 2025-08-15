@@ -178,12 +178,18 @@ definitions:
     type: object
   rest.GetMyProfileOutput:
     properties:
+      address:
+        type: string
       created_at:
+        type: string
+      email:
         type: string
       id:
         type: string
       is_active:
         type: boolean
+      phone_number:
+        type: string
       roles:
         $ref: '#/definitions/model.Roles'
       updated_at:
@@ -347,12 +353,18 @@ definitions:
     type: object
   rest.SignupInput:
     properties:
+      address:
+        example: Jl. Example No. 123, Jakarta
+        type: string
       email:
         example: string@string.com
         type: string
       password:
         example: password123
         minLength: 8
+        type: string
+      phone_number:
+        example: "+628123456789"
         type: string
       username:
         example: username
@@ -1403,7 +1415,7 @@ paths:
       summary: Search childern data
       tags:
       - Childern
-  /v1/me:
+  /v1/users/me:
     get:
       consumes:
       - application/json

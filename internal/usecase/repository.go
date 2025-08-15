@@ -124,11 +124,13 @@ type RepoUpdateUserInput struct {
 
 // RepoCreateUserInput input to create a new user data
 type RepoCreateUserInput struct {
-	Email    string
-	Password string
-	Username string
-	IsActive bool
-	Roles    model.Roles
+	Email       string
+	Password    string
+	Username    string
+	IsActive    bool
+	Roles       model.Roles
+	PhoneNumber sql.NullString
+	Address     sql.NullString
 }
 
 // RepoSearchUserInput options to search users

@@ -17,7 +17,7 @@ import (
 // @Failure		401				{object}	StandardErrorResponse								"Unauthorized"
 // @Failure		404				{object}	StandardErrorResponse								"Not Found"
 // @Failure		500				{object}	StandardErrorResponse								"Internal Error"
-// @Router			/v1/me [get]
+// @Router			/v1/users/me [get]
 func (s *Service) HandleGetMyProfile() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		output, err := s.usersUsecase.GetMyProfile(c.Request().Context())
@@ -29,12 +29,15 @@ func (s *Service) HandleGetMyProfile() echo.HandlerFunc {
 			StatusCode: http.StatusOK,
 			Message:    http.StatusText(http.StatusOK),
 			Data: GetMyProfileOutput{
-				ID:        output.ID,
-				Username:  output.Username,
-				IsActive:  output.IsActive,
-				Roles:     output.Roles,
-				CreatedAt: output.CreatedAt,
-				UpdatedAt: output.UpdatedAt,
+				ID:          output.ID,
+				Username:    output.Username,
+				IsActive:    output.IsActive,
+				Roles:       output.Roles,
+				CreatedAt:   output.CreatedAt,
+				UpdatedAt:   output.UpdatedAt,
+				Email:       output.Email,
+				PhoneNumber: output.PhoneNumber,
+				Address:     output.Address,
 			},
 		})
 	}
