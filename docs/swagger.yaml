@@ -85,6 +85,16 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/model.SubtestGrade'
     type: object
+  model.Roles:
+    enum:
+    - administrator
+    - parent
+    - therapist
+    type: string
+    x-enum-varnames:
+    - RolesAdministrator
+    - RolesParent
+    - RolesTherapist
   model.SubtestGrade:
     properties:
       grade:
@@ -164,6 +174,21 @@ definitions:
       parent_user_name:
         type: string
       updated_at:
+        type: string
+    type: object
+  rest.GetMyProfileOutput:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      roles:
+        $ref: '#/definitions/model.Roles'
+      updated_at:
+        type: string
+      username:
         type: string
     type: object
   rest.InitResetPasswordInput:
@@ -1363,6 +1388,46 @@ paths:
       summary: Search childern data
       tags:
       - Childern
+  /v1/me:
+    get:
+      consumes:
+      - application/json
+      description: Return the profile of the currently authenticated user
+      parameters:
+      - description: JWT Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.StandardSuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/rest.GetMyProfileOutput'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/rest.StandardErrorResponse'
+      security:
+      - ParentLevelAuth: []
+      summary: Get my profile data
+      tags:
+      - Users
 securityDefinitions:
   AdministratorLevelAuth:
     description: Bearer Token authentication for secure endpoints accessible only
