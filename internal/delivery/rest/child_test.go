@@ -21,7 +21,7 @@ func TestChildService_HandleRegisterChildern(t *testing.T) {
 	group := e.Group("")
 
 	mockChildUsecase := usecase_mock.NewChildUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, mockChildUsecase, nil)
+	service := rest.NewService(group, nil, nil, mockChildUsecase, nil, nil)
 
 	dateOfBirth, err := time.Parse("2006-01-02", "2021-12-29")
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func TestChildService_HandleUpdateChildern(t *testing.T) {
 	group := e.Group("")
 
 	mockChildUsecase := usecase_mock.NewChildUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, mockChildUsecase, nil)
+	service := rest.NewService(group, nil, nil, mockChildUsecase, nil, nil)
 
 	id := "315be606-54b9-436d-a84b-90d118c745e7"
 	childID, err := uuid.Parse(id)
@@ -248,7 +248,7 @@ func TestChildService_HandleGetMyChildren(t *testing.T) {
 	group := e.Group("")
 
 	mockChildUsecase := usecase_mock.NewChildUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, mockChildUsecase, nil)
+	service := rest.NewService(group, nil, nil, mockChildUsecase, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -360,7 +360,7 @@ func TestChildService_HandleSearchChildern(t *testing.T) {
 	group := e.Group("")
 
 	mockChildUsecase := usecase_mock.NewChildUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, mockChildUsecase, nil)
+	service := rest.NewService(group, nil, nil, mockChildUsecase, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -472,7 +472,7 @@ func TestChildService_HandleGetChildStats(t *testing.T) {
 	group := e.Group("")
 
 	mockChildUsecase := usecase_mock.NewChildUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, mockChildUsecase, nil)
+	service := rest.NewService(group, nil, nil, mockChildUsecase, nil, nil)
 
 	id := "315be606-54b9-436d-a84b-90d118c745e7"
 	childID, err := uuid.Parse(id)

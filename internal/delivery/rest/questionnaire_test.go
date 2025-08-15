@@ -23,7 +23,7 @@ func TestQuestionnaireService_HandleSubmitQuestionnaire(t *testing.T) {
 	group := e.Group("")
 
 	mockQuestionnaireUsecase := usecase_mock.NewQuestionnaireUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase)
+	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase, nil)
 
 	packageID := uuid.New()
 	childID := uuid.New()
@@ -129,7 +129,7 @@ func TestQuestionnaireService_HandleDownloadQuestionnaireResult(t *testing.T) {
 	group := e.Group("")
 
 	mockQuestionnaireUsecase := usecase_mock.NewQuestionnaireUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase)
+	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase, nil)
 
 	resultID := uuid.New()
 
@@ -244,7 +244,7 @@ func TestQuestionnaireService_HandleSearchQUestionnaireResults(t *testing.T) {
 	group := e.Group("")
 
 	mockQuestionnaireUsecase := usecase_mock.NewQuestionnaireUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase)
+	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase, nil)
 
 	testCases := []struct {
 		name   string
@@ -356,7 +356,7 @@ func TestQuestionnaireService_HandleGetMyQUestionnaireResults(t *testing.T) {
 	group := e.Group("")
 
 	mockQuestionnaireUsecase := usecase_mock.NewQuestionnaireUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase)
+	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase, nil)
 
 	testCases := []struct {
 		name   string
@@ -468,7 +468,7 @@ func TestQuestionnaireService_HandleGetATECQuestionaire(t *testing.T) {
 	group := e.Group("")
 
 	mockQuestionnaireUsecase := usecase_mock.NewQuestionnaireUsecaseIface(t)
-	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase)
+	service := rest.NewService(group, nil, nil, nil, mockQuestionnaireUsecase, nil)
 	packageID := uuid.New()
 
 	testCases := []struct {

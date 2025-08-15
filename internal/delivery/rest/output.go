@@ -150,3 +150,13 @@ type SearchChildernOutput struct {
 type ResendVerificationOutput struct {
 	Message string `json:"message"`
 }
+
+// GetMyProfileOutput response body
+type GetMyProfileOutput struct {
+	ID        uuid.UUID   `json:"id"`
+	Username  string      `json:"username"`
+	IsActive  bool        `json:"is_active"`
+	Roles     model.Roles `json:"roles"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
+}
