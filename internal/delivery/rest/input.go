@@ -179,3 +179,10 @@ type DeleteAccountInput struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8"`
 }
+
+// UpdateMyProfileInput input
+type UpdateMyProfileInput struct {
+	Username    string  `json:"username" validate:"required"`
+	PhoneNumber *string `json:"phone_number" validate:"required"`
+	Address     *string `json:"address" validate:"required"`
+}

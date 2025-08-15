@@ -122,6 +122,13 @@ type RepoUpdateUserInput struct {
 	IsActive *bool
 }
 
+// RepoUpdateUserProfileInput input to update user's own profile
+type RepoUpdateUserProfileInput struct {
+	Username    string
+	PhoneNumber sql.NullString
+	Address     sql.NullString
+}
+
 // RepoCreateUserInput input to create a new user data
 type RepoCreateUserInput struct {
 	Email       string
@@ -146,6 +153,7 @@ type UserRepository interface {
 	Create(ctx context.Context, input RepoCreateUserInput, txController ...any) (*model.User, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*model.User, error)
 	Update(ctx context.Context, userID uuid.UUID, input RepoUpdateUserInput) (*model.User, error)
+	UpdateProfile(ctx context.Context, userID uuid.UUID, input RepoUpdateUserProfileInput) (*model.User, error)
 	Search(ctx context.Context, input RepoSearchUserInput) ([]model.User, error)
 	GetUsersByRoles(ctx context.Context, roles model.Roles) ([]model.User, error)
 	IsAdminAccountExists(ctx context.Context) (bool, error)

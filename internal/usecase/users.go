@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,7 @@ type UsersUsecase struct {
 type UsersUsecaseIface interface {
 	GetMyProfile(ctx context.Context) (*GetMyProfileOutput, error)
 	GetTherapistData(ctx context.Context) ([]GetTherapistDataOutput, error)
+	UpdateMyProfile(ctx context.Context, input UpdateMyProfileInput) (*UpdateMyProfileOutput, error)
 }
 
 // NewUsersUsecase create new UsersUsecase instance
@@ -173,4 +175,93 @@ func (u *UsersUsecase) GetTherapistData(ctx context.Context) ([]GetTherapistData
 	}
 
 	return output, nil
+}
+
+// UpdateMyProfileInput input
+type UpdateMyProfileInput struct {
+	Username    string  `validate:"required"`
+	PhoneNumber *string `validate:"required,e164"`
+	Address     *string `validate:"required,max=256"`
+}
+
+func (i *UpdateMyProfileInput) validate() error {
+	if i.PhoneNumber != nil {
+		trimmed := strings.ReplaceAll(*i.PhoneNumber, " ", "")
+		i.PhoneNumber = &trimmed
+	}
+
+	if i.Address != nil {
+		addr := strings.TrimSpace(*i.Address)
+		i.Address = &addr
+	}
+
+	return common.Validator.Struct(i)
+}
+
+// UpdateMyProfileOutput output
+type UpdateMyProfileOutput struct {
+	Message string
+}
+
+// UpdateMyProfile allows user to update their own profile
+func (u *UsersUsecase) UpdateMyProfile(ctx context.Context, input UpdateMyProfileInput) (*UpdateMyProfileOutput, error) {
+	requester := model.GetUserFromCtx(ctx)
+	if requester == nil {
+		return nil, UsecaseError{
+			ErrType: ErrUnauthorized,
+			Message: ErrUnauthorized.Error(),
+		}
+	}
+
+	if err := input.validate(); err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrBadRequest,
+			Message: err.Error(),
+		}
+	}
+
+	// convert to sql nulls then encrypt values
+	encPhone := sqlNullFromPtr(input.PhoneNumber)
+	encAddr := sqlNullFromPtr(input.Address)
+
+	if encPhone.Valid {
+		phoneEncrypted, err := u.sharedCryptor.Encrypt(encPhone.String)
+		if err != nil {
+			return nil, UsecaseError{
+				ErrType: ErrInternal,
+				Message: ErrInternal.Error(),
+			}
+		}
+
+		encPhone.String = phoneEncrypted
+	}
+
+	if encAddr.Valid {
+		addressEncrypted, err := u.sharedCryptor.Encrypt(encAddr.String)
+		if err != nil {
+			return nil, UsecaseError{
+				ErrType: ErrInternal,
+				Message: ErrInternal.Error(),
+			}
+		}
+
+		encAddr.String = addressEncrypted
+	}
+
+	_, err := u.userRepo.UpdateProfile(ctx, requester.ID, RepoUpdateUserProfileInput{
+		Username:    input.Username,
+		PhoneNumber: encPhone,
+		Address:     encAddr,
+	})
+
+	if err != nil {
+		return nil, UsecaseError{
+			ErrType: ErrInternal,
+			Message: ErrInternal.Error(),
+		}
+	}
+
+	return &UpdateMyProfileOutput{
+		Message: "ok",
+	}, nil
 }
