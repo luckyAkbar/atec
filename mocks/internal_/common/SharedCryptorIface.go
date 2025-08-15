@@ -125,6 +125,62 @@ func (_c *SharedCryptorIface_CreateJWT_Call) RunAndReturn(run func(jwt.Claims) (
 	return _c
 }
 
+// Decrypt provides a mock function with given fields: cipherText
+func (_m *SharedCryptorIface) Decrypt(cipherText string) (string, error) {
+	ret := _m.Called(cipherText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Decrypt")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(cipherText)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(cipherText)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(cipherText)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SharedCryptorIface_Decrypt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Decrypt'
+type SharedCryptorIface_Decrypt_Call struct {
+	*mock.Call
+}
+
+// Decrypt is a helper method to define mock.On call
+//   - cipherText string
+func (_e *SharedCryptorIface_Expecter) Decrypt(cipherText interface{}) *SharedCryptorIface_Decrypt_Call {
+	return &SharedCryptorIface_Decrypt_Call{Call: _e.mock.On("Decrypt", cipherText)}
+}
+
+func (_c *SharedCryptorIface_Decrypt_Call) Run(run func(cipherText string)) *SharedCryptorIface_Decrypt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *SharedCryptorIface_Decrypt_Call) Return(_a0 string, _a1 error) *SharedCryptorIface_Decrypt_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *SharedCryptorIface_Decrypt_Call) RunAndReturn(run func(string) (string, error)) *SharedCryptorIface_Decrypt_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Encrypt provides a mock function with given fields: plainText
 func (_m *SharedCryptorIface) Encrypt(plainText string) (string, error) {
 	ret := _m.Called(plainText)
