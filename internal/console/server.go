@@ -127,6 +127,7 @@ func serverFn(cmd *cobra.Command, _ []string) {
 	packageUsecase := usecase.NewPackageUsecase(packageRepoUCAdapter)
 	childUsecase := usecase.NewChildUsecase(childRepoUCAdapter, resultRepoUCAdapter, userRepoUCAdapter)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepoUCAdapter, childRepoUCAdapter, resultRepoUCAdapter, font)
+	usersUsecase := usecase.NewUsersUsecase(userRepoUCAdapter)
 
 	initAdmin, err := cmd.Flags().GetBool("init-admin-account")
 	if err != nil {
@@ -172,7 +173,7 @@ func serverFn(cmd *cobra.Command, _ []string) {
 
 	v1Group := httpServer.Group("v1")
 
-	rest.NewService(v1Group, authUsecase, packageUsecase, childUsecase, questionnaireUsecase)
+	rest.NewService(v1Group, authUsecase, packageUsecase, childUsecase, questionnaireUsecase, usersUsecase)
 
 	sigCh := make(chan os.Signal, 1)
 	errCh := make(chan error, 1)

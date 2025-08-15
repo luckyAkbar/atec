@@ -20,7 +20,7 @@ func TestAuthService_HandleSignUp(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -123,7 +123,7 @@ func TestAuthService_HandleResendSignupVerification(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -219,7 +219,7 @@ func TestAuthService_HandleVerifyAccount(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -301,7 +301,7 @@ func TestAuthService_HandleLogin(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -400,7 +400,7 @@ func TestAuthService_HandleInitResetPassword(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -496,7 +496,7 @@ func TestAuthService_HandleResetPassword(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -597,7 +597,7 @@ func TestAuthService_HandleRenderChangePasswordPage(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -665,7 +665,7 @@ func TestAuthService_HandleDeleteAccount(t *testing.T) {
 	group := e.Group("")
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	testCases := []struct {
 		name   string

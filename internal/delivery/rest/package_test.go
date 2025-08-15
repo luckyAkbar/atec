@@ -21,7 +21,7 @@ func TestPackageService_HandleCreatePackage(t *testing.T) {
 	group := e.Group("")
 
 	mockPackageUsecase := usecase_mock.NewPackageUsecaseIface(t)
-	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil)
+	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil, nil)
 
 	testCases := []struct {
 		name   string
@@ -130,7 +130,7 @@ func TestPackageService_HandleUpdatePackage(t *testing.T) {
 	group := e.Group("")
 
 	mockPackageUsecase := usecase_mock.NewPackageUsecaseIface(t)
-	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil)
+	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil, nil)
 
 	packageID := uuid.New()
 
@@ -245,7 +245,7 @@ func TestPackageService_HandleActivationPackage(t *testing.T) {
 	group := e.Group("")
 
 	mockPackageUsecase := usecase_mock.NewPackageUsecaseIface(t)
-	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil)
+	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil, nil)
 
 	packageID := uuid.New()
 
@@ -352,7 +352,7 @@ func TestPackageService_HandleDeletePackage(t *testing.T) {
 	group := e.Group("")
 
 	mockPackageUsecase := usecase_mock.NewPackageUsecaseIface(t)
-	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil)
+	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil, nil)
 
 	packageID := uuid.New()
 
@@ -454,7 +454,7 @@ func TestPackageService_HandleSearchActivePackage(t *testing.T) {
 	group := e.Group("")
 
 	mockPackageUsecase := usecase_mock.NewPackageUsecaseIface(t)
-	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil)
+	service := rest.NewService(group, nil, mockPackageUsecase, nil, nil, nil)
 
 	testCases := []struct {
 		name   string

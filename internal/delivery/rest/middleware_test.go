@@ -22,7 +22,7 @@ func TestRESTMiddleware_AuthMiddleware(t *testing.T) {
 
 	mockAuthUsecase := usecase_mock.NewAuthUsecaseIface(t)
 
-	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil)
+	service := rest.NewService(group, mockAuthUsecase, nil, nil, nil, nil)
 
 	fn := func(allowUnauthorized bool) echo.HandlerFunc {
 		return func(c echo.Context) error {

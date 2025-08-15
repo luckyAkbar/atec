@@ -31,6 +31,7 @@ type Service struct {
 	packageUsecase       usecase.PackageUsecaseIface
 	childUsecase         usecase.ChildUsecaseIface
 	questionnaireUsecase usecase.QuestionnaireUsecaseIface
+	usersUsecase         usecase.UsersUsecaseIface
 }
 
 // NewService init rest Service
@@ -38,6 +39,7 @@ func NewService(
 	v1 *echo.Group, authUsecase usecase.AuthUsecaseIface,
 	packageUsecase usecase.PackageUsecaseIface, childUsecase usecase.ChildUsecaseIface,
 	questionnaireUsecase usecase.QuestionnaireUsecaseIface,
+	usersUsecase usecase.UsersUsecaseIface,
 ) *Service {
 	s := &Service{
 		v1:                   v1,
@@ -45,6 +47,7 @@ func NewService(
 		packageUsecase:       packageUsecase,
 		childUsecase:         childUsecase,
 		questionnaireUsecase: questionnaireUsecase,
+		usersUsecase:         usersUsecase,
 	}
 
 	s.initV1Routes()
@@ -82,6 +85,8 @@ func (s *Service) initV1Routes() {
 	)
 	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults(), s.AuthMiddleware(false))
 	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults(), s.AuthMiddleware(false))
+
+	s.v1.GET("/me", s.HandleGetMyProfile(), s.AuthMiddleware(false))
 
 	s.v1.GET("/swagger/*", echoSwagger.WrapHandler)
 }
