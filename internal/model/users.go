@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,13 +20,15 @@ const (
 
 // User represent users table on database
 type User struct {
-	ID        uuid.UUID `gorm:"default:uuid_generate_v4()"`
-	Email     string
-	Password  string `json:"-"`
-	Username  string
-	IsActive  bool
-	Roles     Roles
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	ID          uuid.UUID `gorm:"default:uuid_generate_v4()"`
+	Email       string
+	Password    string `json:"-"`
+	Username    string
+	IsActive    bool
+	Roles       Roles
+	PhoneNumber sql.NullString
+	Address     sql.NullString
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt
 }

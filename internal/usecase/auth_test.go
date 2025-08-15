@@ -2,6 +2,7 @@ package usecase_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -86,52 +87,44 @@ func TestSignupInput(t *testing.T) {
 		si := usecase.SignupInput{
 			Email:    "just filling randomly",
 			Password: "thisShouldBeVal1dPass!",
-			Username: "valid",
+			Username: "username",
 		}
 
-		err := si.Validate()
-		if err == nil {
-			t.Error("expecting err but got nil")
-		}
+		err := common.Validator.Struct(si)
+		require.Error(t, err)
 	})
 
 	t.Run("empty email is unacceptable", func(t *testing.T) {
 		si := usecase.SignupInput{
 			Email:    "",
 			Password: "thisShouldBeVal1dPass!",
-			Username: "valid",
+			Username: "username",
 		}
 
-		err := si.Validate()
-		if err == nil {
-			t.Error("expecting err but got nil")
-		}
+		err := common.Validator.Struct(si)
+		require.Error(t, err)
 	})
 
 	t.Run("password must not empty", func(t *testing.T) {
 		si := usecase.SignupInput{
 			Email:    "valid@mail.test",
 			Password: "",
-			Username: "valid",
+			Username: "username",
 		}
 
-		err := si.Validate()
-		if err == nil {
-			t.Error("expecting err but got nil")
-		}
+		err := common.Validator.Struct(si)
+		require.Error(t, err)
 	})
 
 	t.Run("password must be atleast 8 chars", func(t *testing.T) {
 		si := usecase.SignupInput{
 			Email:    "valid@mail.test",
 			Password: "1234567",
-			Username: "valid",
+			Username: "username",
 		}
 
-		err := si.Validate()
-		if err == nil {
-			t.Error("expecting err but got nil")
-		}
+		err := common.Validator.Struct(si)
+		require.Error(t, err)
 	})
 
 	t.Run("username must not empty", func(t *testing.T) {
@@ -141,10 +134,8 @@ func TestSignupInput(t *testing.T) {
 			Username: "",
 		}
 
-		err := si.Validate()
-		if err == nil {
-			t.Error("expecting err but got nil")
-		}
+		err := common.Validator.Struct(si)
+		require.Error(t, err)
 	})
 
 	t.Run("ok", func(t *testing.T) {
@@ -154,10 +145,8 @@ func TestSignupInput(t *testing.T) {
 			Username: "valid",
 		}
 
-		err := si.Validate()
-		if err != nil {
-			t.Errorf("expecting nil err but got %v", err)
-		}
+		err := common.Validator.Struct(si)
+		require.NoError(t, err)
 	})
 }
 
@@ -472,13 +461,63 @@ func TestAuthUsecase_HandleSignup(t *testing.T) {
 	sampleValidUsername := "validUsername"
 	sampleEncryptedEmail := "encryptedEmail"
 	sampleHashedPassword := "hashedPassword"
+	// optional fields samples
+	samplePhone := "+6281234567890"
+	sampleEncryptedPhone := "encryptedPhone"
+	sampleAddress := "Jl. Mawar No. 1"
+	sampleEncryptedAddress := "encryptedAddress"
 
 	repoCreateUserInput := usecase.RepoCreateUserInput{
+		Email:       sampleEncryptedEmail,
+		Password:    sampleHashedPassword,
+		Username:    sampleValidUsername,
+		IsActive:    false,
+		Roles:       model.RolesParent,
+		PhoneNumber: sql.NullString{},
+		Address:     sql.NullString{},
+	}
+
+	// variations for optional fields
+	repoCreateUserInputPhoneOnly := usecase.RepoCreateUserInput{
 		Email:    sampleEncryptedEmail,
 		Password: sampleHashedPassword,
 		Username: sampleValidUsername,
 		IsActive: false,
 		Roles:    model.RolesParent,
+		PhoneNumber: sql.NullString{
+			String: sampleEncryptedPhone,
+			Valid:  true,
+		},
+		Address: sql.NullString{},
+	}
+
+	repoCreateUserInputAddressOnly := usecase.RepoCreateUserInput{
+		Email:       sampleEncryptedEmail,
+		Password:    sampleHashedPassword,
+		Username:    sampleValidUsername,
+		IsActive:    false,
+		Roles:       model.RolesParent,
+		PhoneNumber: sql.NullString{},
+		Address: sql.NullString{
+			String: sampleEncryptedAddress,
+			Valid:  true,
+		},
+	}
+
+	repoCreateUserInputAll := usecase.RepoCreateUserInput{
+		Email:    sampleEncryptedEmail,
+		Password: sampleHashedPassword,
+		Username: sampleValidUsername,
+		IsActive: false,
+		Roles:    model.RolesParent,
+		PhoneNumber: sql.NullString{
+			String: sampleEncryptedPhone,
+			Valid:  true,
+		},
+		Address: sql.NullString{
+			String: sampleEncryptedAddress,
+			Valid:  true,
+		},
 	}
 
 	uc := usecase.NewAuthUsecase(mockSharedCryptor, mockUserRepo, nil, nil, mockTxCtrlFactory, mockMailer, mockRateLimiter)
@@ -585,6 +624,42 @@ func TestAuthUsecase_HandleSignup(t *testing.T) {
 				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
 				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
 				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return("", assert.AnError).Once()
+			},
+		},
+		{
+			name: "encryption failed when encrypting phone number",
+			input: usecase.SignupInput{
+				Email:       sampleValidEmail,
+				Password:    sampleValidPassword,
+				Username:    sampleValidUsername,
+				PhoneNumber: &samplePhone,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return(sampleHashedPassword, nil).Once()
+				// failure occurs when encrypting phone number
+				mockSharedCryptor.EXPECT().Encrypt(samplePhone).Return("", assert.AnError).Once()
+			},
+		},
+		{
+			name: "encryption failed when encrypting address",
+			input: usecase.SignupInput{
+				Email:    sampleValidEmail,
+				Password: sampleValidPassword,
+				Username: sampleValidUsername,
+				Address:  &sampleAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return(sampleHashedPassword, nil).Once()
+				// failure occurs when encrypting address
+				mockSharedCryptor.EXPECT().Encrypt(sampleAddress).Return("", assert.AnError).Once()
 			},
 		},
 		{
@@ -736,6 +811,95 @@ func TestAuthUsecase_HandleSignup(t *testing.T) {
 				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
 
 				mockUserRepo.EXPECT().Create(ctx, repoCreateUserInput, mock.Anything).Return(&model.User{}, nil).Once()
+				mockSharedCryptor.EXPECT().CreateJWT(mock.Anything).Return("jwt", nil).Once()
+				mockMailer.EXPECT().SendEmail(ctx, mock.Anything).Return(&lib.CreateSmtpEmail{}, nil).Once()
+
+				underlyingTransaction.EXPECT().Commit().Return(nil).Once()
+			},
+		},
+		{
+			name: "ok without phone number but with address",
+			input: usecase.SignupInput{
+				Email:    sampleValidEmail,
+				Password: sampleValidPassword,
+				Username: sampleValidUsername,
+				Address:  &sampleAddress,
+			},
+			wantErr:        false,
+			expectedOutput: &usecase.SignupOutput{Message: "email confirmation sent"},
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return(sampleHashedPassword, nil).Once()
+				mockSharedCryptor.EXPECT().Encrypt(sampleAddress).Return(sampleEncryptedAddress, nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockUserRepo.EXPECT().Create(ctx, repoCreateUserInputAddressOnly, mock.Anything).Return(&model.User{}, nil).Once()
+				mockSharedCryptor.EXPECT().CreateJWT(mock.Anything).Return("jwt", nil).Once()
+				mockMailer.EXPECT().SendEmail(ctx, mock.Anything).Return(&lib.CreateSmtpEmail{}, nil).Once()
+
+				underlyingTransaction.EXPECT().Commit().Return(nil).Once()
+			},
+		},
+		{
+			name: "ok without address but with phone number",
+			input: usecase.SignupInput{
+				Email:       sampleValidEmail,
+				Password:    sampleValidPassword,
+				Username:    sampleValidUsername,
+				PhoneNumber: &samplePhone,
+			},
+			wantErr:        false,
+			expectedOutput: &usecase.SignupOutput{Message: "email confirmation sent"},
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return(sampleHashedPassword, nil).Once()
+				mockSharedCryptor.EXPECT().Encrypt(samplePhone).Return(sampleEncryptedPhone, nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockUserRepo.EXPECT().Create(ctx, repoCreateUserInputPhoneOnly, mock.Anything).Return(&model.User{}, nil).Once()
+				mockSharedCryptor.EXPECT().CreateJWT(mock.Anything).Return("jwt", nil).Once()
+				mockMailer.EXPECT().SendEmail(ctx, mock.Anything).Return(&lib.CreateSmtpEmail{}, nil).Once()
+
+				underlyingTransaction.EXPECT().Commit().Return(nil).Once()
+			},
+		},
+		{
+			name: "ok with all optional inputs supplied (phone number and address)",
+			input: usecase.SignupInput{
+				Email:       sampleValidEmail,
+				Password:    sampleValidPassword,
+				Username:    sampleValidUsername,
+				PhoneNumber: &samplePhone,
+				Address:     &sampleAddress,
+			},
+			wantErr:        false,
+			expectedOutput: &usecase.SignupOutput{Message: "email confirmation sent"},
+			expectedFunctionCall: func() {
+				mockSharedCryptor.EXPECT().Encrypt(sampleValidEmail).Return(sampleEncryptedEmail, nil).Once()
+				mockUserRepo.EXPECT().FindByEmail(ctx, sampleEncryptedEmail).Return(nil, usecase.ErrRepoNotFound).Once()
+				mockSharedCryptor.EXPECT().Hash([]byte(sampleValidPassword)).Return(sampleHashedPassword, nil).Once()
+				mockSharedCryptor.EXPECT().Encrypt(samplePhone).Return(sampleEncryptedPhone, nil).Once()
+				mockSharedCryptor.EXPECT().Encrypt(sampleAddress).Return(sampleEncryptedAddress, nil).Once()
+
+				underlyingTransaction := mockUsecase.NewTransactionController(t)
+				txCtrlWrapper := usecase.NewTxControllerWrapper(underlyingTransaction)
+
+				mockTxCtrlFactory.EXPECT().New().Return(txCtrlWrapper).Once()
+				underlyingTransaction.EXPECT().Begin().Return(struct{}{}).Once()
+
+				mockUserRepo.EXPECT().Create(ctx, repoCreateUserInputAll, mock.Anything).Return(&model.User{}, nil).Once()
 				mockSharedCryptor.EXPECT().CreateJWT(mock.Anything).Return("jwt", nil).Once()
 				mockMailer.EXPECT().SendEmail(ctx, mock.Anything).Return(&lib.CreateSmtpEmail{}, nil).Once()
 

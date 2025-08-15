@@ -127,7 +127,7 @@ func serverFn(cmd *cobra.Command, _ []string) {
 	packageUsecase := usecase.NewPackageUsecase(packageRepoUCAdapter)
 	childUsecase := usecase.NewChildUsecase(childRepoUCAdapter, resultRepoUCAdapter, userRepoUCAdapter)
 	questionnaireUsecase := usecase.NewQuestionnaireUsecase(packageRepoUCAdapter, childRepoUCAdapter, resultRepoUCAdapter, font)
-	usersUsecase := usecase.NewUsersUsecase(userRepoUCAdapter)
+	usersUsecase := usecase.NewUsersUsecase(userRepoUCAdapter, sharedCryptor)
 
 	initAdmin, err := cmd.Flags().GetBool("init-admin-account")
 	if err != nil {

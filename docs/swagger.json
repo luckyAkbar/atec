@@ -1483,7 +1483,7 @@
                 }
             }
         },
-        "/v1/me": {
+        "/v1/users/me": {
             "get": {
                 "security": [
                     {
@@ -1881,7 +1881,13 @@
         "rest.GetMyProfileOutput": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -1889,6 +1895,9 @@
                 },
                 "is_active": {
                     "type": "boolean"
+                },
+                "phone_number": {
+                    "type": "string"
                 },
                 "roles": {
                     "$ref": "#/definitions/model.Roles"
@@ -2144,6 +2153,10 @@
                 "username"
             ],
             "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Jl. Example No. 123, Jakarta"
+                },
                 "email": {
                     "type": "string",
                     "example": "string@string.com"
@@ -2152,6 +2165,10 @@
                     "type": "string",
                     "minLength": 8,
                     "example": "password123"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+628123456789"
                 },
                 "username": {
                     "type": "string",

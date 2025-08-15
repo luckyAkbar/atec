@@ -3,9 +3,11 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis_rate/v10"
@@ -60,6 +62,54 @@ func NewAuthUsecase(
 		mailer:                       mailer,
 		rateLimiter:                  rateLimiter,
 	}
+}
+
+// sqlNullFromPtr converts optional string pointer into sql.NullString
+func sqlNullFromPtr(s *string) sql.NullString {
+	if s == nil || *s == "" {
+		return sql.NullString{Valid: false}
+	}
+
+	return sql.NullString{String: *s, Valid: true}
+}
+
+// encryptUserData encrypts email/phone/address fields from a user-like payload.
+// If Email is empty string, only encrypts optional fields.
+func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, sql.NullString, error) {
+	var encryptedEmail string
+
+	var err error
+
+	if user.Email != "" {
+		encryptedEmail, err = u.sharedCryptor.Encrypt(user.Email)
+		if err != nil {
+			return "", sql.NullString{}, sql.NullString{}, err
+		}
+	}
+
+	var encPhone sql.NullString
+
+	if user.PhoneNumber.Valid && user.PhoneNumber.String != "" {
+		p, err := u.sharedCryptor.Encrypt(user.PhoneNumber.String)
+		if err != nil {
+			return "", sql.NullString{}, sql.NullString{}, err
+		}
+
+		encPhone = sql.NullString{String: p, Valid: true}
+	}
+
+	var encAddress sql.NullString
+
+	if user.Address.Valid && user.Address.String != "" {
+		a, err := u.sharedCryptor.Encrypt(user.Address.String)
+		if err != nil {
+			return "", sql.NullString{}, sql.NullString{}, err
+		}
+
+		encAddress = sql.NullString{String: a, Valid: true}
+	}
+
+	return encryptedEmail, encPhone, encAddress, nil
 }
 
 // LoginInput input
@@ -143,11 +193,13 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 	loginToken, err := u.sharedCryptor.CreateJWT(model.LoginTokenClaims{
 		Role: user.Roles,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    string(TokenIssuerSystem),
-			Subject:   string(LoginToken),
-			Audience:  []string{user.ID.String()},
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.LoginTokenExpiry())),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:   string(TokenIssuerSystem),
+			Subject:  string(LoginToken),
+			Audience: []string{user.ID.String()},
+			ExpiresAt: jwt.NewNumericDate(
+				time.Now().Add(config.LoginTokenExpiry()),
+			),
+			IssuedAt: jwt.NewNumericDate(time.Now()),
 		},
 	})
 
@@ -160,20 +212,30 @@ func (u *AuthUsecase) HandleLogin(ctx context.Context, input LoginInput) (*Login
 		}
 	}
 
-	return &LoginOutput{
-		Token: loginToken,
-	}, nil
+	return &LoginOutput{Token: loginToken}, nil
 }
 
 // SignupInput input
 type SignupInput struct {
-	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=8"`
-	Username string `validate:"required"`
+	Email       string  `validate:"required,email"`
+	Password    string  `validate:"required,min=8"`
+	Username    string  `validate:"required"`
+	PhoneNumber *string `validate:"omitempty,e164"`
+	Address     *string `validate:"omitempty,max=256"`
 }
 
-// Validate validate SignupInput's fields
-func (si SignupInput) Validate() error {
+// Validate validates SignupInput's fields and trims whitespace-only where needed
+func (si *SignupInput) Validate() error {
+	if si.PhoneNumber != nil {
+		trimmed := strings.ReplaceAll(*si.PhoneNumber, " ", "")
+		si.PhoneNumber = &trimmed
+	}
+
+	if si.Address != nil {
+		addr := strings.TrimSpace(*si.Address)
+		si.Address = &addr
+	}
+
 	return common.Validator.Struct(si)
 }
 
@@ -251,12 +313,32 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		}
 	}
 
+	_, encPhone, encAddress, err := u.encryptUserData(
+		model.User{
+			Email:       "",
+			PhoneNumber: sqlNullFromPtr(input.PhoneNumber),
+			Address:     sqlNullFromPtr(input.Address),
+		},
+	)
+
+	if err != nil {
+		return nil, UsecaseError{ErrType: ErrInternal, Message: "encryption process failed"}
+	}
+
 	createUserInput := RepoCreateUserInput{
 		Email:    emailEncrypted,
 		Password: hashedPassword,
 		Username: input.Username,
 		IsActive: false,
 		Roles:    model.RolesParent,
+		PhoneNumber: sql.NullString{
+			String: encPhone.String,
+			Valid:  encPhone.Valid,
+		},
+		Address: sql.NullString{
+			String: encAddress.String,
+			Valid:  encAddress.Valid,
+		},
 	}
 
 	txCtrl := u.transactionControllerFactory.New()

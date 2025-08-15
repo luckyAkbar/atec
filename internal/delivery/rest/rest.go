@@ -86,7 +86,7 @@ func (s *Service) initV1Routes() {
 	s.v1.GET("/atec/questionnaires/results", s.HandleSearchQUestionnaireResults(), s.AuthMiddleware(false))
 	s.v1.GET("/atec/questionnaires/results/my", s.HandleGetMyQUestionnaireResults(), s.AuthMiddleware(false))
 
-	s.v1.GET("/me", s.HandleGetMyProfile(), s.AuthMiddleware(false))
+	s.v1.GET("/users/me", s.HandleGetMyProfile(), s.AuthMiddleware(false))
 
 	s.v1.GET("/users/therapists", s.HandleGetTherapists(), s.AuthMiddleware(false))
 

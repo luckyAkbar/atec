@@ -25,7 +25,7 @@ func TestUsersService_HandleGetMyProfile(t *testing.T) {
 
 	t.Run("unauthorized mapped from usecase", func(t *testing.T) {
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(http.MethodGet, "/v1/me", nil)
+		req := httptest.NewRequest(http.MethodGet, "/v1/users/me", nil)
 		ctx := e.NewContext(req, rec)
 
 		mockUsersUC.EXPECT().GetMyProfile(ctx.Request().Context()).Return(nil, usecase.UsecaseError{ErrType: usecase.ErrUnauthorized}).Once()
@@ -37,7 +37,7 @@ func TestUsersService_HandleGetMyProfile(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		rec := httptest.NewRecorder()
-		req := httptest.NewRequest(http.MethodGet, "/v1/me", nil)
+		req := httptest.NewRequest(http.MethodGet, "/v1/users/me", nil)
 		ctx := e.NewContext(req, rec)
 
 		output := &usecase.GetMyProfileOutput{

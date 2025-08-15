@@ -33,9 +33,11 @@ type GetMyQUestionnaireResultsInput struct {
 
 // SignupInput input
 type SignupInput struct {
-	Email    string `json:"email" validate:"required,email" example:"string@string.com"`
-	Password string `json:"password" validate:"required,min=8" example:"password123"`
-	Username string `json:"username" validate:"required" example:"username"`
+	Email       string  `json:"email" validate:"required,email" example:"string@string.com"`
+	Password    string  `json:"password" validate:"required,min=8" example:"password123"`
+	Username    string  `json:"username" validate:"required" example:"username"`
+	PhoneNumber *string `json:"phone_number" example:"+628123456789"`
+	Address     *string `json:"address" example:"Jl. Example No. 123, Jakarta"`
 }
 
 // VerifyAccountInput input

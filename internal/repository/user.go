@@ -46,11 +46,13 @@ func (r *UserRepository) Create(ctx context.Context, input usecase.RepoCreateUse
 	}
 
 	user := &model.User{
-		Email:    input.Email,
-		Password: input.Password,
-		IsActive: input.IsActive,
-		Roles:    input.Roles,
-		Username: input.Username,
+		Email:       input.Email,
+		Password:    input.Password,
+		IsActive:    input.IsActive,
+		Roles:       input.Roles,
+		Username:    input.Username,
+		PhoneNumber: input.PhoneNumber,
+		Address:     input.Address,
 	}
 
 	err := tx.Create(user).Error
