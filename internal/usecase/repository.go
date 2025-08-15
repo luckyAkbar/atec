@@ -145,6 +145,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*model.User, error)
 	Update(ctx context.Context, userID uuid.UUID, input RepoUpdateUserInput) (*model.User, error)
 	Search(ctx context.Context, input RepoSearchUserInput) ([]model.User, error)
+	GetUsersByRoles(ctx context.Context, roles model.Roles) ([]model.User, error)
 	IsAdminAccountExists(ctx context.Context) (bool, error)
 	DeleteByID(ctx context.Context, input RepoDeleteUserByIDInput, txController ...any) error
 }

@@ -300,3 +300,10 @@ func (r *UserRepositoryUCAdapter) DeleteByID(ctx context.Context, input usecase.
 
 	return fmt.Errorf("%w: invalid transaction controller, expecting typeof gorm transaction", usecase.ErrRepoInternal)
 }
+
+// GetUsersByRoles call the repository's GetUsersByRoles method and convert the error to usecase error
+func (r *UserRepositoryUCAdapter) GetUsersByRoles(ctx context.Context, roles model.Roles) ([]model.User, error) {
+	res, err := r.repo.GetUsersByRoles(ctx, roles)
+
+	return res, UsecaseErrorUCAdapter(err)
+}

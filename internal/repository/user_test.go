@@ -590,3 +590,79 @@ func TestUserRepository_DeleteByID(t *testing.T) {
 		})
 	}
 }
+
+func TestUserRepository_GetUsersByRoles(t *testing.T) {
+	ctx := context.Background()
+	kit, closer := InitializeRepoTestKit(t)
+
+	defer closer()
+
+	dbMock := kit.DBmock
+	repo := repository.NewUserRepository(kit.DB)
+
+	role := model.RolesTherapist
+
+	testCases := []struct {
+		name                 string
+		wantErr              bool
+		expectedErr          error
+		expectedOutputLen    int
+		expectedFunctionCall func()
+	}{
+		{
+			name:        "database returning unexpected error",
+			wantErr:     true,
+			expectedErr: assert.AnError,
+			expectedFunctionCall: func() {
+				dbMock.ExpectQuery(`^SELECT .+ FROM "users"`).
+					WithArgs(role).
+					WillReturnError(assert.AnError)
+			},
+		},
+		{
+			name:        "no result found must return not found error",
+			wantErr:     true,
+			expectedErr: repository.ErrNotFound,
+			expectedFunctionCall: func() {
+				dbMock.ExpectQuery(`^SELECT .+ FROM "users"`).
+					WithArgs(role).
+					WillReturnRows(sqlmock.NewRows([]string{}))
+			},
+		},
+		{
+			name:              "ok",
+			wantErr:           false,
+			expectedOutputLen: 2,
+			expectedFunctionCall: func() {
+				dbMock.ExpectQuery(`^SELECT .+ FROM "users"`).
+					WithArgs(role).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(uuid.New()).AddRow(uuid.New()))
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedFunctionCall != nil {
+				tc.expectedFunctionCall()
+			}
+
+			res, err := repo.GetUsersByRoles(ctx, role)
+
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Nil(t, res)
+
+				if tc.expectedErr != nil {
+					assert.Equal(t, tc.expectedErr, err)
+				}
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.NotNil(t, res)
+			assert.Len(t, res, tc.expectedOutputLen)
+		})
+	}
+}

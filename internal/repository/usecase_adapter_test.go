@@ -440,6 +440,17 @@ func TestUserRepositoryUCAdapter(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("GetUsersByRoles - ok", func(t *testing.T) {
+		role := model.RolesTherapist
+
+		dbMock.ExpectQuery(`^SELECT .+ FROM "users"`).
+			WithArgs(role).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(uuid.New()).AddRow(uuid.New()))
+
+		_, err := adapter.GetUsersByRoles(ctx, role)
+		assert.NoError(t, err)
+	})
+
 	t.Run("Update - ok", func(t *testing.T) {
 		userID := uuid.New()
 		email := "test@email.com"

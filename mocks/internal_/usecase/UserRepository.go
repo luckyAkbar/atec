@@ -272,6 +272,65 @@ func (_c *UserRepository_FindByID_Call) RunAndReturn(run func(context.Context, u
 	return _c
 }
 
+// GetUsersByRoles provides a mock function with given fields: ctx, roles
+func (_m *UserRepository) GetUsersByRoles(ctx context.Context, roles model.Roles) ([]model.User, error) {
+	ret := _m.Called(ctx, roles)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUsersByRoles")
+	}
+
+	var r0 []model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.Roles) ([]model.User, error)); ok {
+		return rf(ctx, roles)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, model.Roles) []model.User); ok {
+		r0 = rf(ctx, roles)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, model.Roles) error); ok {
+		r1 = rf(ctx, roles)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UserRepository_GetUsersByRoles_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUsersByRoles'
+type UserRepository_GetUsersByRoles_Call struct {
+	*mock.Call
+}
+
+// GetUsersByRoles is a helper method to define mock.On call
+//   - ctx context.Context
+//   - roles model.Roles
+func (_e *UserRepository_Expecter) GetUsersByRoles(ctx interface{}, roles interface{}) *UserRepository_GetUsersByRoles_Call {
+	return &UserRepository_GetUsersByRoles_Call{Call: _e.mock.On("GetUsersByRoles", ctx, roles)}
+}
+
+func (_c *UserRepository_GetUsersByRoles_Call) Run(run func(ctx context.Context, roles model.Roles)) *UserRepository_GetUsersByRoles_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(model.Roles))
+	})
+	return _c
+}
+
+func (_c *UserRepository_GetUsersByRoles_Call) Return(_a0 []model.User, _a1 error) *UserRepository_GetUsersByRoles_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *UserRepository_GetUsersByRoles_Call) RunAndReturn(run func(context.Context, model.Roles) ([]model.User, error)) *UserRepository_GetUsersByRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsAdminAccountExists provides a mock function with given fields: ctx
 func (_m *UserRepository) IsAdminAccountExists(ctx context.Context) (bool, error) {
 	ret := _m.Called(ctx)

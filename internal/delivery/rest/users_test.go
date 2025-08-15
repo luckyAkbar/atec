@@ -54,3 +54,44 @@ func TestUsersService_HandleGetMyProfile(t *testing.T) {
 		assert.Equal(t, "application/json", rec.Header().Get(echo.HeaderContentType))
 	})
 }
+
+func TestUsersService_HandleGetTherapists(t *testing.T) {
+	e := echo.New()
+	group := e.Group("")
+
+	mockUsersUC := usecase_mock.NewUsersUsecaseIface(t)
+
+	svc := rest.NewService(group, nil, nil, nil, nil, mockUsersUC)
+
+	t.Run("unauthorized mapped from usecase", func(t *testing.T) {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/v1/users/therapists", nil)
+		ctx := e.NewContext(req, rec)
+
+		mockUsersUC.EXPECT().GetTherapistData(ctx.Request().Context()).Return(nil, usecase.UsecaseError{ErrType: usecase.ErrUnauthorized}).Once()
+
+		err := svc.HandleGetTherapists()(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/v1/users/therapists", nil)
+		ctx := e.NewContext(req, rec)
+
+		output := []usecase.GetTherapistDataOutput{
+			{
+				ID:       uuid.New(),
+				Username: "t1",
+				IsActive: true,
+			},
+		}
+		mockUsersUC.EXPECT().GetTherapistData(ctx.Request().Context()).Return(output, nil).Once()
+
+		err := svc.HandleGetTherapists()(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "application/json", rec.Header().Get(echo.HeaderContentType))
+	})
+}
