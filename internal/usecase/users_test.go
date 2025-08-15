@@ -408,3 +408,169 @@ func TestUsersUsecase_GetTherapistData(t *testing.T) {
 		})
 	}
 }
+
+func TestUsersUsecase_UpdateMyProfile(t *testing.T) {
+	ctx := context.Background()
+
+	mockUserRepo := mock_usecase.NewUserRepository(t)
+	mockCryptor := mockCommon.NewSharedCryptorIface(t)
+	usersUsecase := usecase.NewUsersUsecase(mockUserRepo, mockCryptor)
+
+	user := model.AuthUser{ID: uuid.New(), Role: model.RolesParent}
+	userCtx := model.SetUserToCtx(ctx, user)
+
+	validUsername := "new-username"
+	validPhone := "+6281234567890"
+	validAddress := "Jl. Mawar No. 1"
+
+	testCases := []struct {
+		name                 string
+		ctx                  context.Context
+		input                usecase.UpdateMyProfileInput
+		wantErr              bool
+		expectedErr          error
+		expectedFunctionCall func()
+	}{
+		{
+			name:        "unauthorized when requester not in context",
+			ctx:         ctx,
+			wantErr:     true,
+			expectedErr: usecase.ErrUnauthorized,
+		},
+		{
+			name: "validation error - missing username",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    "",
+				PhoneNumber: &validPhone,
+				Address:     &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "validation error - missing phone number",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    validUsername,
+				PhoneNumber: nil,
+				Address:     &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "validation error - invalid phone format",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username: validUsername,
+				PhoneNumber: func() *string {
+					s := "123"
+
+					return &s
+				}(),
+				Address: &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrBadRequest,
+		},
+		{
+			name: "encryption failed when encrypting phone number",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    validUsername,
+				PhoneNumber: &validPhone,
+				Address:     &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockCryptor.EXPECT().Encrypt(validPhone).Return("", assert.AnError).Once()
+			},
+		},
+		{
+			name: "encryption failed when encrypting address",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    validUsername,
+				PhoneNumber: &validPhone,
+				Address:     &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockCryptor.EXPECT().Encrypt(validPhone).Return("enc-phone", nil).Once()
+				mockCryptor.EXPECT().Encrypt(validAddress).Return("", assert.AnError).Once()
+			},
+		},
+		{
+			name: "repository failed to update profile",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    validUsername,
+				PhoneNumber: &validPhone,
+				Address:     &validAddress,
+			},
+			wantErr:     true,
+			expectedErr: usecase.ErrInternal,
+			expectedFunctionCall: func() {
+				mockCryptor.EXPECT().Encrypt(validPhone).Return("enc-phone", nil).Once()
+				mockCryptor.EXPECT().Encrypt(validAddress).Return("enc-addr", nil).Once()
+				mockUserRepo.EXPECT().UpdateProfile(userCtx, user.ID, usecase.RepoUpdateUserProfileInput{
+					Username:    validUsername,
+					PhoneNumber: sql.NullString{String: "enc-phone", Valid: true},
+					Address:     sql.NullString{String: "enc-addr", Valid: true},
+				}).Return(nil, usecase.ErrRepoInternal).Once()
+			},
+		},
+		{
+			name: "success",
+			ctx:  userCtx,
+			input: usecase.UpdateMyProfileInput{
+				Username:    validUsername,
+				PhoneNumber: &validPhone,
+				Address:     &validAddress,
+			},
+			wantErr: false,
+			expectedFunctionCall: func() {
+				mockCryptor.EXPECT().Encrypt(validPhone).Return("enc-phone", nil).Once()
+				mockCryptor.EXPECT().Encrypt(validAddress).Return("enc-addr", nil).Once()
+				mockUserRepo.EXPECT().UpdateProfile(userCtx, user.ID, usecase.RepoUpdateUserProfileInput{
+					Username:    validUsername,
+					PhoneNumber: sql.NullString{String: "enc-phone", Valid: true},
+					Address:     sql.NullString{String: "enc-addr", Valid: true},
+				}).Return(&model.User{}, nil).Once()
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedFunctionCall != nil {
+				tc.expectedFunctionCall()
+			}
+
+			res, err := usersUsecase.UpdateMyProfile(tc.ctx, tc.input)
+
+			if tc.wantErr {
+				require.Error(t, err)
+
+				if tc.expectedErr != nil {
+					ucErr, ok := err.(usecase.UsecaseError)
+					require.True(t, ok)
+					assert.Equal(t, tc.expectedErr, ucErr.ErrType)
+				}
+
+				assert.Nil(t, res)
+
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotNil(t, res)
+			assert.Equal(t, "ok", res.Message)
+		})
+	}
+}

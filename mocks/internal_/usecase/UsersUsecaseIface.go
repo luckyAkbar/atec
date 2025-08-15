@@ -138,6 +138,65 @@ func (_c *UsersUsecaseIface_GetTherapistData_Call) RunAndReturn(run func(context
 	return _c
 }
 
+// UpdateMyProfile provides a mock function with given fields: ctx, input
+func (_m *UsersUsecaseIface) UpdateMyProfile(ctx context.Context, input usecase.UpdateMyProfileInput) (*usecase.UpdateMyProfileOutput, error) {
+	ret := _m.Called(ctx, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateMyProfile")
+	}
+
+	var r0 *usecase.UpdateMyProfileOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.UpdateMyProfileInput) (*usecase.UpdateMyProfileOutput, error)); ok {
+		return rf(ctx, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, usecase.UpdateMyProfileInput) *usecase.UpdateMyProfileOutput); ok {
+		r0 = rf(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*usecase.UpdateMyProfileOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, usecase.UpdateMyProfileInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UsersUsecaseIface_UpdateMyProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateMyProfile'
+type UsersUsecaseIface_UpdateMyProfile_Call struct {
+	*mock.Call
+}
+
+// UpdateMyProfile is a helper method to define mock.On call
+//   - ctx context.Context
+//   - input usecase.UpdateMyProfileInput
+func (_e *UsersUsecaseIface_Expecter) UpdateMyProfile(ctx interface{}, input interface{}) *UsersUsecaseIface_UpdateMyProfile_Call {
+	return &UsersUsecaseIface_UpdateMyProfile_Call{Call: _e.mock.On("UpdateMyProfile", ctx, input)}
+}
+
+func (_c *UsersUsecaseIface_UpdateMyProfile_Call) Run(run func(ctx context.Context, input usecase.UpdateMyProfileInput)) *UsersUsecaseIface_UpdateMyProfile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(usecase.UpdateMyProfileInput))
+	})
+	return _c
+}
+
+func (_c *UsersUsecaseIface_UpdateMyProfile_Call) Return(_a0 *usecase.UpdateMyProfileOutput, _a1 error) *UsersUsecaseIface_UpdateMyProfile_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *UsersUsecaseIface_UpdateMyProfile_Call) RunAndReturn(run func(context.Context, usecase.UpdateMyProfileInput) (*usecase.UpdateMyProfileOutput, error)) *UsersUsecaseIface_UpdateMyProfile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewUsersUsecaseIface creates a new instance of UsersUsecaseIface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUsersUsecaseIface(t interface {

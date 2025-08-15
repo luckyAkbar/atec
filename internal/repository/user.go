@@ -97,6 +97,28 @@ func updateUserInputToUpdatedFields(uui usecase.RepoUpdateUserInput) map[string]
 	return fields
 }
 
+func updateUserProfileInputToUpdatedFields(input usecase.RepoUpdateUserProfileInput) map[string]interface{} {
+	fields := map[string]interface{}{}
+
+	if input.Username != "" {
+		fields["username"] = input.Username
+	}
+
+	if input.PhoneNumber.Valid {
+		fields["phone_number"] = input.PhoneNumber
+	} else {
+		fields["phone_number"] = gorm.Expr("NULL")
+	}
+
+	if input.Address.Valid {
+		fields["address"] = input.Address
+	} else {
+		fields["address"] = gorm.Expr("NULL")
+	}
+
+	return fields
+}
+
 // Update update a users record by its id
 func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input usecase.RepoUpdateUserInput) (*model.User, error) {
 	user := &model.User{}
@@ -104,6 +126,20 @@ func (r *UserRepository) Update(ctx context.Context, userID uuid.UUID, input use
 	err := r.db.WithContext(ctx).Model(user).
 		Clauses(clause.Returning{}).Where("id = ?", userID).
 		Updates(updateUserInputToUpdatedFields(input)).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// UpdateProfile update changeable fields in user's profile by its id
+func (r *UserRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, input usecase.RepoUpdateUserProfileInput) (*model.User, error) {
+	user := &model.User{}
+
+	err := r.db.WithContext(ctx).Model(user).
+		Clauses(clause.Returning{}).Where("id = ?", userID).
+		Updates(updateUserProfileInputToUpdatedFields(input)).Error
 	if err != nil {
 		return nil, err
 	}

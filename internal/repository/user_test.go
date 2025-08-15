@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -663,6 +664,92 @@ func TestUserRepository_GetUsersByRoles(t *testing.T) {
 			require.NoError(t, err)
 			assert.NotNil(t, res)
 			assert.Len(t, res, tc.expectedOutputLen)
+		})
+	}
+}
+
+func TestUserRepository_UpdateProfile(t *testing.T) {
+	ctx := context.Background()
+	kit, closer := InitializeRepoTestKit(t)
+
+	defer closer()
+
+	dbMock := kit.DBmock
+	repo := repository.NewUserRepository(kit.DB)
+
+	userID := uuid.New()
+	username := "newusername"
+	phone := sql.NullString{String: "+6281234567", Valid: true}
+	address := sql.NullString{String: "Jl. Test", Valid: true}
+
+	testCases := []struct {
+		name                 string
+		input                usecase.RepoUpdateUserProfileInput
+		wantErr              bool
+		expectedErr          error
+		expectedFunctionCall func()
+	}{
+		{
+			name: "success",
+			input: usecase.RepoUpdateUserProfileInput{
+				Username:    username,
+				PhoneNumber: phone,
+				Address:     address,
+			},
+			wantErr: false,
+			expectedFunctionCall: func() {
+				dbMock.ExpectBegin()
+
+				dbMock.ExpectQuery("^UPDATE \"users\" SET").
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), userID).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+
+				dbMock.ExpectCommit()
+			},
+		},
+		{
+			name: "error",
+			input: usecase.RepoUpdateUserProfileInput{
+				Username:    username,
+				PhoneNumber: phone,
+				Address:     address,
+			},
+			wantErr:     true,
+			expectedErr: assert.AnError,
+			expectedFunctionCall: func() {
+				dbMock.ExpectBegin()
+
+				dbMock.ExpectQuery("^UPDATE \"users\" SET").
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), userID).
+					WillReturnError(assert.AnError)
+
+				dbMock.ExpectRollback()
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedFunctionCall != nil {
+				tc.expectedFunctionCall()
+			}
+
+			res, err := repo.UpdateProfile(ctx, userID, tc.input)
+
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Nil(t, res)
+
+				if tc.expectedErr != nil {
+					assert.Equal(t, tc.expectedErr, err)
+				}
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.NotNil(t, res)
+			assert.Equal(t, res.ID, userID)
 		})
 	}
 }

@@ -288,6 +288,17 @@ func (r *UserRepositoryUCAdapter) Update(ctx context.Context, userID uuid.UUID, 
 	return res, UsecaseErrorUCAdapter(err)
 }
 
+// UpdateProfile call the repository's UpdateProfile method and convert the error to usecase error
+func (r *UserRepositoryUCAdapter) UpdateProfile(
+	ctx context.Context,
+	userID uuid.UUID,
+	input usecase.RepoUpdateUserProfileInput,
+) (*model.User, error) {
+	res, err := r.repo.UpdateProfile(ctx, userID, input)
+
+	return res, UsecaseErrorUCAdapter(err)
+}
+
 // DeleteByID call the repository's DeleteByID method and convert the error to usecase error
 func (r *UserRepositoryUCAdapter) DeleteByID(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...any) error {
 	if len(txController) == 0 {

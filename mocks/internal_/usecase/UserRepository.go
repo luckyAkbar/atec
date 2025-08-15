@@ -506,6 +506,66 @@ func (_c *UserRepository_Update_Call) RunAndReturn(run func(context.Context, uui
 	return _c
 }
 
+// UpdateProfile provides a mock function with given fields: ctx, userID, input
+func (_m *UserRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, input usecase.RepoUpdateUserProfileInput) (*model.User, error) {
+	ret := _m.Called(ctx, userID, input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateProfile")
+	}
+
+	var r0 *model.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, usecase.RepoUpdateUserProfileInput) (*model.User, error)); ok {
+		return rf(ctx, userID, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, usecase.RepoUpdateUserProfileInput) *model.User); ok {
+		r0 = rf(ctx, userID, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID, usecase.RepoUpdateUserProfileInput) error); ok {
+		r1 = rf(ctx, userID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UserRepository_UpdateProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateProfile'
+type UserRepository_UpdateProfile_Call struct {
+	*mock.Call
+}
+
+// UpdateProfile is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID uuid.UUID
+//   - input usecase.RepoUpdateUserProfileInput
+func (_e *UserRepository_Expecter) UpdateProfile(ctx interface{}, userID interface{}, input interface{}) *UserRepository_UpdateProfile_Call {
+	return &UserRepository_UpdateProfile_Call{Call: _e.mock.On("UpdateProfile", ctx, userID, input)}
+}
+
+func (_c *UserRepository_UpdateProfile_Call) Run(run func(ctx context.Context, userID uuid.UUID, input usecase.RepoUpdateUserProfileInput)) *UserRepository_UpdateProfile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uuid.UUID), args[2].(usecase.RepoUpdateUserProfileInput))
+	})
+	return _c
+}
+
+func (_c *UserRepository_UpdateProfile_Call) Return(_a0 *model.User, _a1 error) *UserRepository_UpdateProfile_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *UserRepository_UpdateProfile_Call) RunAndReturn(run func(context.Context, uuid.UUID, usecase.RepoUpdateUserProfileInput) (*model.User, error)) *UserRepository_UpdateProfile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewUserRepository creates a new instance of UserRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewUserRepository(t interface {
