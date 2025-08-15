@@ -158,6 +158,20 @@ func (r *UserRepository) Search(ctx context.Context, input usecase.RepoSearchUse
 	return users, nil
 }
 
+// GetUsersByRoles returns all users with the specified role
+func (r *UserRepository) GetUsersByRoles(ctx context.Context, roles model.Roles) ([]model.User, error) {
+	users := []model.User{}
+	if err := r.db.WithContext(ctx).Where("roles = ?", roles).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return nil, ErrNotFound
+	}
+
+	return users, nil
+}
+
 // DeleteByID delete a user by its id
 func (r *UserRepository) DeleteByID(ctx context.Context, input usecase.RepoDeleteUserByIDInput, txController ...*gorm.DB) error {
 	tx := r.db
