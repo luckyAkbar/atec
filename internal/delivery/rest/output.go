@@ -49,6 +49,19 @@ type SearchQUestionnaireResultsOutput struct {
 	DeletedAt null.Time          `json:"deleted_at,omitempty"`
 }
 
+// GetMyQuestionnaireResultOutput output
+type GetMyQuestionnaireResultOutput struct {
+	ID        uuid.UUID          `json:"id"`
+	PackageID uuid.UUID          `json:"package_id"`
+	ChildID   uuid.UUID          `json:"child_id"`
+	CreatedBy uuid.UUID          `json:"created_by"`
+	Answer    model.AnswerDetail `json:"answer"`
+	Grade     QuestionnaireGrade `json:"grade"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+	DeletedAt null.Time          `json:"deleted_at,omitempty"`
+}
+
 // GetMyQUestionnaireResultsOutput output
 type GetMyQUestionnaireResultsOutput struct {
 	TODO []any `json:"todo"`

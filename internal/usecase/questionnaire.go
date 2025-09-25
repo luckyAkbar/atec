@@ -430,15 +430,16 @@ func (guhi GetUserHistoryInput) validate() error {
 
 // GetUserHistoryOutput output
 type GetUserHistoryOutput struct {
-	ID        uuid.UUID
-	PackageID uuid.UUID
-	ChildID   uuid.UUID
-	CreatedBy uuid.UUID
-	Answer    model.AnswerDetail
-	Result    model.ResultDetail
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt sql.NullTime
+	ID         uuid.UUID
+	PackageID  uuid.UUID
+	ChildID    uuid.UUID
+	CreatedBy  uuid.UUID
+	Answer     model.AnswerDetail
+	Result     model.ResultDetail
+	Indication model.IndicationCategory
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  sql.NullTime
 }
 
 // HandleGetUserHistory will return a list of questionnaire result made by the requester
@@ -484,6 +485,28 @@ func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input G
 		break
 	}
 
+	uniquePackages := map[uuid.UUID]*model.Package{}
+	for _, res := range results {
+		uniquePackages[res.PackageID] = &model.Package{ID: res.PackageID}
+	}
+
+	for _, uniquePackage := range uniquePackages {
+		pack, err := u.packageRepo.FindByID(ctx, uniquePackage.ID)
+		switch err {
+		default:
+			logger.WithField("package_id", uniquePackage.ID).WithError(err).Error("failed to find package from database, might result incorrect indication category")
+
+			break
+		case ErrRepoNotFound:
+			logger.WithField("package_id", uniquePackage.ID).WithError(err).Error("unable to find package when displaying user questionnaire history")
+
+			break
+
+		case nil:
+			uniquePackages[uniquePackage.ID] = pack
+		}
+	}
+
 	output := []GetUserHistoryOutput{}
 
 	for _, res := range results {
@@ -492,6 +515,9 @@ func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input G
 			PackageID: res.PackageID,
 			ChildID:   res.ChildID,
 			CreatedBy: res.CreatedBy,
+			Indication: uniquePackages[res.PackageID].IndicationCategories.GetIndicationCategoryByScore(
+				res.Result.CountTotalScore(),
+			),
 			Answer:    res.Answer,
 			Result:    res.Result,
 			CreatedAt: res.CreatedAt,
