@@ -601,7 +601,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rest.SearchQUestionnaireResultsOutput"
+                                            "$ref": "#/definitions/rest.GetMyQuestionnaireResultOutput"
                                         }
                                     }
                                 }
@@ -1988,6 +1988,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.GetMyQuestionnaireResultOutput": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "$ref": "#/definitions/model.AnswerDetail"
+                },
+                "child_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "grade": {
+                    "$ref": "#/definitions/rest.QuestionnaireGrade"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "package_id": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

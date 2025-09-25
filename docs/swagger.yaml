@@ -197,6 +197,27 @@ definitions:
       username:
         type: string
     type: object
+  rest.GetMyQuestionnaireResultOutput:
+    properties:
+      answer:
+        $ref: '#/definitions/model.AnswerDetail'
+      child_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      deleted_at:
+        type: string
+      grade:
+        $ref: '#/definitions/rest.QuestionnaireGrade'
+      id:
+        type: string
+      package_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
   rest.GetTherapistOutput:
     properties:
       created_at:
@@ -899,7 +920,7 @@ paths:
             - $ref: '#/definitions/rest.StandardSuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/rest.SearchQUestionnaireResultsOutput'
+                  $ref: '#/definitions/rest.GetMyQuestionnaireResultOutput'
               type: object
         "400":
           description: Bad request
