@@ -164,7 +164,7 @@ func (s *Service) HandleSearchQUestionnaireResults() echo.HandlerFunc {
 // @Security		ParentLevelAuth
 // @Param			Authorization					header		string															true	"JWT token from auth process"
 // @Param			get_my_questionnaire_results	query		GetMyQUestionnaireResultsInput									true	"param to search"
-// @Success		200								{object}	StandardSuccessResponse{data=SearchQUestionnaireResultsOutput}	"success response"
+// @Success		200								{object}	StandardSuccessResponse{data=GetMyQuestionnaireResultOutput}	"success response"
 // @Failure		400								{object}	StandardErrorResponse											"Bad request"
 // @Failure		500								{object}	StandardErrorResponse											"Internal Error"
 // @Router			/v1/atec/questionnaires/results/my [get]
@@ -188,15 +188,19 @@ func (s *Service) HandleGetMyQUestionnaireResults() echo.HandlerFunc {
 			return UsecaseErrorToRESTResponse(c, err)
 		}
 
-		result := []SearchQUestionnaireResultsOutput{}
+		result := []GetMyQuestionnaireResultOutput{}
 		for _, val := range output {
-			result = append(result, SearchQUestionnaireResultsOutput{
+			result = append(result, GetMyQuestionnaireResultOutput{
 				ID:        val.ID,
 				PackageID: val.PackageID,
 				ChildID:   val.ChildID,
 				CreatedBy: val.CreatedBy,
 				Answer:    val.Answer,
-				Result:    val.Result,
+				Grade: QuestionnaireGrade{
+					Detail:     val.Result,
+					Total:      val.Result.CountTotalScore(),
+					Indication: val.Indication,
+				},
 				CreatedAt: val.CreatedAt,
 				UpdatedAt: val.UpdatedAt,
 				DeletedAt: null.NewTime(val.DeletedAt.Time, val.DeletedAt.Valid),
