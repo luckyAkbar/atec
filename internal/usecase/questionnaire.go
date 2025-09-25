@@ -494,14 +494,11 @@ func (u *QuestionnaireUsecase) HandleGetUserHistory(ctx context.Context, input G
 		pack, err := u.packageRepo.FindByID(ctx, uniquePackage.ID)
 		switch err {
 		default:
-			logger.WithField("package_id", uniquePackage.ID).WithError(err).Error("failed to find package from database, might result incorrect indication category")
-
-			break
+			logger.WithField("package_id", uniquePackage.ID).
+				WithError(err).Error("failed to find package from database, might result incorrect indication category")
 		case ErrRepoNotFound:
-			logger.WithField("package_id", uniquePackage.ID).WithError(err).Error("unable to find package when displaying user questionnaire history")
-
-			break
-
+			logger.WithField("package_id", uniquePackage.ID).
+				WithError(err).Error("unable to find package when displaying user questionnaire history")
 		case nil:
 			uniquePackages[uniquePackage.ID] = pack
 		}
