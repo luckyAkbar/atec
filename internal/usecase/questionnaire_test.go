@@ -11,6 +11,7 @@ import (
 	"github.com/luckyAkbar/atec/internal/usecase"
 	mockUsecase "github.com/luckyAkbar/atec/mocks/internal_/usecase"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -1394,8 +1395,9 @@ func TestQuestionnaireUsecase_HandleGetUserHistory(t *testing.T) {
 	userCtx := model.SetUserToCtx(ctx, user)
 
 	mockResultRepo := mockUsecase.NewResultRepository(t)
+	mockPackageRepo := mockUsecase.NewPackageRepo(t)
 
-	uc := usecase.NewQuestionnaireUsecase(nil, nil, mockResultRepo, nil)
+	uc := usecase.NewQuestionnaireUsecase(mockPackageRepo, nil, mockResultRepo, nil)
 
 	expectedOutputLen := 78
 
@@ -1477,6 +1479,11 @@ func TestQuestionnaireUsecase_HandleGetUserHistory(t *testing.T) {
 					Offset: validInput.Offset,
 					UserID: userID,
 				}).Return(make([]model.Result, expectedOutputLen), nil).Once()
+
+				mockPackageRepo.EXPECT().FindByID(userCtx, mock.Anything).Return(&model.Package{
+					ID:                   uuid.New(),
+					IndicationCategories: validIndicationCategories,
+				}, nil).Once()
 			},
 		},
 	}
