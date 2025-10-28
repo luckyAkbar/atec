@@ -75,7 +75,7 @@ func sqlNullFromPtr(s *string) sql.NullString {
 
 // encryptUserData encrypts email/phone/address fields from a user-like payload.
 // If Email is empty string, only encrypts optional fields.
-func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, sql.NullString, error) {
+func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, sql.NullString, sql.NullString, error) {
 	var encryptedEmail string
 
 	var err error
@@ -83,7 +83,7 @@ func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, 
 	if user.Email != "" {
 		encryptedEmail, err = u.sharedCryptor.Encrypt(user.Email)
 		if err != nil {
-			return "", sql.NullString{}, sql.NullString{}, err
+			return "", sql.NullString{}, sql.NullString{}, sql.NullString{}, err
 		}
 	}
 
@@ -92,7 +92,7 @@ func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, 
 	if user.PhoneNumber.Valid && user.PhoneNumber.String != "" {
 		p, err := u.sharedCryptor.Encrypt(user.PhoneNumber.String)
 		if err != nil {
-			return "", sql.NullString{}, sql.NullString{}, err
+			return "", sql.NullString{}, sql.NullString{}, sql.NullString{}, err
 		}
 
 		encPhone = sql.NullString{String: p, Valid: true}
@@ -103,13 +103,24 @@ func (u *AuthUsecase) encryptUserData(user model.User) (string, sql.NullString, 
 	if user.Address.Valid && user.Address.String != "" {
 		a, err := u.sharedCryptor.Encrypt(user.Address.String)
 		if err != nil {
-			return "", sql.NullString{}, sql.NullString{}, err
+			return "", sql.NullString{}, sql.NullString{}, sql.NullString{}, err
 		}
 
 		encAddress = sql.NullString{String: a, Valid: true}
 	}
 
-	return encryptedEmail, encPhone, encAddress, nil
+	var encNIK sql.NullString
+
+	if user.NIK.Valid && user.NIK.String != "" {
+		n, err := u.sharedCryptor.Encrypt(user.NIK.String)
+		if err != nil {
+			return "", sql.NullString{}, sql.NullString{}, sql.NullString{}, err
+		}
+
+		encNIK = sql.NullString{String: n, Valid: true}
+	}
+
+	return encryptedEmail, encPhone, encAddress, encNIK, nil
 }
 
 // LoginInput input
@@ -222,6 +233,7 @@ type SignupInput struct {
 	Username    string  `validate:"required"`
 	PhoneNumber *string `validate:"omitempty,e164"`
 	Address     *string `validate:"omitempty,max=256"`
+	NIK         *string `validate:"omitempty,numeric,len=16"`
 }
 
 // Validate validates SignupInput's fields and trims whitespace-only where needed
@@ -234,6 +246,11 @@ func (si *SignupInput) Validate() error {
 	if si.Address != nil {
 		addr := strings.TrimSpace(*si.Address)
 		si.Address = &addr
+	}
+
+	if si.NIK != nil {
+		nik := strings.TrimSpace(*si.NIK)
+		si.NIK = &nik
 	}
 
 	return common.Validator.Struct(si)
@@ -313,11 +330,12 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		}
 	}
 
-	_, encPhone, encAddress, err := u.encryptUserData(
+	_, encPhone, encAddress, encNIK, err := u.encryptUserData(
 		model.User{
 			Email:       "",
 			PhoneNumber: sqlNullFromPtr(input.PhoneNumber),
 			Address:     sqlNullFromPtr(input.Address),
+			NIK:         sqlNullFromPtr(input.NIK),
 		},
 	)
 
@@ -338,6 +356,10 @@ func (u *AuthUsecase) HandleSignup(ctx context.Context, input SignupInput) (*Sig
 		Address: sql.NullString{
 			String: encAddress.String,
 			Valid:  encAddress.Valid,
+		},
+		NIK: sql.NullString{
+			String: encNIK.String,
+			Valid:  encNIK.Valid,
 		},
 	}
 

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 	"time"
 
@@ -29,13 +30,13 @@ func NewUsersUsecase(userRepo UserRepository, sharedCryptor common.SharedCryptor
 }
 
 // decryptUserData decrypts sensitive fields on user and returns plain values.
-func (u *UsersUsecase) decryptUserData(user *model.User) (string, *string, *string, error) {
+func (u *UsersUsecase) decryptUserData(user *model.User) (string, *string, *string, *string, error) {
 	decryptedEmail := ""
 
 	if user.Email != "" {
 		de, err := u.sharedCryptor.Decrypt(user.Email)
 		if err != nil {
-			return "", nil, nil, err
+			return "", nil, nil, nil, err
 		}
 
 		decryptedEmail = de
@@ -46,7 +47,7 @@ func (u *UsersUsecase) decryptUserData(user *model.User) (string, *string, *stri
 	if user.PhoneNumber.Valid {
 		p, err := u.sharedCryptor.Decrypt(user.PhoneNumber.String)
 		if err != nil {
-			return "", nil, nil, err
+			return "", nil, nil, nil, err
 		}
 
 		phonePtr = &p
@@ -57,13 +58,24 @@ func (u *UsersUsecase) decryptUserData(user *model.User) (string, *string, *stri
 	if user.Address.Valid {
 		a, err := u.sharedCryptor.Decrypt(user.Address.String)
 		if err != nil {
-			return "", nil, nil, err
+			return "", nil, nil, nil, err
 		}
 
 		addressPtr = &a
 	}
 
-	return decryptedEmail, phonePtr, addressPtr, nil
+	var nikPtr *string
+
+	if user.NIK.Valid {
+		n, err := u.sharedCryptor.Decrypt(user.NIK.String)
+		if err != nil {
+			return "", nil, nil, nil, err
+		}
+
+		nikPtr = &n
+	}
+
+	return decryptedEmail, phonePtr, addressPtr, nikPtr, nil
 }
 
 // GetMyProfileOutput output
@@ -77,6 +89,7 @@ type GetMyProfileOutput struct {
 	Email       string
 	PhoneNumber *string
 	Address     *string
+	NIK         string
 }
 
 // GetMyProfile returns currently authenticated user's profile from database
@@ -105,7 +118,7 @@ func (u *UsersUsecase) GetMyProfile(ctx context.Context) (*GetMyProfileOutput, e
 		}
 	}
 
-	decryptedEmail, phonePtr, addressPtr, decErr := u.decryptUserData(user)
+	decryptedEmail, phonePtr, addressPtr, nikPtr, decErr := u.decryptUserData(user)
 	if decErr != nil {
 		return nil, UsecaseError{
 			ErrType: ErrInternal,
@@ -123,6 +136,12 @@ func (u *UsersUsecase) GetMyProfile(ctx context.Context) (*GetMyProfileOutput, e
 		Email:       decryptedEmail,
 		PhoneNumber: phonePtr,
 		Address:     addressPtr,
+		NIK: func() string {
+			if nikPtr == nil {
+				return ""
+			}
+			return *nikPtr
+		}(),
 	}, nil
 }
 
@@ -182,6 +201,7 @@ type UpdateMyProfileInput struct {
 	Username    string  `validate:"required"`
 	PhoneNumber *string `validate:"required,e164"`
 	Address     *string `validate:"required,max=256"`
+	NIK         *string `validate:"omitempty,numeric,len=16"`
 }
 
 func (i *UpdateMyProfileInput) validate() error {
@@ -193,6 +213,11 @@ func (i *UpdateMyProfileInput) validate() error {
 	if i.Address != nil {
 		addr := strings.TrimSpace(*i.Address)
 		i.Address = &addr
+	}
+
+	if i.NIK != nil {
+		nik := strings.TrimSpace(*i.NIK)
+		i.NIK = &nik
 	}
 
 	return common.Validator.Struct(i)
@@ -248,10 +273,24 @@ func (u *UsersUsecase) UpdateMyProfile(ctx context.Context, input UpdateMyProfil
 		encAddr.String = addressEncrypted
 	}
 
+	var nikField *sql.NullString
+	if input.NIK != nil {
+		nikNS := sqlNullFromPtr(input.NIK)
+		if nikNS.Valid {
+			enc, err := u.sharedCryptor.Encrypt(nikNS.String)
+			if err != nil {
+				return nil, UsecaseError{ErrType: ErrInternal, Message: ErrInternal.Error()}
+			}
+			nikNS.String = enc
+		}
+		nikField = &nikNS
+	}
+
 	_, err := u.userRepo.UpdateProfile(ctx, requester.ID, RepoUpdateUserProfileInput{
 		Username:    input.Username,
 		PhoneNumber: encPhone,
 		Address:     encAddr,
+		NIK:         nikField,
 	})
 
 	if err != nil {

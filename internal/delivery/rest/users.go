@@ -39,6 +39,7 @@ func (s *Service) HandleGetMyProfile() echo.HandlerFunc {
 				Email:       output.Email,
 				PhoneNumber: output.PhoneNumber,
 				Address:     output.Address,
+				NIK:         output.NIK,
 			},
 		})
 	}
@@ -111,6 +112,7 @@ func (s *Service) HandleUpdateMyProfile() echo.HandlerFunc {
 			Username:    input.Username,
 			PhoneNumber: input.PhoneNumber,
 			Address:     input.Address,
+			NIK:         input.NIK,
 		})
 		if err != nil {
 			return UsecaseErrorToRESTResponse(c, err)

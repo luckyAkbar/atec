@@ -38,6 +38,7 @@ type SignupInput struct {
 	Username    string  `json:"username" validate:"required" example:"username"`
 	PhoneNumber *string `json:"phone_number" example:"+628123456789"`
 	Address     *string `json:"address" example:"Jl. Example No. 123, Jakarta"`
+	NIK         *string `json:"nik" example:"3201020101010001"`
 }
 
 // VerifyAccountInput input
@@ -185,4 +186,5 @@ type UpdateMyProfileInput struct {
 	Username    string  `json:"username" validate:"required"`
 	PhoneNumber *string `json:"phone_number" validate:"required"`
 	Address     *string `json:"address" validate:"required"`
+	NIK         *string `json:"nik"`
 }
