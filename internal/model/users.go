@@ -26,6 +26,7 @@ type User struct {
 	Username    string
 	IsActive    bool
 	Roles       Roles
+	NIK         sql.NullString
 	PhoneNumber sql.NullString
 	Address     sql.NullString
 	CreatedAt   time.Time

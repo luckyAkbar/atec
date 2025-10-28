@@ -51,6 +51,7 @@ func (r *UserRepository) Create(ctx context.Context, input usecase.RepoCreateUse
 		IsActive:    input.IsActive,
 		Roles:       input.Roles,
 		Username:    input.Username,
+		NIK:         input.NIK,
 		PhoneNumber: input.PhoneNumber,
 		Address:     input.Address,
 	}
@@ -114,6 +115,12 @@ func updateUserProfileInputToUpdatedFields(input usecase.RepoUpdateUserProfileIn
 		fields["address"] = input.Address
 	} else {
 		fields["address"] = gorm.Expr("NULL")
+	}
+
+	if input.NIK.Valid {
+		fields["nik"] = input.NIK
+	} else if (usecase.RepoUpdateUserProfileInput{}).NIK != input.NIK { // detect presence for explicit NULL
+		fields["nik"] = gorm.Expr("NULL")
 	}
 
 	return fields

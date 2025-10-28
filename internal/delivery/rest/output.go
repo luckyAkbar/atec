@@ -175,6 +175,7 @@ type GetMyProfileOutput struct {
 	Email       string      `json:"email"`
 	PhoneNumber *string     `json:"phone_number"`
 	Address     *string     `json:"address"`
+	NIK         string      `json:"nik"`
 }
 
 // GetTherapistOutput output

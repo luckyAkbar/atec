@@ -36,6 +36,7 @@ func (s *Service) HandleSignUp() echo.HandlerFunc {
 			Username:    input.Username,
 			PhoneNumber: input.PhoneNumber,
 			Address:     input.Address,
+			NIK:         input.NIK,
 		})
 
 		if err != nil {

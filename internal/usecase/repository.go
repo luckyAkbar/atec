@@ -127,6 +127,7 @@ type RepoUpdateUserProfileInput struct {
 	Username    string
 	PhoneNumber sql.NullString
 	Address     sql.NullString
+	NIK         *sql.NullString
 }
 
 // RepoCreateUserInput input to create a new user data
@@ -138,6 +139,7 @@ type RepoCreateUserInput struct {
 	Roles       model.Roles
 	PhoneNumber sql.NullString
 	Address     sql.NullString
+	NIK         sql.NullString
 }
 
 // RepoSearchUserInput options to search users
