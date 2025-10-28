@@ -117,10 +117,12 @@ func updateUserProfileInputToUpdatedFields(input usecase.RepoUpdateUserProfileIn
 		fields["address"] = gorm.Expr("NULL")
 	}
 
-	if input.NIK.Valid {
-		fields["nik"] = input.NIK
-	} else if (usecase.RepoUpdateUserProfileInput{}).NIK != input.NIK { // detect presence for explicit NULL
-		fields["nik"] = gorm.Expr("NULL")
+	if input.NIK != nil {
+		if input.NIK.Valid {
+			fields["nik"] = *input.NIK
+		} else {
+			fields["nik"] = gorm.Expr("NULL")
+		}
 	}
 
 	return fields

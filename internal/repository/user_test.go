@@ -125,7 +125,7 @@ func TestUserRepository_Create(t *testing.T) {
 				dbMock.ExpectBegin()
 
 				dbMock.ExpectQuery("^INSERT INTO \"users\"").
-					WithArgs(email, password, username, isActive, roles, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(email, password, username, isActive, roles, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(uuid.New()))
 
 				dbMock.ExpectCommit()
@@ -145,7 +145,7 @@ func TestUserRepository_Create(t *testing.T) {
 				dbMock.ExpectBegin()
 
 				dbMock.ExpectQuery("^INSERT INTO \"users\"").
-					WithArgs(email, password, username, isActive, roles, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(email, password, username, isActive, roles, sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(assert.AnError)
 
 				dbMock.ExpectRollback()

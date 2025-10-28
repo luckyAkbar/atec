@@ -126,6 +126,12 @@ func (u *UsersUsecase) GetMyProfile(ctx context.Context) (*GetMyProfileOutput, e
 		}
 	}
 
+	// normalize NIK: when nil on DB, expose empty string on REST layer
+	nik := ""
+	if nikPtr != nil {
+		nik = *nikPtr
+	}
+
 	return &GetMyProfileOutput{
 		ID:          user.ID,
 		Username:    user.Username,
@@ -136,12 +142,7 @@ func (u *UsersUsecase) GetMyProfile(ctx context.Context) (*GetMyProfileOutput, e
 		Email:       decryptedEmail,
 		PhoneNumber: phonePtr,
 		Address:     addressPtr,
-		NIK: func() string {
-			if nikPtr == nil {
-				return ""
-			}
-			return *nikPtr
-		}(),
+		NIK:         nik,
 	}, nil
 }
 
@@ -274,15 +275,19 @@ func (u *UsersUsecase) UpdateMyProfile(ctx context.Context, input UpdateMyProfil
 	}
 
 	var nikField *sql.NullString
+
 	if input.NIK != nil {
 		nikNS := sqlNullFromPtr(input.NIK)
+
 		if nikNS.Valid {
 			enc, err := u.sharedCryptor.Encrypt(nikNS.String)
 			if err != nil {
 				return nil, UsecaseError{ErrType: ErrInternal, Message: ErrInternal.Error()}
 			}
+
 			nikNS.String = enc
 		}
+
 		nikField = &nikNS
 	}
 
