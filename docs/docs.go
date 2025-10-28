@@ -1978,6 +1978,9 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
+                "nik": {
+                    "type": "string"
+                },
                 "phone_number": {
                     "type": "string"
                 },
@@ -2275,6 +2278,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "string@string.com"
                 },
+                "nik": {
+                    "type": "string",
+                    "example": "3201020101010001"
+                },
                 "password": {
                     "type": "string",
                     "minLength": 8,
@@ -2407,6 +2414,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "nik": {
                     "type": "string"
                 },
                 "phone_number": {
